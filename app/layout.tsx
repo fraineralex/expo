@@ -8,8 +8,8 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Buses y Puertos de Comunicacion USB - Los Ingenieros",
-  description: "Presentacion interactiva sobre buses y puertos de comunicacion USB",
+  title: "Comparador de Rendimiento: Monociclo vs Pipeline - Los Ingenieros",
+  description: "Presentacion interactiva comparando procesador monociclo vs pipeline de 5 etapas - Proyecto Final Arquitectura del Computador",
   generator: "v0.app",
   icons: {
     icon: [

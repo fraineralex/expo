@@ -1,5 +1,5 @@
-import WebSimPresentation from "@/components/websim-presentation"
+import PipelinePresentation from "@/components/pipeline-presentation"
 
 export default function Page() {
-  return <WebSimPresentation />
+  return <PipelinePresentation />
 }
