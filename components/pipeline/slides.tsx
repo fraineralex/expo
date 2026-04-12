@@ -642,55 +642,63 @@ export function ChristopherSlide({ isPrintMode = false }: { isPrintMode?: boolea
           </div>
         </div>
 
-        {/* Side panel - compact stats */}
-        <div className="w-64 flex flex-col gap-3">
-          {/* Formula */}
-          <div className="bg-white rounded-xl p-4 border-2 border-orange-200 shadow-sm">
-            <div className="text-xs text-slate-500 mb-2 font-medium">Formula</div>
-            <div className="bg-orange-50 rounded-lg p-3 font-mono text-center border border-orange-100">
-              <span className="text-orange-700 font-bold">T = N × T<sub>ciclo</sub></span>
+        {/* Side panel - compact stats with proper spacing for navigation */}
+        <div className="w-64 flex flex-col gap-2">
+          {/* Formula - more compact */}
+          <div className="bg-white rounded-xl p-3 border-2 border-orange-200 shadow-sm">
+            <div className="bg-orange-50 rounded-lg p-2 font-mono text-center border border-orange-100">
+              <span className="text-orange-700 font-bold text-sm">T = N × T<sub>ciclo</sub></span>
             </div>
-            <div className="mt-2 text-xs text-slate-500 text-center">
+            <div className="mt-1 text-xs text-slate-500 text-center">
               {totalInstructions} × {MONOCYCLE_CYCLE_TIME}ns = <span className="font-bold text-orange-600">{totalTime}ns</span>
             </div>
           </div>
 
-          {/* Live Stats */}
-          <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm flex-1">
-            <div className="text-xs text-slate-500 mb-3 font-medium">Estadisticas</div>
-            <div className="space-y-3">
+          {/* Live Stats - reduced height */}
+          <div className="bg-white rounded-xl p-3 border border-slate-200 shadow-sm">
+            <div className="grid grid-cols-2 gap-2 text-sm">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-slate-500">Ciclo</span>
-                <span className="font-mono font-bold text-orange-600 text-lg">{currentCycle}/{totalInstructions}</span>
+                <span className="text-slate-400 text-xs">Ciclo</span>
+                <span className="font-mono font-bold text-orange-600">{currentCycle}/{totalInstructions}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-slate-500">Tiempo</span>
+                <span className="text-slate-400 text-xs">Tiempo</span>
                 <span className="font-mono font-bold text-slate-800">{executedTime}ns</span>
               </div>
-              <div className="h-px bg-slate-100"></div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-emerald-600">Util</span>
+                <span className="text-emerald-500 text-xs">Util</span>
                 <span className="font-mono font-bold text-emerald-600">{usefulTime}ns</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-red-500">Desperdicio</span>
+                <span className="text-red-400 text-xs">Desperdicio</span>
                 <span className="font-mono font-bold text-red-500">{wastedTime}ns</span>
               </div>
             </div>
           </div>
 
-          {/* Final result - only shows when complete */}
-          {currentCycle === totalInstructions && (
-            <div className="bg-gradient-to-br from-orange-500 to-red-500 rounded-xl p-4 text-white shadow-lg">
-              <div className="text-center">
+          {/* Final result - always visible area, content conditional */}
+          <div className={`rounded-xl p-3 text-center transition-all duration-300 ${
+            currentCycle === totalInstructions 
+              ? "bg-gradient-to-br from-orange-500 to-red-500 text-white shadow-lg" 
+              : "bg-slate-100 border border-slate-200"
+          }`}>
+            {currentCycle === totalInstructions ? (
+              <>
                 <div className="text-orange-100 text-xs mb-1">Resultado Final</div>
-                <div className="text-2xl font-bold">{totalTime}ns</div>
-                <div className="mt-2 text-sm opacity-90">
+                <div className="text-xl font-bold">{totalTime}ns</div>
+                <div className="text-sm opacity-90">
                   <span className="font-bold">{((totalWasted / totalTime) * 100).toFixed(0)}%</span> desperdiciado
                 </div>
+              </>
+            ) : (
+              <div className="text-slate-400 text-sm py-2">
+                Ejecuta la simulacion para ver el resultado
               </div>
-            </div>
-          )}
+            )}
+          </div>
+
+          {/* Spacer to push content away from navigation */}
+          <div className="flex-1 min-h-8"></div>
         </div>
       </div>
 
