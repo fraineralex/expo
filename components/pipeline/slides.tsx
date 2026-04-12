@@ -1245,12 +1245,15 @@ export function GraciasSlide({ isPrintMode = false }: { isPrintMode?: boolean })
 export function QRSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
   const [qrDataUrl, setQrDataUrl] = useState("")
   const [presentationUrl, setPresentationUrl] = useState("")
+  const [isPreview, setIsPreview] = useState(false)
 
   useEffect(() => {
     if (typeof window === "undefined") return
-    // Generate QR for the main presentation (not /remote)
     const url = window.location.origin
     setPresentationUrl(url)
+    // Check if we're in v0 preview (vusercontent.net) which requires auth
+    setIsPreview(url.includes("vusercontent.net") || url.includes("localhost"))
+    
     QRCode.toDataURL(url, {
       width: 300,
       margin: 2,
@@ -1259,41 +1262,85 @@ export function QRSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
   }, [])
 
   return (
-    <div className="w-full h-full bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex flex-col items-center justify-center p-12 relative overflow-hidden">
+    <div className="w-full h-full bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex flex-col items-center justify-center p-8 relative overflow-hidden">
       <div className="absolute inset-0 opacity-20" style={{
         backgroundImage: "linear-gradient(rgba(99,102,241,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.08) 1px, transparent 1px)",
         backgroundSize: "50px 50px",
       }} />
 
-      <div className="flex items-center gap-3 mb-6 z-10">
+      <div className="flex items-center gap-3 mb-4 z-10">
         <div className="p-3 bg-indigo-100 rounded-xl">
           <QrCode className="w-8 h-8 text-indigo-600" />
         </div>
         <h2 className="text-3xl font-bold text-slate-800">Ver en tu Celular</h2>
       </div>
 
-      <p className="text-slate-600 mb-6 text-center z-10 max-w-md">
-        Escanea el codigo QR para ver la presentacion interactiva en tu dispositivo movil
-      </p>
-
-      <div className="bg-white rounded-3xl shadow-xl p-6 border border-slate-200 z-10">
-        {qrDataUrl ? (
-          <img src={qrDataUrl} alt="QR para ver presentacion" className="w-64 h-64" />
-        ) : (
-          <div className="w-64 h-64 bg-slate-100 rounded-xl animate-pulse flex items-center justify-center">
-            <span className="text-slate-400">Generando...</span>
+      {isPreview ? (
+        <div className="z-10 max-w-xl text-center">
+          <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-6 mb-6">
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <div className="w-3 h-3 bg-amber-400 rounded-full animate-pulse"></div>
+              <span className="font-semibold text-amber-700">Modo Preview</span>
+            </div>
+            <p className="text-amber-800 text-sm mb-4">
+              El QR no funcionara desde el preview porque requiere autenticacion de v0.
+            </p>
+            <div className="bg-white rounded-xl p-4 border border-amber-200">
+              <p className="text-slate-700 text-sm font-medium mb-2">Para compartir con tu celular:</p>
+              <ol className="text-left text-sm text-slate-600 space-y-2">
+                <li className="flex items-start gap-2">
+                  <span className="bg-indigo-100 text-indigo-700 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                  <span>Haz clic en <strong>&quot;Publish&quot;</strong> en la esquina superior derecha</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="bg-indigo-100 text-indigo-700 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                  <span>Espera que se despliegue en Vercel</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="bg-indigo-100 text-indigo-700 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shrink-0">3</span>
+                  <span>Abre la URL publica y el QR funcionara</span>
+                </li>
+              </ol>
+            </div>
           </div>
-        )}
-      </div>
 
-      <p className="text-slate-500 text-sm mt-4 font-mono z-10 bg-slate-100 px-4 py-2 rounded-lg">{presentationUrl}</p>
+          <div className="opacity-50">
+            <div className="bg-white rounded-3xl shadow-xl p-6 border border-slate-200 inline-block">
+              {qrDataUrl ? (
+                <img src={qrDataUrl} alt="QR (solo funciona despues de publicar)" className="w-48 h-48" />
+              ) : (
+                <div className="w-48 h-48 bg-slate-100 rounded-xl animate-pulse" />
+              )}
+            </div>
+            <p className="text-slate-400 text-xs mt-2 font-mono">{presentationUrl}</p>
+          </div>
+        </div>
+      ) : (
+        <>
+          <p className="text-slate-600 mb-4 text-center z-10 max-w-md">
+            Escanea el codigo QR para ver la presentacion interactiva en tu dispositivo movil
+          </p>
 
-      <div className="mt-8 bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-slate-200 z-10 max-w-lg">
-        <p className="text-slate-600 text-sm text-center">
-          <span className="font-semibold text-indigo-600">Tip:</span> Usa las flechas del teclado o desliza para navegar. 
-          Cada diapositiva tiene simulaciones interactivas que puedes controlar.
-        </p>
-      </div>
+          <div className="bg-white rounded-3xl shadow-xl p-6 border border-slate-200 z-10">
+            {qrDataUrl ? (
+              <img src={qrDataUrl} alt="QR para ver presentacion" className="w-64 h-64" />
+            ) : (
+              <div className="w-64 h-64 bg-slate-100 rounded-xl animate-pulse flex items-center justify-center">
+                <span className="text-slate-400">Generando...</span>
+              </div>
+            )}
+          </div>
+
+          <p className="text-slate-500 text-sm mt-4 font-mono z-10 bg-slate-100 px-4 py-2 rounded-lg">{presentationUrl}</p>
+
+          <div className="mt-6 bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-slate-200 z-10 max-w-lg">
+            <p className="text-slate-600 text-sm text-center">
+              <span className="font-semibold text-indigo-600">Tip:</span> Usa las flechas del teclado o desliza para navegar. 
+              Cada diapositiva tiene simulaciones interactivas que puedes controlar.
+            </p>
+          </div>
+        </>
+      )}
 
       <SlideNavigation slideNumber={8} totalSlides={8} />
     </div>
