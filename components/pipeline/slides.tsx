@@ -409,6 +409,19 @@ export function ChristopherSlide({ isPrintMode = false }: { isPrintMode?: boolea
       setCurrentCycle((c) => c + 1)
     }
   }, [currentCycle, totalInstructions])
+
+  // Expose simulation actions for remote control
+  useEffect(() => {
+    window.triggerSimulationAction = (action: string) => {
+      switch (action) {
+        case "play": startSimulation(); break
+        case "pause": pauseSimulation(); break
+        case "step": stepForward(); break
+        case "reset": resetSimulation(); break
+      }
+    }
+    return () => { window.triggerSimulationAction = undefined }
+  }, [startSimulation, pauseSimulation, stepForward, resetSimulation])
   
   useEffect(() => {
     if (isPrintMode || !isRunning) return
@@ -710,6 +723,19 @@ export function EnmanuelSlide({ isPrintMode = false }: { isPrintMode?: boolean }
   const stepForward = useCallback(() => {
     if (currentCycle < totalCycles) setCurrentCycle((c) => c + 1)
   }, [currentCycle, totalCycles])
+
+  // Expose simulation actions for remote control
+  useEffect(() => {
+    window.triggerSimulationAction = (action: string) => {
+      switch (action) {
+        case "play": startSimulation(); break
+        case "pause": pauseSimulation(); break
+        case "step": stepForward(); break
+        case "reset": resetSimulation(); break
+      }
+    }
+    return () => { window.triggerSimulationAction = undefined }
+  }, [startSimulation, pauseSimulation, stepForward, resetSimulation])
 
   useEffect(() => {
     if (isPrintMode || !isRunning) return
@@ -1240,19 +1266,20 @@ export function GraciasSlide({ isPrintMode = false }: { isPrintMode?: boolean })
 }
 
 /* ─────────────────────────────────────────────
-   QR SLIDE - View presentation on phone
+   QR SLIDE - Remote Control
 ───────────────────────────────────────────── */
 export function QRSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
   const [qrDataUrl, setQrDataUrl] = useState("")
-  const [presentationUrl, setPresentationUrl] = useState("")
+  const [remoteUrl, setRemoteUrl] = useState("")
   const [isPreview, setIsPreview] = useState(false)
 
   useEffect(() => {
     if (typeof window === "undefined") return
-    const url = window.location.origin
-    setPresentationUrl(url)
+    const baseUrl = window.location.origin
+    const url = `${baseUrl}/remote`
+    setRemoteUrl(url)
     // Check if we're in v0 preview (vusercontent.net) which requires auth
-    setIsPreview(url.includes("vusercontent.net") || url.includes("localhost"))
+    setIsPreview(baseUrl.includes("vusercontent.net") || baseUrl.includes("localhost"))
     
     QRCode.toDataURL(url, {
       width: 300,
@@ -1272,7 +1299,7 @@ export function QRSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
         <div className="p-3 bg-indigo-100 rounded-xl">
           <QrCode className="w-8 h-8 text-indigo-600" />
         </div>
-        <h2 className="text-3xl font-bold text-slate-800">Ver en tu Celular</h2>
+        <h2 className="text-3xl font-bold text-slate-800">Control Remoto</h2>
       </div>
 
       {isPreview ? (
@@ -1283,10 +1310,10 @@ export function QRSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
               <span className="font-semibold text-amber-700">Modo Preview</span>
             </div>
             <p className="text-amber-800 text-sm mb-4">
-              El QR no funcionara desde el preview porque requiere autenticacion de v0.
+              El control remoto no funcionara desde el preview porque requiere autenticacion de v0.
             </p>
             <div className="bg-white rounded-xl p-4 border border-amber-200">
-              <p className="text-slate-700 text-sm font-medium mb-2">Para compartir con tu celular:</p>
+              <p className="text-slate-700 text-sm font-medium mb-2">Para usar el control remoto:</p>
               <ol className="text-left text-sm text-slate-600 space-y-2">
                 <li className="flex items-start gap-2">
                   <span className="bg-indigo-100 text-indigo-700 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shrink-0">1</span>
@@ -1298,7 +1325,7 @@ export function QRSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="bg-indigo-100 text-indigo-700 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shrink-0">3</span>
-                  <span>Abre la URL publica y el QR funcionara</span>
+                  <span>Abre la URL publica y escanea el QR</span>
                 </li>
               </ol>
             </div>
@@ -1312,18 +1339,18 @@ export function QRSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
                 <div className="w-48 h-48 bg-slate-100 rounded-xl animate-pulse" />
               )}
             </div>
-            <p className="text-slate-400 text-xs mt-2 font-mono">{presentationUrl}</p>
+            <p className="text-slate-400 text-xs mt-2 font-mono">{remoteUrl}</p>
           </div>
         </div>
       ) : (
         <>
           <p className="text-slate-600 mb-4 text-center z-10 max-w-md">
-            Escanea el codigo QR para ver la presentacion interactiva en tu dispositivo movil
+            Escanea el codigo QR para controlar la presentacion desde tu celular
           </p>
 
           <div className="bg-white rounded-3xl shadow-xl p-6 border border-slate-200 z-10">
             {qrDataUrl ? (
-              <img src={qrDataUrl} alt="QR para ver presentacion" className="w-64 h-64" />
+              <img src={qrDataUrl} alt="QR para control remoto" className="w-64 h-64" />
             ) : (
               <div className="w-64 h-64 bg-slate-100 rounded-xl animate-pulse flex items-center justify-center">
                 <span className="text-slate-400">Generando...</span>
@@ -1331,12 +1358,12 @@ export function QRSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
             )}
           </div>
 
-          <p className="text-slate-500 text-sm mt-4 font-mono z-10 bg-slate-100 px-4 py-2 rounded-lg">{presentationUrl}</p>
+          <p className="text-slate-500 text-sm mt-4 font-mono z-10 bg-slate-100 px-4 py-2 rounded-lg">{remoteUrl}</p>
 
           <div className="mt-6 bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-slate-200 z-10 max-w-lg">
             <p className="text-slate-600 text-sm text-center">
-              <span className="font-semibold text-indigo-600">Tip:</span> Usa las flechas del teclado o desliza para navegar. 
-              Cada diapositiva tiene simulaciones interactivas que puedes controlar.
+              <span className="font-semibold text-indigo-600">Desde tu celular podras:</span> Navegar entre diapositivas, 
+              iniciar/pausar simulaciones, y controlar la presentacion en tiempo real.
             </p>
           </div>
         </>

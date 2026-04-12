@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useCallback } from "react"
 import Reveal from "reveal.js"
 import "reveal.js/dist/reveal.css"
 
@@ -18,13 +18,76 @@ import {
 declare global {
   interface Window {
     Reveal?: Reveal.Api
+    triggerSimulationAction?: (action: string) => void
   }
 }
+
+const SLIDES_WITH_SIMULATION = [2, 3] // Christopher and Enmanuel slides
 
 export default function PipelinePresentation() {
   const deckRef = useRef<HTMLDivElement>(null)
   const revealRef = useRef<Reveal.Api | null>(null)
   const [isPrintMode, setIsPrintMode] = useState(false)
+  const lastCommandTimestamp = useRef<number>(0)
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Broadcast current state to remote
+  const broadcastState = useCallback(async (slideIndex: number, isPlaying = false) => {
+    try {
+      await fetch("/api/presentation/state", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          currentSlide: slideIndex,
+          totalSlides: 8,
+          hasSimulation: SLIDES_WITH_SIMULATION.includes(slideIndex),
+          isPlaying,
+        }),
+      })
+    } catch {
+      // Ignore errors - remote might not be connected
+    }
+  }, [])
+
+  // Poll for commands from remote
+  const pollCommands = useCallback(async () => {
+    if (!revealRef.current) return
+    
+    try {
+      const res = await fetch(`/api/presentation/command?since=${lastCommandTimestamp.current}`)
+      if (!res.ok) return
+      
+      const data = await res.json()
+      if (!data.command) return
+      
+      lastCommandTimestamp.current = data.command.timestamp
+      
+      switch (data.command.action) {
+        case "next":
+          revealRef.current.next()
+          break
+        case "prev":
+          revealRef.current.prev()
+          break
+        case "goto":
+          if (data.command.slideIndex !== undefined) {
+            revealRef.current.slide(data.command.slideIndex, 0)
+          }
+          break
+        case "play":
+        case "pause":
+        case "step":
+        case "reset":
+          // Trigger simulation action via global function
+          if (window.triggerSimulationAction) {
+            window.triggerSimulationAction(data.command.action)
+          }
+          break
+      }
+    } catch {
+      // Ignore polling errors
+    }
+  }, [])
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
@@ -41,6 +104,23 @@ export default function PipelinePresentation() {
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [])
+
+  // Start polling for remote commands (with delay to let packages install)
+  useEffect(() => {
+    if (isPrintMode) return
+    
+    // Delay start by 3 seconds to let the API routes compile
+    const startDelay = setTimeout(() => {
+      pollIntervalRef.current = setInterval(pollCommands, 1000)
+    }, 3000)
+    
+    return () => {
+      clearTimeout(startDelay)
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current)
+      }
+    }
+  }, [isPrintMode, pollCommands])
 
   useEffect(() => {
     if (!deckRef.current || revealRef.current) return
@@ -82,6 +162,14 @@ export default function PipelinePresentation() {
       .then(() => {
         revealRef.current = deck
         window.Reveal = deck
+        
+        // Broadcast initial state
+        broadcastState(deck.getIndices().h)
+        
+        // Broadcast state on slide change
+        deck.on("slidechanged", (event: { indexh: number }) => {
+          broadcastState(event.indexh)
+        })
       })
       .catch((error) => {
         console.error("Reveal.js initialization error:", error)
