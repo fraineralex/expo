@@ -14,6 +14,12 @@ import {
   ConclusionSlide,
 } from "./pipeline/slides"
 
+declare global {
+  interface Window {
+    Reveal?: Reveal.Api
+  }
+}
+
 export default function PipelinePresentation() {
   const deckRef = useRef<HTMLDivElement>(null)
   const revealRef = useRef<Reveal.Api | null>(null)
@@ -41,7 +47,7 @@ export default function PipelinePresentation() {
     const deck = new Reveal(deckRef.current, {
       hash: false,
       history: false,
-      controls: !isPrintMode,
+      controls: false, // We use custom navigation
       progress: !isPrintMode,
       center: false,
       transition: isPrintMode ? "none" : "slide",
@@ -64,7 +70,7 @@ export default function PipelinePresentation() {
       autoPlayMedia: false,
       navigationMode: "linear",
       fragments: false,
-      slideNumber: !isPrintMode,
+      slideNumber: false, // We show custom slide numbers
       disableLayout: !isPrintMode,
       pdfMaxPagesPerSlide: 1,
       pdfSeparateFragments: false,
@@ -74,6 +80,8 @@ export default function PipelinePresentation() {
       .initialize()
       .then(() => {
         revealRef.current = deck
+        // Expose Reveal globally for custom navigation
+        window.Reveal = deck
 
         deck.on("slidechanged", (event: { currentSlide: HTMLElement }) => {
           const fragments = event.currentSlide.querySelectorAll(".fragment")
@@ -98,6 +106,7 @@ export default function PipelinePresentation() {
           // Ignore destroy errors
         }
         revealRef.current = null
+        window.Reveal = undefined
       }
     }
   }, [isPrintMode])
@@ -153,12 +162,12 @@ export default function PipelinePresentation() {
         }
 
         .reveal {
-          --r-background-color: #0a0a1a;
+          --r-background-color: #f8fafc;
           --r-main-font: inherit;
           --r-main-font-size: 18px;
-          --r-main-color: #f8fafc;
-          --r-heading-color: #f8fafc;
-          --r-link-color: #22d3ee;
+          --r-main-color: #1e293b;
+          --r-heading-color: #0f172a;
+          --r-link-color: #0d9488;
         }
 
         .reveal .slides {
@@ -193,36 +202,41 @@ export default function PipelinePresentation() {
         }
 
         .reveal .progress {
-          background: rgba(34, 211, 238, 0.15);
-          height: 3px;
+          background: rgba(13, 148, 136, 0.15);
+          height: 4px;
           z-index: 100;
         }
 
         .reveal .progress span {
-          background: linear-gradient(90deg, #22d3ee, #a78bfa);
+          background: linear-gradient(90deg, #0d9488, #7c3aed);
         }
 
         .reveal .controls {
-          color: #22d3ee;
-          z-index: 100;
-        }
-
-        .reveal .controls button {
-          color: #22d3ee;
-        }
-
-        .reveal .controls .navigate-up,
-        .reveal .controls .navigate-down {
           display: none;
         }
 
         .reveal .slide-number {
-          background: rgba(10, 10, 26, 0.8);
-          color: #64748b;
-          font-family: monospace;
-          font-size: 11px;
-          padding: 4px 8px;
+          display: none;
+        }
+
+        /* Custom scrollbar for light theme */
+        ::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+          background: #f1f5f9;
           border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8;
         }
 
         @media print {
@@ -230,7 +244,7 @@ export default function PipelinePresentation() {
             width: 100% !important;
             height: 100% !important;
             overflow: visible !important;
-            background: #0a0a1a !important;
+            background: #f8fafc !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
             color-adjust: exact !important;
@@ -266,7 +280,7 @@ export default function PipelinePresentation() {
             margin: 0 !important;
             padding: 0 !important;
             box-sizing: border-box !important;
-            background: #0a0a1a !important;
+            background: #f8fafc !important;
           }
 
           .reveal .slides > section > div {
