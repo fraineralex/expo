@@ -13,7 +13,6 @@ import {
   OliverSlide,
   GraciasSlide,
   QRSlide,
-  broadcastState,
 } from "./pipeline/slides"
 
 declare global {
@@ -21,8 +20,6 @@ declare global {
     Reveal?: Reveal.Api
   }
 }
-
-const CHANNEL_NAME = "pipeline-presentation-sync"
 
 export default function PipelinePresentation() {
   const deckRef = useRef<HTMLDivElement>(null)
@@ -85,50 +82,12 @@ export default function PipelinePresentation() {
       .then(() => {
         revealRef.current = deck
         window.Reveal = deck
-
-        // Broadcast initial state
-        const slideIndex = deck.getIndices().h
-        broadcastState({
-          slideIndex,
-          hasSimulation: [2, 3, 5].includes(slideIndex),
-          isPlaying: false,
-          canStep: true,
-          canReset: false
-        })
-
-        deck.on("slidechanged", (event: { indexh: number }) => {
-          const slideIndex = event.indexh
-          // Broadcast slide change to remote
-          broadcastState({
-            slideIndex,
-            hasSimulation: [2, 3, 5].includes(slideIndex),
-            isPlaying: false,
-            canStep: true,
-            canReset: false
-          })
-        })
       })
       .catch((error) => {
         console.error("Reveal.js initialization error:", error)
       })
 
-    // Listen for remote control actions
-    const channel = new BroadcastChannel(CHANNEL_NAME)
-    channel.onmessage = (e) => {
-      if (e.data.type === "action") {
-        switch (e.data.action) {
-          case "prev":
-            if (revealRef.current) revealRef.current.prev()
-            break
-          case "next":
-            if (revealRef.current) revealRef.current.next()
-            break
-        }
-      }
-    }
-
     return () => {
-      channel.close()
       if (revealRef.current) {
         try {
           revealRef.current.destroy()

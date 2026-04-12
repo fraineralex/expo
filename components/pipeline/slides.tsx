@@ -17,39 +17,14 @@ import {
   ChevronLeft,
   Gauge,
   SkipForward,
-  QrCode,
-  Smartphone
+  QrCode
 } from "lucide-react"
 import QRCode from "qrcode"
 
 /* ─────────────────────────────────────────────
-   SIMULATION STATE CHANNEL (for remote control)
+   PIPELINE PRESENTATION SLIDES
+   Los Ingenieros - Arquitectura del Computador
 ───────────────────────────────────────────── */
-const CHANNEL_NAME = "pipeline-presentation-sync"
-
-export interface SimulationState {
-  slideIndex: number
-  hasSimulation: boolean
-  isPlaying: boolean
-  canStep: boolean
-  canReset: boolean
-}
-
-export function broadcastState(state: SimulationState) {
-  if (typeof window !== "undefined") {
-    const channel = new BroadcastChannel(CHANNEL_NAME)
-    channel.postMessage({ type: "state", ...state })
-    channel.close()
-  }
-}
-
-export function broadcastAction(action: "play" | "pause" | "step" | "reset" | "prev" | "next") {
-  if (typeof window !== "undefined") {
-    const channel = new BroadcastChannel(CHANNEL_NAME)
-    channel.postMessage({ type: "action", action })
-    channel.close()
-  }
-}
 
 /* ─────────────────────────────────────────────
    SHARED PRESENTER BADGE (TOP RIGHT)
@@ -434,18 +409,7 @@ export function ChristopherSlide({ isPrintMode = false }: { isPrintMode?: boolea
       setCurrentCycle((c) => c + 1)
     }
   }, [currentCycle, totalInstructions])
-
-  // Broadcast state for remote control
-  useEffect(() => {
-    broadcastState({
-      slideIndex: 2,
-      hasSimulation: true,
-      isPlaying: isRunning,
-      canStep: currentCycle < totalInstructions,
-      canReset: currentCycle > 0
-    })
-  }, [isRunning, currentCycle, totalInstructions])
-
+  
   useEffect(() => {
     if (isPrintMode || !isRunning) return
 
@@ -464,23 +428,6 @@ export function ChristopherSlide({ isPrintMode = false }: { isPrintMode?: boolea
       if (intervalRef.current) clearInterval(intervalRef.current)
     }
   }, [isPrintMode, isRunning, totalInstructions])
-
-  // Listen for remote control actions
-  useEffect(() => {
-    if (typeof window === "undefined") return
-    const channel = new BroadcastChannel(CHANNEL_NAME)
-    channel.onmessage = (e) => {
-      if (e.data.type === "action") {
-        switch (e.data.action) {
-          case "play": startSimulation(); break
-          case "pause": pauseSimulation(); break
-          case "step": stepForward(); break
-          case "reset": resetSimulation(); break
-        }
-      }
-    }
-    return () => channel.close()
-  }, [startSimulation, pauseSimulation, stepForward, resetSimulation])
 
   return (
     <div className="w-full h-full bg-gradient-to-br from-orange-50 via-white to-amber-50 flex flex-col p-6 relative overflow-hidden">
@@ -709,7 +656,7 @@ export function ChristopherSlide({ isPrintMode = false }: { isPrintMode?: boolea
 
 /* ─────────────────────────────────────────────
    SLIDE 3: ENMANUEL - Pipeline de 5 Etapas
-───────────────────────────────────────────── */
+──────────────────────��────────────────────── */
 const PIPELINE_STAGES = ["IF", "ID", "EX", "MEM", "WB"]
 const STAGE_COLORS = {
   IF: "#0d9488",
@@ -764,17 +711,6 @@ export function EnmanuelSlide({ isPrintMode = false }: { isPrintMode?: boolean }
     if (currentCycle < totalCycles) setCurrentCycle((c) => c + 1)
   }, [currentCycle, totalCycles])
 
-  // Broadcast state
-  useEffect(() => {
-    broadcastState({
-      slideIndex: 3,
-      hasSimulation: true,
-      isPlaying: isRunning,
-      canStep: currentCycle < totalCycles,
-      canReset: currentCycle > 0
-    })
-  }, [isRunning, currentCycle, totalCycles])
-
   useEffect(() => {
     if (isPrintMode || !isRunning) return
     intervalRef.current = setInterval(() => {
@@ -788,23 +724,6 @@ export function EnmanuelSlide({ isPrintMode = false }: { isPrintMode?: boolean }
     }, 600)
     return () => { if (intervalRef.current) clearInterval(intervalRef.current) }
   }, [isPrintMode, isRunning, totalCycles])
-
-  // Listen for remote
-  useEffect(() => {
-    if (typeof window === "undefined") return
-    const channel = new BroadcastChannel(CHANNEL_NAME)
-    channel.onmessage = (e) => {
-      if (e.data.type === "action") {
-        switch (e.data.action) {
-          case "play": startSimulation(); break
-          case "pause": pauseSimulation(); break
-          case "step": stepForward(); break
-          case "reset": resetSimulation(); break
-        }
-      }
-    }
-    return () => channel.close()
-  }, [startSimulation, pauseSimulation, stepForward, resetSimulation])
 
   const getInstructionStage = (instrIdx: number, cycle: number): string | null => {
     const stageIdx = cycle - instrIdx - 1
@@ -1321,16 +1240,17 @@ export function GraciasSlide({ isPrintMode = false }: { isPrintMode?: boolean })
 }
 
 /* ─────────────────────────────────────────────
-   QR CONTROL SLIDE
+   QR SLIDE - View presentation on phone
 ───────────────────────────────────────────── */
 export function QRSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
   const [qrDataUrl, setQrDataUrl] = useState("")
-  const [remoteUrl, setRemoteUrl] = useState("")
+  const [presentationUrl, setPresentationUrl] = useState("")
 
   useEffect(() => {
     if (typeof window === "undefined") return
-    const url = `${window.location.origin}/remote`
-    setRemoteUrl(url)
+    // Generate QR for the main presentation (not /remote)
+    const url = window.location.origin
+    setPresentationUrl(url)
     QRCode.toDataURL(url, {
       width: 300,
       margin: 2,
@@ -1349,16 +1269,16 @@ export function QRSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
         <div className="p-3 bg-indigo-100 rounded-xl">
           <QrCode className="w-8 h-8 text-indigo-600" />
         </div>
-        <h2 className="text-3xl font-bold text-slate-800">Control Remoto</h2>
+        <h2 className="text-3xl font-bold text-slate-800">Ver en tu Celular</h2>
       </div>
 
-      <p className="text-slate-600 mb-6 text-center z-10">
-        Escanea el codigo QR para controlar la presentacion desde tu celular
+      <p className="text-slate-600 mb-6 text-center z-10 max-w-md">
+        Escanea el codigo QR para ver la presentacion interactiva en tu dispositivo movil
       </p>
 
       <div className="bg-white rounded-3xl shadow-xl p-6 border border-slate-200 z-10">
         {qrDataUrl ? (
-          <img src={qrDataUrl} alt="QR para control remoto" className="w-64 h-64" />
+          <img src={qrDataUrl} alt="QR para ver presentacion" className="w-64 h-64" />
         ) : (
           <div className="w-64 h-64 bg-slate-100 rounded-xl animate-pulse flex items-center justify-center">
             <span className="text-slate-400">Generando...</span>
@@ -1366,21 +1286,13 @@ export function QRSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
         )}
       </div>
 
-      <p className="text-slate-500 text-sm mt-4 font-mono z-10">{remoteUrl}</p>
+      <p className="text-slate-500 text-sm mt-4 font-mono z-10 bg-slate-100 px-4 py-2 rounded-lg">{presentationUrl}</p>
 
-      <div className="mt-8 flex items-center gap-8 text-slate-500 z-10">
-        <div className="flex items-center gap-2">
-          <ChevronLeft className="w-5 h-5" />
-          <span>Anterior</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span>Siguiente</span>
-          <ChevronRight className="w-5 h-5" />
-        </div>
-        <div className="flex items-center gap-2">
-          <Smartphone className="w-5 h-5" />
-          <span>Controlar simulaciones</span>
-        </div>
+      <div className="mt-8 bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-slate-200 z-10 max-w-lg">
+        <p className="text-slate-600 text-sm text-center">
+          <span className="font-semibold text-indigo-600">Tip:</span> Usa las flechas del teclado o desliza para navegar. 
+          Cada diapositiva tiene simulaciones interactivas que puedes controlar.
+        </p>
       </div>
 
       <SlideNavigation slideNumber={8} totalSlides={8} />
