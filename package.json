@@ -59,7 +59,8 @@
     "vaul": "^1.1.2",
     "zod": "3.25.76",
     "tailwindcss-animate": "^1.0.7",
-    "reveal.js": "5.2.1"
+    "reveal.js": "5.2.1",
+    "qrcode": "^1.5.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.9",

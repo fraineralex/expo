@@ -11,7 +11,9 @@ import {
   EnmanuelSlide,
   FrainerSlide,
   OliverSlide,
-  ConclusionSlide,
+  GraciasSlide,
+  QRSlide,
+  broadcastState,
 } from "./pipeline/slides"
 
 declare global {
@@ -19,6 +21,8 @@ declare global {
     Reveal?: Reveal.Api
   }
 }
+
+const CHANNEL_NAME = "pipeline-presentation-sync"
 
 export default function PipelinePresentation() {
   const deckRef = useRef<HTMLDivElement>(null)
@@ -47,7 +51,7 @@ export default function PipelinePresentation() {
     const deck = new Reveal(deckRef.current, {
       hash: false,
       history: false,
-      controls: false, // We use custom navigation
+      controls: false,
       progress: !isPrintMode,
       center: false,
       transition: isPrintMode ? "none" : "slide",
@@ -70,7 +74,7 @@ export default function PipelinePresentation() {
       autoPlayMedia: false,
       navigationMode: "linear",
       fragments: false,
-      slideNumber: false, // We show custom slide numbers
+      slideNumber: false,
       disableLayout: !isPrintMode,
       pdfMaxPagesPerSlide: 1,
       pdfSeparateFragments: false,
@@ -80,17 +84,27 @@ export default function PipelinePresentation() {
       .initialize()
       .then(() => {
         revealRef.current = deck
-        // Expose Reveal globally for custom navigation
         window.Reveal = deck
 
-        deck.on("slidechanged", (event: { currentSlide: HTMLElement }) => {
-          const fragments = event.currentSlide.querySelectorAll(".fragment")
-          let delay = 0
-          fragments.forEach((fragment) => {
-            setTimeout(() => {
-              fragment.classList.add("visible")
-            }, delay)
-            delay += 400
+        // Broadcast initial state
+        const slideIndex = deck.getIndices().h
+        broadcastState({
+          slideIndex,
+          hasSimulation: [2, 3, 5].includes(slideIndex),
+          isPlaying: false,
+          canStep: true,
+          canReset: false
+        })
+
+        deck.on("slidechanged", (event: { indexh: number }) => {
+          const slideIndex = event.indexh
+          // Broadcast slide change to remote
+          broadcastState({
+            slideIndex,
+            hasSimulation: [2, 3, 5].includes(slideIndex),
+            isPlaying: false,
+            canStep: true,
+            canReset: false
           })
         })
       })
@@ -98,11 +112,27 @@ export default function PipelinePresentation() {
         console.error("Reveal.js initialization error:", error)
       })
 
+    // Listen for remote control actions
+    const channel = new BroadcastChannel(CHANNEL_NAME)
+    channel.onmessage = (e) => {
+      if (e.data.type === "action") {
+        switch (e.data.action) {
+          case "prev":
+            if (revealRef.current) revealRef.current.prev()
+            break
+          case "next":
+            if (revealRef.current) revealRef.current.next()
+            break
+        }
+      }
+    }
+
     return () => {
+      channel.close()
       if (revealRef.current) {
         try {
           revealRef.current.destroy()
-        } catch (e) {
+        } catch {
           // Ignore destroy errors
         }
         revealRef.current = null
@@ -145,9 +175,14 @@ export default function PipelinePresentation() {
             <OliverSlide isPrintMode={isPrintMode} />
           </section>
 
-          {/* SLIDE 7: Conclusion */}
+          {/* SLIDE 7: Gracias */}
           <section data-transition="zoom">
-            <ConclusionSlide isPrintMode={isPrintMode} />
+            <GraciasSlide isPrintMode={isPrintMode} />
+          </section>
+
+          {/* SLIDE 8: QR Control Remoto */}
+          <section data-transition="slide">
+            <QRSlide isPrintMode={isPrintMode} />
           </section>
         </div>
       </div>
@@ -219,7 +254,6 @@ export default function PipelinePresentation() {
           display: none;
         }
 
-        /* Custom scrollbar for light theme */
         ::-webkit-scrollbar {
           width: 8px;
           height: 8px;
