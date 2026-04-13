@@ -370,7 +370,7 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
   )
 }
 
-/* ───────────────────────────────��─────────────
+/* ───────────────────────────────��─────────��───
    SLIDE 2: CHRISTOPHER - Procesador Monociclo
    REDESIGNED: Cleaner, more visual, less text
 ───────────────────────────────────────────── */
@@ -1313,236 +1313,246 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                   {/* Detailed Visual Simulation */}
                   <div className="flex-1 flex flex-col gap-1 min-h-0">
                     <div className="flex-1 relative bg-white rounded-lg border border-orange-200 overflow-hidden">
-                      {/* IMAGE COMPRESSION - Show pixelated image becoming clear */}
+                      {/* IMAGE COMPRESSION - Single view that transitions */}
                       {selectedTask.visualType === "image" && (
-                        <div className="absolute inset-0 flex">
-                          {/* Source high quality side */}
-                          <div className="w-1/2 relative border-r border-orange-300">
-                            <div className="absolute top-0 left-0 text-[8px] bg-orange-100 text-orange-600 px-1 rounded-br font-medium">Original</div>
-                            <div className="absolute inset-0 flex items-center justify-center p-2">
-                              <div className="w-full h-full rounded bg-gradient-to-br from-sky-400 via-emerald-400 to-amber-400 relative overflow-hidden">
-                                <div className="absolute inset-2 bg-white/30 rounded-full" />
-                                <div className="absolute bottom-2 left-2 right-2 h-3 bg-emerald-600/50 rounded" />
-                                <div className="absolute top-3 left-3 w-4 h-4 bg-amber-300 rounded-full" />
-                              </div>
-                            </div>
-                          </div>
-                          {/* Destination - progressively deblurring */}
-                          <div className="w-1/2 relative">
-                            <div className="absolute top-0 left-0 text-[8px] bg-orange-100 text-orange-600 px-1 rounded-br font-medium">Comprimido</div>
-                            <div className="absolute inset-0 flex items-center justify-center p-2">
-                              <div className="w-full h-full rounded relative overflow-hidden">
-                                {/* Pixelated grid that becomes clearer */}
-                                <div className="absolute inset-0 grid grid-cols-8 grid-rows-6 gap-px">
-                                  {[...Array(48)].map((_, i) => {
-                                    const row = Math.floor(i / 8)
-                                    const col = i % 8
-                                    const processed = i < Math.floor(rwMonoProgress * 0.48)
-                                    const baseColor = row < 2 ? "bg-sky-400" : row < 4 ? "bg-emerald-400" : "bg-amber-400"
-                                    return (
-                                      <div key={i} className={`transition-all duration-150 ${processed ? baseColor : "bg-slate-200"}`}
-                                        style={{ opacity: processed ? 1 : 0.3, filter: processed ? "none" : "blur(1px)" }} />
-                                    )
-                                  })}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* FILE COPY - Show text chunks moving */}
-                      {selectedTask.visualType === "file" && (
-                        <div className="absolute inset-0 flex">
-                          {/* Source file */}
-                          <div className="w-[45%] relative p-1.5">
-                            <div className="text-[8px] text-orange-600 font-medium mb-0.5">Origen</div>
-                            <div className="bg-slate-50 rounded border border-slate-200 p-1 h-[calc(100%-16px)] overflow-hidden">
-                              <div className="text-[7px] font-mono text-slate-600 leading-tight space-y-0.5">
-                                {["const data = {", "  name: 'Archivo'", "  size: 10240", "  type: 'text'", "  content: [...]", "  metadata: {}", "  checksum: 'a3f'", "};"].map((line, i) => (
-                                  <div key={i} className={`transition-all ${i < Math.floor(rwMonoProgress / 12.5) ? "opacity-30 line-through" : ""}`}>{line}</div>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                          {/* Transfer animation */}
-                          <div className="w-[10%] flex items-center justify-center relative">
-                            <div className="absolute h-full w-0.5 bg-orange-200" />
-                            {rwIsRunning && (
-                              <div className="absolute w-3 h-3 bg-orange-400 rounded-full animate-bounce shadow-lg" 
-                                style={{ top: `${(rwMonoProgress % 20) * 4}%` }}>
-                                <FileText className="w-2 h-2 text-white m-0.5" />
+                        <div className="absolute inset-0 p-2 flex flex-col">
+                          <div className="flex-1 relative rounded-lg overflow-hidden border-2 border-orange-200">
+                            {/* Original image - visible before compression starts */}
+                            <img 
+                              src="/images/sample-landscape.jpg" 
+                              alt="Original landscape"
+                              className="absolute inset-0 w-full h-full object-cover transition-all duration-300"
+                              style={{ 
+                                filter: rwMonoProgress > 0 ? `blur(${Math.max(0, 8 - rwMonoProgress * 0.08)}px)` : 'none',
+                                opacity: rwMonoProgress > 0 ? 0.3 + (rwMonoProgress * 0.007) : 1
+                              }}
+                            />
+                            {/* Pixelation overlay during compression */}
+                            {rwMonoProgress > 0 && rwMonoProgress < 100 && (
+                              <div className="absolute inset-0 grid grid-cols-6 grid-rows-4 gap-0.5 p-1">
+                                {[...Array(24)].map((_, i) => {
+                                  const processed = i < Math.floor(rwMonoProgress * 0.24)
+                                  return (
+                                    <div key={i} className={`rounded transition-all duration-200 ${
+                                      processed ? "bg-transparent" : "bg-slate-300/60"
+                                    }`} />
+                                  )
+                                })}
                               </div>
                             )}
-                          </div>
-                          {/* Destination file */}
-                          <div className="w-[45%] relative p-1.5">
-                            <div className="text-[8px] text-orange-600 font-medium mb-0.5">Destino</div>
-                            <div className="bg-orange-50 rounded border border-orange-200 p-1 h-[calc(100%-16px)] overflow-hidden">
-                              <div className="text-[7px] font-mono text-orange-700 leading-tight space-y-0.5">
-                                {["const data = {", "  name: 'Archivo'", "  size: 10240", "  type: 'text'", "  content: [...]", "  metadata: {}", "  checksum: 'a3f'", "};"].map((line, i) => (
-                                  <div key={i} className={`transition-all ${i < Math.floor(rwMonoProgress / 12.5) ? "opacity-100" : "opacity-0"}`}>{line}</div>
-                                ))}
-                              </div>
+                            {/* Status label */}
+                            <div className={`absolute top-2 left-2 px-2 py-1 rounded text-sm font-bold ${
+                              rwMonoProgress === 0 ? "bg-blue-500 text-white" :
+                              rwMonoProgress >= 100 ? "bg-emerald-500 text-white" :
+                              "bg-orange-500 text-white animate-pulse"
+                            }`}>
+                              {rwMonoProgress === 0 ? "ORIGINAL 4K" : 
+                               rwMonoProgress >= 100 ? "COMPRIMIDO" : 
+                               `Comprimiendo ${rwMonoProgress.toFixed(0)}%`}
+                            </div>
+                            {/* File size indicator */}
+                            <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-sm font-mono">
+                              {rwMonoProgress === 0 ? "12.4 MB" : 
+                               `${(12.4 - rwMonoProgress * 0.1).toFixed(1)} MB`}
                             </div>
                           </div>
                         </div>
                       )}
                       
-                      {/* DATABASE QUERY - Show SQL execution stages */}
-                      {selectedTask.visualType === "database" && (
-                        <div className="absolute inset-0 p-1.5 flex flex-col gap-1">
-                          {/* SQL Query */}
-                          <div className="bg-slate-900 rounded p-1 text-[7px] font-mono text-emerald-400">
-                            SELECT * FROM users JOIN orders ON users.id = orders.user_id WHERE status = &apos;active&apos;
+                      {/* FILE COPY - Large visual with progress */}
+                      {selectedTask.visualType === "file" && (
+                        <div className="absolute inset-0 p-2 flex items-center justify-center gap-4">
+                          {/* Source file */}
+                          <div className="flex flex-col items-center">
+                            <FileText className={`w-16 h-16 transition-all ${rwMonoProgress > 0 ? "text-slate-300" : "text-blue-500"}`} />
+                            <span className="text-sm font-bold text-slate-700 mt-1">Origen</span>
+                            <span className="text-xs text-slate-500">10 MB</span>
                           </div>
-                          {/* Pipeline stages */}
-                          <div className="flex gap-1 flex-1">
-                            {[
-                              { name: "Parse", icon: "{ }", rows: 0 },
-                              { name: "Plan", icon: "?", rows: 0 },
-                              { name: "Scan", icon: ">>", rows: 1000 },
-                              { name: "Filter", icon: "~", rows: 245 },
-                              { name: "Return", icon: "<", rows: 10 }
-                            ].map((stage, i) => (
-                              <div key={i} className={`flex-1 rounded border text-center flex flex-col items-center justify-center transition-all ${
-                                rwMonoStage === i ? "bg-orange-100 border-orange-400 scale-105" : 
-                                rwMonoStage > i ? "bg-emerald-50 border-emerald-300" : "bg-slate-50 border-slate-200"
+                          
+                          {/* Transfer animation */}
+                          <div className="flex-1 max-w-[120px] flex flex-col items-center gap-2">
+                            <div className="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
+                              <div className="h-full bg-orange-500 transition-all rounded-full" 
+                                style={{ width: `${rwMonoProgress}%` }} />
+                            </div>
+                            <div className="text-lg font-bold text-orange-600">
+                              {rwMonoProgress.toFixed(0)}%
+                            </div>
+                            {rwIsRunning && (
+                              <div className="flex gap-1">
+                                {[0,1,2].map(i => (
+                                  <div key={i} className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" 
+                                    style={{ animationDelay: `${i * 150}ms` }} />
+                                ))}
+                              </div>
+                            )}
+                            <span className="text-xs text-slate-500">
+                              {(rwMonoProgress * 0.1).toFixed(1)} MB copiados
+                            </span>
+                          </div>
+                          
+                          {/* Destination file */}
+                          <div className="flex flex-col items-center">
+                            <FileText className={`w-16 h-16 transition-all ${
+                              rwMonoProgress >= 100 ? "text-emerald-500" : 
+                              rwMonoProgress > 0 ? "text-orange-400" : "text-slate-300"
+                            }`} />
+                            <span className="text-sm font-bold text-slate-700 mt-1">Destino</span>
+                            <span className="text-xs text-slate-500">
+                              {rwMonoProgress >= 100 ? "10 MB" : "---"}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* DATABASE QUERY - Large stage indicators */}
+                      {selectedTask.visualType === "database" && (
+                        <div className="absolute inset-0 p-2 flex flex-col gap-2">
+                          {/* Current stage - BIG */}
+                          <div className="flex-1 flex items-center justify-center">
+                            <div className={`text-center transition-all ${rwIsRunning ? "animate-pulse" : ""}`}>
+                              <Database className={`w-16 h-16 mx-auto mb-2 ${
+                                rwMonoProgress >= 100 ? "text-emerald-500" : "text-orange-500"
+                              }`} />
+                              <div className="text-xl font-bold text-slate-800">
+                                {["Analizando SQL", "Planificando", "Escaneando", "Filtrando", "Retornando"][rwMonoStage]}
+                              </div>
+                              <div className="text-sm text-slate-500 mt-1">
+                                {rwMonoStage === 0 && "Parseando consulta..."}
+                                {rwMonoStage === 1 && "Optimizando ruta..."}
+                                {rwMonoStage === 2 && "Leyendo 1000 filas..."}
+                                {rwMonoStage === 3 && "Aplicando WHERE..."}
+                                {rwMonoStage === 4 && "10 resultados listos"}
+                              </div>
+                            </div>
+                          </div>
+                          {/* Stage progress bar */}
+                          <div className="flex gap-1">
+                            {["Parse", "Plan", "Scan", "Filter", "Return"].map((stage, i) => (
+                              <div key={i} className={`flex-1 h-8 rounded flex items-center justify-center text-xs font-bold transition-all ${
+                                rwMonoStage === i ? "bg-orange-500 text-white scale-105" : 
+                                rwMonoStage > i ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-500"
                               }`}>
-                                <div className="text-[8px] font-bold">{stage.icon}</div>
-                                <div className="text-[7px] font-medium">{stage.name}</div>
-                                {stage.rows > 0 && rwMonoStage >= i && (
-                                  <div className="text-[6px] text-slate-500">{stage.rows} filas</div>
-                                )}
+                                {stage}
                               </div>
                             ))}
                           </div>
-                          {/* Results preview */}
-                          <div className="bg-slate-50 rounded border border-slate-200 p-1 flex-1 overflow-hidden">
-                            <div className="text-[7px] font-mono text-slate-600">
-                              {rwMonoStage >= 4 && (
-                                <div className="space-y-0.5">
-                                  <div className="bg-slate-200 px-1 rounded text-[6px]">id | name | order_total</div>
-                                  {[...Array(Math.min(3, Math.floor(rwMonoProgress / 30)))].map((_, i) => (
-                                    <div key={i} className="text-emerald-600">{i+1} | Usuario{i+1} | ${(100 + i * 50)}</div>
-                                  ))}
+                        </div>
+                      )}
+                      
+                      {/* EMAIL PROCESSING - Large counters */}
+                      {selectedTask.visualType === "email" && (
+                        <div className="absolute inset-0 p-2 flex flex-col">
+                          {/* Main processing view */}
+                          <div className="flex-1 flex items-center justify-center gap-6">
+                            {/* Current email being processed */}
+                            <div className={`flex flex-col items-center ${rwIsRunning ? "animate-pulse" : ""}`}>
+                              <Mail className="w-14 h-14 text-orange-500" />
+                              <span className="text-sm font-bold text-orange-600 mt-1">Procesando</span>
+                              <span className="text-xs text-slate-500">1 email a la vez</span>
+                            </div>
+                            
+                            {/* Results */}
+                            <div className="flex gap-4">
+                              <div className="bg-emerald-100 rounded-xl p-3 text-center min-w-[80px]">
+                                <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto" />
+                                <div className="text-2xl font-bold text-emerald-600 mt-1">
+                                  {Math.floor(rwMonoProgress * 0.66)}
+                                </div>
+                                <div className="text-xs text-emerald-600">Legitimos</div>
+                              </div>
+                              <div className="bg-red-100 rounded-xl p-3 text-center min-w-[80px]">
+                                <AlertTriangle className="w-8 h-8 text-red-500 mx-auto" />
+                                <div className="text-2xl font-bold text-red-600 mt-1">
+                                  {Math.floor(rwMonoProgress * 0.34)}
+                                </div>
+                                <div className="text-xs text-red-600">Spam</div>
+                              </div>
+                            </div>
+                          </div>
+                          {/* Progress */}
+                          <div className="text-center text-sm text-slate-600">
+                            <span className="font-bold">{Math.floor(rwMonoProgress)}</span> de 100 correos procesados
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* VIDEO RENDERING - Large frame view */}
+                      {selectedTask.visualType === "video" && (
+                        <div className="absolute inset-0 p-2 flex flex-col gap-2">
+                          {/* Main frame being rendered */}
+                          <div className="flex-1 flex items-center justify-center">
+                            <div className="relative">
+                              <div className={`w-32 h-20 rounded-lg border-4 flex items-center justify-center ${
+                                rwIsRunning ? "border-orange-500 bg-orange-100" : 
+                                rwMonoProgress >= 100 ? "border-emerald-500 bg-emerald-100" : "border-slate-300 bg-slate-100"
+                              }`}>
+                                <Video className={`w-10 h-10 ${
+                                  rwIsRunning ? "text-orange-500 animate-pulse" : 
+                                  rwMonoProgress >= 100 ? "text-emerald-500" : "text-slate-400"
+                                }`} />
+                              </div>
+                              <div className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded">
+                                Frame {Math.floor(rwMonoProgress * 0.3)}/30
+                              </div>
+                            </div>
+                          </div>
+                          {/* Stage indicator */}
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-slate-800">
+                              {["Decodificando", "Transformando", "Codificando", "Buffering", "Escribiendo"][rwMonoStage]}
+                            </div>
+                            <div className="flex justify-center gap-2 mt-2">
+                              {["Dec", "Tfm", "Enc", "Buf", "Wrt"].map((s, i) => (
+                                <div key={i} className={`w-10 h-6 rounded flex items-center justify-center text-xs font-bold ${
+                                  rwMonoStage === i ? "bg-orange-500 text-white" : 
+                                  rwMonoStage > i ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-500"
+                                }`}>{s}</div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* ZIP ARCHIVE - Large progress view */}
+                      {selectedTask.visualType === "archive" && (
+                        <div className="absolute inset-0 p-2 flex items-center justify-center gap-6">
+                          {/* Files being compressed */}
+                          <div className="flex flex-col items-center">
+                            <div className="grid grid-cols-3 gap-1">
+                              {[...Array(9)].map((_, i) => {
+                                const isCompressed = i < Math.floor(rwMonoProgress / 11)
+                                return (
+                                  <FileText key={i} className={`w-6 h-6 transition-all ${
+                                    isCompressed ? "text-slate-300 scale-75" : "text-blue-500"
+                                  }`} />
+                                )
+                              })}
+                            </div>
+                            <span className="text-sm font-bold text-slate-700 mt-2">
+                              {50 - Math.floor(rwMonoProgress / 2)} archivos
+                            </span>
+                          </div>
+                          
+                          {/* Arrow */}
+                          <div className="text-3xl text-orange-500">{"->"}</div>
+                          
+                          {/* ZIP result */}
+                          <div className="flex flex-col items-center">
+                            <div className="relative">
+                              <Archive className={`w-16 h-16 ${
+                                rwMonoProgress >= 100 ? "text-emerald-500" : "text-orange-500"
+                              }`} />
+                              {rwIsRunning && (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
                                 </div>
                               )}
                             </div>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* EMAIL PROCESSING - Show email list being processed */}
-                      {selectedTask.visualType === "email" && (
-                        <div className="absolute inset-0 p-1.5 flex flex-col gap-1">
-                          <div className="text-[8px] font-medium text-orange-600">Procesando Correos (Spam Filter)</div>
-                          <div className="flex-1 grid grid-cols-2 gap-1 overflow-hidden">
-                            {/* Inbox */}
-                            <div className="bg-slate-50 rounded border border-slate-200 p-1">
-                              <div className="text-[7px] font-medium text-slate-500 mb-0.5">Bandeja ({100 - Math.floor(rwMonoProgress)})</div>
-                              <div className="space-y-0.5">
-                                {[...Array(5)].map((_, i) => {
-                                  const emailIdx = Math.floor(rwMonoProgress) + i
-                                  if (emailIdx >= 100) return null
-                                  const isSpam = emailIdx % 3 === 0
-                                  return (
-                                    <div key={i} className={`text-[6px] p-0.5 rounded flex items-center gap-0.5 ${
-                                      i === 0 && rwIsRunning ? "bg-orange-100 border border-orange-300" : "bg-white border border-slate-100"
-                                    }`}>
-                                      <Mail className="w-2 h-2 text-slate-400" />
-                                      <span className="truncate">{isSpam ? "URGENT: Win $$$" : `Email #${emailIdx + 1}`}</span>
-                                    </div>
-                                  )
-                                })}
-                              </div>
-                            </div>
-                            {/* Processed */}
-                            <div className="flex flex-col gap-1">
-                              <div className="flex-1 bg-emerald-50 rounded border border-emerald-200 p-1">
-                                <div className="text-[7px] font-medium text-emerald-600 mb-0.5">Legitimos ({Math.floor(rwMonoProgress * 0.66)})</div>
-                                <CheckCircle2 className="w-4 h-4 text-emerald-400 mx-auto" />
-                              </div>
-                              <div className="flex-1 bg-red-50 rounded border border-red-200 p-1">
-                                <div className="text-[7px] font-medium text-red-600 mb-0.5">Spam ({Math.floor(rwMonoProgress * 0.34)})</div>
-                                <AlertTriangle className="w-4 h-4 text-red-400 mx-auto" />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* VIDEO RENDERING - Show frames being processed */}
-                      {selectedTask.visualType === "video" && (
-                        <div className="absolute inset-0 p-1.5 flex flex-col gap-1">
-                          <div className="flex items-center justify-between">
-                            <span className="text-[8px] font-medium text-orange-600">Renderizando 4K Video</span>
-                            <span className="text-[7px] text-slate-500">{Math.floor(rwMonoProgress * 0.3)}/30 frames</span>
-                          </div>
-                          {/* Frame strip */}
-                          <div className="flex-1 flex gap-0.5 overflow-hidden">
-                            {[...Array(10)].map((_, i) => {
-                              const frameIdx = Math.floor(rwMonoProgress / 10) - 2 + i
-                              const isProcessed = frameIdx < Math.floor(rwMonoProgress / 3.33)
-                              const isCurrent = Math.abs(frameIdx - Math.floor(rwMonoProgress / 3.33)) < 1
-                              return (
-                                <div key={i} className={`flex-1 rounded border-2 transition-all ${
-                                  isCurrent && rwIsRunning ? "border-orange-500 scale-110 shadow-lg z-10" :
-                                  isProcessed ? "border-emerald-300 bg-emerald-50" : "border-slate-200 bg-slate-100"
-                                }`}>
-                                  <div className={`w-full h-full rounded-sm flex items-center justify-center ${
-                                    isProcessed ? "bg-gradient-to-br from-sky-200 to-emerald-200" : "bg-slate-200"
-                                  }`}>
-                                    {isCurrent && rwIsRunning && <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse" />}
-                                    {isProcessed && !isCurrent && <CheckCircle2 className="w-2 h-2 text-emerald-500" />}
-                                    {!isProcessed && !isCurrent && <div className="w-2 h-2 bg-slate-300 rounded" />}
-                                  </div>
-                                  <div className="text-[5px] text-center text-slate-500">F{Math.max(1, frameIdx + 1)}</div>
-                                </div>
-                              )
-                            })}
-                          </div>
-                          {/* Processing indicator */}
-                          <div className="bg-slate-100 rounded p-1 flex items-center gap-2">
-                            <div className="text-[7px] text-slate-600">Etapa: {["Decode", "Transform", "Encode", "Buffer", "Write"][rwMonoStage]}</div>
-                            <div className="flex-1 h-1 bg-slate-200 rounded-full overflow-hidden">
-                              <div className="h-full bg-orange-400 transition-all" style={{ width: `${(rwMonoStage + 1) * 20}%` }} />
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* ZIP ARCHIVE - Show files being compressed */}
-                      {selectedTask.visualType === "archive" && (
-                        <div className="absolute inset-0 p-1.5 flex gap-1">
-                          {/* Source files */}
-                          <div className="w-1/2 flex flex-col">
-                            <div className="text-[8px] font-medium text-orange-600 mb-0.5">Archivos ({50 - Math.floor(rwMonoProgress / 2)})</div>
-                            <div className="flex-1 bg-slate-50 rounded border border-slate-200 p-1 overflow-hidden">
-                              <div className="grid grid-cols-4 gap-0.5">
-                                {[...Array(20)].map((_, i) => {
-                                  const isCompressed = i < Math.floor(rwMonoProgress / 5)
-                                  return (
-                                    <div key={i} className={`aspect-square rounded flex items-center justify-center transition-all ${
-                                      isCompressed ? "opacity-20 scale-75" : "bg-white border border-slate-200"
-                                    }`}>
-                                      {!isCompressed && <FileText className="w-2 h-2 text-slate-400" />}
-                                    </div>
-                                  )
-                                })}
-                              </div>
-                            </div>
-                          </div>
-                          {/* ZIP file growing */}
-                          <div className="w-1/2 flex flex-col">
-                            <div className="text-[8px] font-medium text-orange-600 mb-0.5">archivo.zip</div>
-                            <div className="flex-1 bg-orange-50 rounded border-2 border-orange-300 flex items-center justify-center relative overflow-hidden">
-                              <Archive className="w-8 h-8 text-orange-400" />
-                              <div className="absolute bottom-0 left-0 right-0 bg-orange-400 transition-all flex items-center justify-center"
-                                style={{ height: `${rwMonoProgress}%` }}>
-                                <span className="text-[8px] text-white font-bold">{Math.floor(rwMonoProgress / 2)} archivos</span>
-                              </div>
-                            </div>
+                            <span className="text-sm font-bold text-slate-700 mt-2">archivo.zip</span>
+                            <span className="text-lg font-bold text-orange-600">
+                              {Math.floor(rwMonoProgress / 2)}/50
+                            </span>
                           </div>
                         </div>
                       )}
@@ -1572,229 +1582,214 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                   {/* Detailed Visual Simulation - Pipeline processes multiple stages simultaneously */}
                   <div className="flex-1 flex flex-col gap-1 min-h-0">
                     <div className="flex-1 relative bg-white rounded-lg border border-purple-200 overflow-hidden">
-                      {/* IMAGE COMPRESSION - Multiple blocks processing at once */}
+                      {/* IMAGE COMPRESSION - Pipeline: faster with parallel processing */}
                       {selectedTask.visualType === "image" && (
-                        <div className="absolute inset-0 flex">
-                          <div className="w-1/2 relative border-r border-purple-300">
-                            <div className="absolute top-0 left-0 text-[8px] bg-purple-100 text-purple-600 px-1 rounded-br font-medium">Original</div>
-                            <div className="absolute inset-0 flex items-center justify-center p-2">
-                              <div className="w-full h-full rounded bg-gradient-to-br from-sky-400 via-emerald-400 to-amber-400 relative overflow-hidden">
-                                <div className="absolute inset-2 bg-white/30 rounded-full" />
-                                <div className="absolute bottom-2 left-2 right-2 h-3 bg-emerald-600/50 rounded" />
-                                <div className="absolute top-3 left-3 w-4 h-4 bg-amber-300 rounded-full" />
+                        <div className="absolute inset-0 p-2 flex flex-col">
+                          <div className="flex-1 relative rounded-lg overflow-hidden border-2 border-purple-200">
+                            <img 
+                              src="/images/sample-landscape.jpg" 
+                              alt="Landscape being compressed"
+                              className="absolute inset-0 w-full h-full object-cover transition-all duration-150"
+                              style={{ 
+                                filter: rwPipeProgress > 0 ? `blur(${Math.max(0, 8 - rwPipeProgress * 0.08)}px)` : 'none',
+                                opacity: rwPipeProgress > 0 ? 0.3 + (rwPipeProgress * 0.007) : 1
+                              }}
+                            />
+                            {/* Multiple parallel compression blocks */}
+                            {rwPipeProgress > 0 && rwPipeProgress < 100 && (
+                              <div className="absolute inset-0 grid grid-cols-6 grid-rows-4 gap-0.5 p-1">
+                                {[...Array(24)].map((_, i) => {
+                                  const processed = i < Math.floor(rwPipeProgress * 0.24)
+                                  return (
+                                    <div key={i} className={`rounded transition-all duration-100 ${
+                                      processed ? "bg-transparent" : "bg-slate-300/60"
+                                    }`} />
+                                  )
+                                })}
                               </div>
+                            )}
+                            {/* Status - shows parallel processing */}
+                            <div className={`absolute top-2 left-2 px-2 py-1 rounded text-sm font-bold ${
+                              rwPipeProgress === 0 ? "bg-blue-500 text-white" :
+                              rwPipeProgress >= 100 ? "bg-emerald-500 text-white" :
+                              "bg-purple-500 text-white animate-pulse"
+                            }`}>
+                              {rwPipeProgress === 0 ? "ORIGINAL 4K" : 
+                               rwPipeProgress >= 100 ? "COMPRIMIDO" : 
+                               `5 bloques paralelos ${rwPipeProgress.toFixed(0)}%`}
                             </div>
-                          </div>
-                          <div className="w-1/2 relative">
-                            <div className="absolute top-0 left-0 text-[8px] bg-purple-100 text-purple-600 px-1 rounded-br font-medium">Comprimido</div>
-                            <div className="absolute inset-0 flex items-center justify-center p-2">
-                              <div className="w-full h-full rounded relative overflow-hidden">
-                                <div className="absolute inset-0 grid grid-cols-8 grid-rows-6 gap-px">
-                                  {[...Array(48)].map((_, i) => {
-                                    const row = Math.floor(i / 8)
-                                    const processed = i < Math.floor(rwPipeProgress * 0.48)
-                                    const baseColor = row < 2 ? "bg-sky-400" : row < 4 ? "bg-emerald-400" : "bg-amber-400"
-                                    return (
-                                      <div key={i} className={`transition-all duration-75 ${processed ? baseColor : "bg-slate-200"}`}
-                                        style={{ opacity: processed ? 1 : 0.3 }} />
-                                    )
-                                  })}
-                                </div>
-                              </div>
+                            <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-sm font-mono">
+                              {rwPipeProgress === 0 ? "12.4 MB" : 
+                               `${(12.4 - rwPipeProgress * 0.1).toFixed(1)} MB`}
                             </div>
                           </div>
                         </div>
                       )}
                       
-                      {/* FILE COPY - Multiple chunks transferring */}
+                      {/* FILE COPY - Pipeline: 5 parallel transfers */}
                       {selectedTask.visualType === "file" && (
-                        <div className="absolute inset-0 flex">
-                          <div className="w-[40%] relative p-1.5">
-                            <div className="text-[8px] text-purple-600 font-medium mb-0.5">Origen</div>
-                            <div className="bg-slate-50 rounded border border-slate-200 p-1 h-[calc(100%-16px)] overflow-hidden">
-                              <div className="text-[7px] font-mono text-slate-600 leading-tight space-y-0.5">
-                                {["const data = {", "  name: 'Archivo'", "  size: 10240", "  type: 'text'", "  content: [...]", "  metadata: {}", "  checksum: 'a3f'", "};"].map((line, i) => (
-                                  <div key={i} className={`transition-all ${i < Math.floor(rwPipeProgress / 12.5) ? "opacity-30 line-through" : ""}`}>{line}</div>
-                                ))}
-                              </div>
-                            </div>
+                        <div className="absolute inset-0 p-2 flex items-center justify-center gap-3">
+                          <div className="flex flex-col items-center">
+                            <FileText className={`w-14 h-14 transition-all ${rwPipeProgress > 0 ? "text-slate-300" : "text-blue-500"}`} />
+                            <span className="text-sm font-bold text-slate-700 mt-1">Origen</span>
                           </div>
-                          <div className="w-[20%] flex items-center justify-center relative">
-                            <div className="absolute h-full w-0.5 bg-purple-200" />
-                            {/* Multiple parallel transfers */}
-                            {rwIsRunning && [...Array(3)].map((_, i) => (
-                              <div key={i} className="absolute w-2.5 h-2.5 bg-purple-400 rounded-full shadow-lg animate-pulse"
-                                style={{ 
-                                  top: `${20 + i * 25 + (rwPipeProgress % 15) * 2}%`,
-                                  animationDelay: `${i * 100}ms`
-                                }}>
-                                <FileText className="w-1.5 h-1.5 text-white m-0.5" />
-                              </div>
-                            ))}
-                          </div>
-                          <div className="w-[40%] relative p-1.5">
-                            <div className="text-[8px] text-purple-600 font-medium mb-0.5">Destino</div>
-                            <div className="bg-purple-50 rounded border border-purple-200 p-1 h-[calc(100%-16px)] overflow-hidden">
-                              <div className="text-[7px] font-mono text-purple-700 leading-tight space-y-0.5">
-                                {["const data = {", "  name: 'Archivo'", "  size: 10240", "  type: 'text'", "  content: [...]", "  metadata: {}", "  checksum: 'a3f'", "};"].map((line, i) => (
-                                  <div key={i} className={`transition-all ${i < Math.floor(rwPipeProgress / 12.5) ? "opacity-100" : "opacity-0"}`}>{line}</div>
-                                ))}
-                              </div>
+                          
+                          {/* 5 parallel transfers */}
+                          <div className="flex-1 max-w-[140px] flex flex-col items-center gap-1">
+                            <div className="text-xs font-bold text-purple-600">5 Canales Paralelos</div>
+                            <div className="w-full space-y-1">
+                              {[0,1,2,3,4].map(i => (
+                                <div key={i} className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                                  <div className={`h-full bg-purple-500 transition-all rounded-full ${rwIsRunning ? "animate-pulse" : ""}`}
+                                    style={{ width: `${Math.min(100, rwPipeProgress + i * 5)}%`, animationDelay: `${i * 100}ms` }} />
+                                </div>
+                              ))}
                             </div>
+                            <div className="text-lg font-bold text-purple-600">{rwPipeProgress.toFixed(0)}%</div>
+                            <span className="text-xs text-slate-500">{(rwPipeProgress * 0.1).toFixed(1)} MB</span>
+                          </div>
+                          
+                          <div className="flex flex-col items-center">
+                            <FileText className={`w-14 h-14 transition-all ${
+                              rwPipeProgress >= 100 ? "text-emerald-500" : 
+                              rwPipeProgress > 0 ? "text-purple-400" : "text-slate-300"
+                            }`} />
+                            <span className="text-sm font-bold text-slate-700 mt-1">Destino</span>
                           </div>
                         </div>
                       )}
                       
-                      {/* DATABASE QUERY - All stages active simultaneously */}
+                      {/* DATABASE QUERY - All 5 stages active */}
                       {selectedTask.visualType === "database" && (
-                        <div className="absolute inset-0 p-1.5 flex flex-col gap-1">
-                          <div className="bg-slate-900 rounded p-1 text-[7px] font-mono text-emerald-400">
-                            SELECT * FROM users JOIN orders ON users.id = orders.user_id WHERE status = &apos;active&apos;
+                        <div className="absolute inset-0 p-2 flex flex-col gap-2">
+                          <div className="flex-1 flex items-center justify-center">
+                            <div className="text-center">
+                              <Database className={`w-14 h-14 mx-auto mb-1 ${
+                                rwPipeProgress >= 100 ? "text-emerald-500" : "text-purple-500"
+                              }`} />
+                              <div className="text-lg font-bold text-slate-800">
+                                5 Etapas Simultaneas
+                              </div>
+                              <div className="text-sm text-purple-600">
+                                Todas las etapas trabajan en paralelo
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex gap-1 flex-1">
-                            {[
-                              { name: "Parse", icon: "{ }", rows: 0 },
-                              { name: "Plan", icon: "?", rows: 0 },
-                              { name: "Scan", icon: ">>", rows: 1000 },
-                              { name: "Filter", icon: "~", rows: 245 },
-                              { name: "Return", icon: "<", rows: 10 }
-                            ].map((stage, i) => {
+                          {/* All stages active simultaneously */}
+                          <div className="flex gap-1">
+                            {["Parse", "Plan", "Scan", "Filter", "Return"].map((stage, i) => {
                               const stageProgress = Math.max(0, Math.min(100, rwPipeProgress + (4 - i) * 20))
                               const isActive = stageProgress > 0 && stageProgress < 100
                               const isDone = stageProgress >= 100
                               return (
-                                <div key={i} className={`flex-1 rounded border text-center flex flex-col items-center justify-center transition-all ${
-                                  isActive ? "bg-purple-100 border-purple-400 scale-105 shadow" : 
-                                  isDone ? "bg-emerald-50 border-emerald-300" : "bg-slate-50 border-slate-200"
+                                <div key={i} className={`flex-1 h-10 rounded flex flex-col items-center justify-center text-xs font-bold transition-all ${
+                                  isActive ? "bg-purple-500 text-white animate-pulse" : 
+                                  isDone ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-500"
                                 }`}>
-                                  <div className="text-[8px] font-bold">{stage.icon}</div>
-                                  <div className="text-[7px] font-medium">{stage.name}</div>
-                                  {isActive && <div className="w-full h-0.5 bg-purple-200 mt-0.5"><div className="h-full bg-purple-500 transition-all" style={{ width: `${stageProgress}%` }} /></div>}
-                                  {stage.rows > 0 && isDone && <div className="text-[6px] text-emerald-600">{stage.rows}</div>}
+                                  <span>{stage}</span>
+                                  {isActive && <div className="w-3/4 h-1 bg-white/30 rounded mt-0.5"><div className="h-full bg-white rounded" style={{ width: `${stageProgress}%` }} /></div>}
                                 </div>
                               )
                             })}
                           </div>
-                          <div className="bg-slate-50 rounded border border-slate-200 p-1 flex-1 overflow-hidden">
-                            <div className="text-[7px] font-mono text-slate-600">
-                              {rwPipeProgress > 60 && (
-                                <div className="space-y-0.5">
-                                  <div className="bg-slate-200 px-1 rounded text-[6px]">id | name | order_total</div>
-                                  {[...Array(Math.min(3, Math.floor((rwPipeProgress - 60) / 13)))].map((_, i) => (
-                                    <div key={i} className="text-emerald-600">{i+1} | Usuario{i+1} | ${(100 + i * 50)}</div>
-                                  ))}
+                        </div>
+                      )}
+                      
+                      {/* EMAIL PROCESSING - 5 emails at once */}
+                      {selectedTask.visualType === "email" && (
+                        <div className="absolute inset-0 p-2 flex flex-col">
+                          <div className="flex-1 flex items-center justify-center gap-4">
+                            {/* 5 emails processing simultaneously */}
+                            <div className="flex flex-col items-center">
+                              <div className="flex gap-1">
+                                {[0,1,2,3,4].map(i => (
+                                  <Mail key={i} className={`w-8 h-8 ${rwIsRunning ? "text-purple-500 animate-pulse" : "text-purple-400"}`} 
+                                    style={{ animationDelay: `${i * 100}ms` }} />
+                                ))}
+                              </div>
+                              <span className="text-sm font-bold text-purple-600 mt-1">5 en paralelo</span>
+                            </div>
+                            
+                            <div className="flex gap-3">
+                              <div className="bg-emerald-100 rounded-xl p-2 text-center min-w-[70px]">
+                                <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto" />
+                                <div className="text-xl font-bold text-emerald-600">{Math.floor(rwPipeProgress * 0.66)}</div>
+                                <div className="text-xs text-emerald-600">OK</div>
+                              </div>
+                              <div className="bg-red-100 rounded-xl p-2 text-center min-w-[70px]">
+                                <AlertTriangle className="w-8 h-8 text-red-500 mx-auto" />
+                                <div className="text-xl font-bold text-red-600">{Math.floor(rwPipeProgress * 0.34)}</div>
+                                <div className="text-xs text-red-600">Spam</div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-center text-sm text-slate-600">
+                            <span className="font-bold">{Math.floor(rwPipeProgress)}</span>/100 procesados
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* VIDEO RENDERING - 5 frames at different stages */}
+                      {selectedTask.visualType === "video" && (
+                        <div className="absolute inset-0 p-2 flex flex-col gap-2">
+                          <div className="flex-1 flex items-center justify-center">
+                            {/* 5 frames in different stages */}
+                            <div className="flex gap-2">
+                              {[0,1,2,3,4].map(i => {
+                                const frameNum = Math.floor(rwPipeProgress * 0.3) - 2 + i
+                                return (
+                                  <div key={i} className="flex flex-col items-center">
+                                    <div className={`w-12 h-8 rounded border-2 flex items-center justify-center ${
+                                      rwIsRunning ? "border-purple-500 bg-purple-100" : "border-emerald-500 bg-emerald-100"
+                                    }`}>
+                                      <Video className={`w-5 h-5 ${rwIsRunning ? "text-purple-500" : "text-emerald-500"}`} />
+                                    </div>
+                                    <span className="text-xs font-bold text-slate-600">F{Math.max(1, frameNum)}</span>
+                                    <span className="text-[10px] text-purple-500">{["Dec", "Tfm", "Enc", "Buf", "Wrt"][i]}</span>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-purple-600">
+                              {Math.floor(rwPipeProgress * 0.3)}/30 frames
+                            </div>
+                            <div className="text-sm text-slate-500">5 frames simultaneos</div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* ZIP ARCHIVE - 5 files at once */}
+                      {selectedTask.visualType === "archive" && (
+                        <div className="absolute inset-0 p-2 flex items-center justify-center gap-4">
+                          {/* 5 files compressing */}
+                          <div className="flex flex-col items-center">
+                            <div className="flex gap-1">
+                              {[0,1,2,3,4].map(i => (
+                                <FileText key={i} className={`w-7 h-7 ${
+                                  rwIsRunning ? "text-purple-500 animate-pulse" : "text-slate-400"
+                                }`} style={{ animationDelay: `${i * 80}ms` }} />
+                              ))}
+                            </div>
+                            <span className="text-sm font-bold text-slate-700 mt-1">
+                              {50 - Math.floor(rwPipeProgress / 2)} restantes
+                            </span>
+                          </div>
+                          
+                          <div className="text-2xl text-purple-500">{"->"}</div>
+                          
+                          <div className="flex flex-col items-center">
+                            <div className="relative">
+                              <Archive className={`w-14 h-14 ${rwPipeProgress >= 100 ? "text-emerald-500" : "text-purple-500"}`} />
+                              {rwIsRunning && (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
                                 </div>
                               )}
                             </div>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* EMAIL PROCESSING - Multiple emails processed at once */}
-                      {selectedTask.visualType === "email" && (
-                        <div className="absolute inset-0 p-1.5 flex flex-col gap-1">
-                          <div className="text-[8px] font-medium text-purple-600">Procesando 5 Correos en Paralelo</div>
-                          <div className="flex-1 grid grid-cols-2 gap-1 overflow-hidden">
-                            <div className="bg-slate-50 rounded border border-slate-200 p-1">
-                              <div className="text-[7px] font-medium text-slate-500 mb-0.5">Bandeja ({100 - Math.floor(rwPipeProgress)})</div>
-                              <div className="space-y-0.5">
-                                {[...Array(5)].map((_, i) => {
-                                  const emailIdx = Math.floor(rwPipeProgress) + i
-                                  if (emailIdx >= 100) return null
-                                  return (
-                                    <div key={i} className={`text-[6px] p-0.5 rounded flex items-center gap-0.5 ${
-                                      rwIsRunning ? "bg-purple-100 border border-purple-300 animate-pulse" : "bg-white border border-slate-100"
-                                    }`} style={{ animationDelay: `${i * 50}ms` }}>
-                                      <Mail className="w-2 h-2 text-purple-400" />
-                                      <span className="truncate">Email #{emailIdx + 1}</span>
-                                    </div>
-                                  )
-                                })}
-                              </div>
-                            </div>
-                            <div className="flex flex-col gap-1">
-                              <div className="flex-1 bg-emerald-50 rounded border border-emerald-200 p-1">
-                                <div className="text-[7px] font-medium text-emerald-600 mb-0.5">Legitimos ({Math.floor(rwPipeProgress * 0.66)})</div>
-                                <CheckCircle2 className="w-4 h-4 text-emerald-400 mx-auto" />
-                              </div>
-                              <div className="flex-1 bg-red-50 rounded border border-red-200 p-1">
-                                <div className="text-[7px] font-medium text-red-600 mb-0.5">Spam ({Math.floor(rwPipeProgress * 0.34)})</div>
-                                <AlertTriangle className="w-4 h-4 text-red-400 mx-auto" />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* VIDEO RENDERING - Multiple frames at different stages */}
-                      {selectedTask.visualType === "video" && (
-                        <div className="absolute inset-0 p-1.5 flex flex-col gap-1">
-                          <div className="flex items-center justify-between">
-                            <span className="text-[8px] font-medium text-purple-600">Renderizando 5 Frames en Paralelo</span>
-                            <span className="text-[7px] text-slate-500">{Math.floor(rwPipeProgress * 0.3)}/30 frames</span>
-                          </div>
-                          <div className="flex-1 flex gap-0.5 overflow-hidden">
-                            {[...Array(10)].map((_, i) => {
-                              const frameIdx = Math.floor(rwPipeProgress / 10) - 2 + i
-                              const isProcessed = frameIdx < Math.floor(rwPipeProgress / 3.33)
-                              const isActive = Math.abs(frameIdx - Math.floor(rwPipeProgress / 3.33)) < 3
-                              return (
-                                <div key={i} className={`flex-1 rounded border-2 transition-all ${
-                                  isActive && !isProcessed && rwIsRunning ? "border-purple-500 shadow-lg" :
-                                  isProcessed ? "border-emerald-300 bg-emerald-50" : "border-slate-200 bg-slate-100"
-                                }`}>
-                                  <div className={`w-full h-full rounded-sm flex items-center justify-center ${
-                                    isProcessed ? "bg-gradient-to-br from-sky-200 to-emerald-200" : 
-                                    isActive && rwIsRunning ? "bg-purple-100" : "bg-slate-200"
-                                  }`}>
-                                    {isActive && !isProcessed && rwIsRunning && <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse" />}
-                                    {isProcessed && <CheckCircle2 className="w-2 h-2 text-emerald-500" />}
-                                  </div>
-                                  <div className="text-[5px] text-center text-slate-500">F{Math.max(1, frameIdx + 1)}</div>
-                                </div>
-                              )
-                            })}
-                          </div>
-                          <div className="bg-purple-50 rounded p-1 flex items-center gap-1 text-[7px]">
-                            <span className="text-purple-600 font-medium">5 etapas activas:</span>
-                            {["Dec", "Trf", "Enc", "Buf", "Wrt"].map((s, i) => (
-                              <span key={i} className="bg-purple-200 text-purple-700 px-1 rounded text-[6px]">{s}</span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* ZIP ARCHIVE - Multiple files compressing */}
-                      {selectedTask.visualType === "archive" && (
-                        <div className="absolute inset-0 p-1.5 flex gap-1">
-                          <div className="w-1/2 flex flex-col">
-                            <div className="text-[8px] font-medium text-purple-600 mb-0.5">Archivos ({50 - Math.floor(rwPipeProgress / 2)})</div>
-                            <div className="flex-1 bg-slate-50 rounded border border-slate-200 p-1 overflow-hidden">
-                              <div className="grid grid-cols-4 gap-0.5">
-                                {[...Array(20)].map((_, i) => {
-                                  const isCompressed = i < Math.floor(rwPipeProgress / 5)
-                                  const isCompressing = !isCompressed && i < Math.floor(rwPipeProgress / 5) + 3
-                                  return (
-                                    <div key={i} className={`aspect-square rounded flex items-center justify-center transition-all ${
-                                      isCompressed ? "opacity-20 scale-75" : 
-                                      isCompressing && rwIsRunning ? "bg-purple-100 border-2 border-purple-400 animate-pulse" : "bg-white border border-slate-200"
-                                    }`} style={{ animationDelay: `${i * 30}ms` }}>
-                                      {!isCompressed && <FileText className={`w-2 h-2 ${isCompressing ? "text-purple-500" : "text-slate-400"}`} />}
-                                    </div>
-                                  )
-                                })}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="w-1/2 flex flex-col">
-                            <div className="text-[8px] font-medium text-purple-600 mb-0.5">archivo.zip</div>
-                            <div className="flex-1 bg-purple-50 rounded border-2 border-purple-300 flex items-center justify-center relative overflow-hidden">
-                              <Archive className="w-8 h-8 text-purple-400" />
-                              <div className="absolute bottom-0 left-0 right-0 bg-purple-400 transition-all flex items-center justify-center"
-                                style={{ height: `${rwPipeProgress}%` }}>
-                                <span className="text-[8px] text-white font-bold">{Math.floor(rwPipeProgress / 2)} archivos</span>
-                              </div>
-                            </div>
+                            <span className="text-lg font-bold text-purple-600">{Math.floor(rwPipeProgress / 2)}/50</span>
+                            <span className="text-xs text-purple-500">5 archivos/ciclo</span>
                           </div>
                         </div>
                       )}
