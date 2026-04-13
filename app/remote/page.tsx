@@ -54,7 +54,7 @@ export default function RemoteControlPage() {
       }
 
       const data = await res.json()
-      if (!data.state || data.warning === "Redis not configured") {
+      if (!data.state) {
         setIsConnected(false)
         return
       }

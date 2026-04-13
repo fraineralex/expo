@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { redis, isRedisConfigured, PRESENTATION_COMMAND_KEY, type PresentationCommand } from "@/lib/redis"
+import { getPresentationCommand, setPresentationCommand, type PresentationCommand } from "@/lib/redis"
 
 export const dynamic = "force-dynamic"
 export const fetchCache = "force-no-store"
@@ -11,15 +11,7 @@ const noStoreHeaders = {
   Expires: "0",
 }
 
-// POST - Send a command from remote
 export async function POST(request: Request) {
-  if (!isRedisConfigured || !redis) {
-    return NextResponse.json(
-      { success: false, error: "Redis not configured", command: null },
-      { headers: noStoreHeaders }
-    )
-  }
-  
   try {
     const body = await request.json()
     const command: PresentationCommand = {
@@ -27,10 +19,9 @@ export async function POST(request: Request) {
       slideIndex: body.slideIndex,
       timestamp: Date.now(),
     }
-    
-    // Store command with 30 second expiration
-    await redis.set(PRESENTATION_COMMAND_KEY, JSON.stringify(command), { ex: 30 })
-    
+
+    await setPresentationCommand(command)
+
     return NextResponse.json({ success: true, command }, { headers: noStoreHeaders })
   } catch (error) {
     console.error("Error sending command:", error)
@@ -38,29 +29,21 @@ export async function POST(request: Request) {
   }
 }
 
-// GET - Poll for commands from presentation
 export async function GET(request: Request) {
-  if (!isRedisConfigured || !redis) {
-    return NextResponse.json({ command: null, warning: "Redis not configured" }, { headers: noStoreHeaders })
-  }
-  
   try {
     const url = new URL(request.url)
     const lastTimestamp = parseInt(url.searchParams.get("since") || "0")
-    
-    const data = await redis.get(PRESENTATION_COMMAND_KEY)
-    
-    if (!data) {
+
+    const command = await getPresentationCommand()
+
+    if (!command) {
       return NextResponse.json({ command: null }, { headers: noStoreHeaders })
     }
-    
-    const command = typeof data === "string" ? JSON.parse(data) : data as PresentationCommand
-    
-    // Only return if it's a new command
+
     if (command.timestamp > lastTimestamp) {
       return NextResponse.json({ command }, { headers: noStoreHeaders })
     }
-    
+
     return NextResponse.json({ command: null }, { headers: noStoreHeaders })
   } catch (error) {
     console.error("Error getting command:", error)

@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server"
-import { redis, isRedisConfigured, PRESENTATION_STATE_KEY, type PresentationState } from "@/lib/redis"
+import {
+  getPresentationState,
+  setPresentationState,
+  type PresentationState,
+} from "@/lib/redis"
 
 export const dynamic = "force-dynamic"
 export const fetchCache = "force-no-store"
@@ -21,13 +25,6 @@ const defaultState: PresentationState = {
 
 // POST - Update state from presentation
 export async function POST(request: Request) {
-  if (!isRedisConfigured || !redis) {
-    return NextResponse.json(
-      { success: true, state: defaultState, warning: "Redis not configured" },
-      { headers: noStoreHeaders }
-    )
-  }
-  
   try {
     const body = await request.json()
     const state: PresentationState = {
@@ -37,10 +34,9 @@ export async function POST(request: Request) {
       isPlaying: body.isPlaying,
       timestamp: Date.now(),
     }
-    
-    // Store state with 5 minute expiration
-    await redis.set(PRESENTATION_STATE_KEY, JSON.stringify(state), { ex: 300 })
-    
+
+    await setPresentationState(state)
+
     return NextResponse.json({ success: true, state }, { headers: noStoreHeaders })
   } catch (error) {
     console.error("Error updating state:", error)
@@ -50,18 +46,13 @@ export async function POST(request: Request) {
 
 // GET - Get current state for remote
 export async function GET() {
-  if (!isRedisConfigured || !redis) {
-    return NextResponse.json({ state: defaultState, warning: "Redis not configured" }, { headers: noStoreHeaders })
-  }
-  
   try {
-    const data = await redis.get(PRESENTATION_STATE_KEY)
-    
-    if (!data) {
+    const state = await getPresentationState()
+
+    if (!state) {
       return NextResponse.json({ state: defaultState }, { headers: noStoreHeaders })
     }
-    
-    const state = typeof data === "string" ? JSON.parse(data) : data as PresentationState
+
     return NextResponse.json({ state }, { headers: noStoreHeaders })
   } catch (error) {
     console.error("Error getting state:", error)
