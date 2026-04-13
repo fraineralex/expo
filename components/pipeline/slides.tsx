@@ -1061,25 +1061,44 @@ const PIPELINE_INSTRUCTIONS = [
 export function EnmanuelSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
   const [currentCycle, setCurrentCycle] = useState(0)
   const [isRunning, setIsRunning] = useState(false)
-  const [speed, setSpeed] = useState(600)
+  const [speed, setSpeed] = useState(800)
+  const [hoveredStation, setHoveredStation] = useState<string | null>(null)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
   // Pipeline configuration
-  const INSTRUCTION_COLORS = ["#0d9488", "#7c3aed", "#db2777", "#ea580c", "#16a34a", "#2563eb"]
-  const INSTRUCTION_NAMES = ["ADD", "LOAD", "SUB", "STORE", "AND", "OR"]
+  const PLATE_COLORS = ["#0d9488", "#7c3aed", "#db2777", "#ea580c", "#16a34a", "#2563eb"]
+  const PLATE_NAMES = ["Taco", "Burger", "Pizza", "Sushi", "Pasta", "Wrap"]
   const totalCycles = 10
   const cycleTimePipeline = 200
+
+  // Kitchen stations configuration
+  const KITCHEN_STATIONS = [
+    { stage: "IF", name: "Recepcion", desc: "Aqui el CPU esta en etapa IF: el mesero recibe la orden, equivalente a buscar la instruccion en memoria.", icon: "tablet", color: "#8b5cf6" },
+    { stage: "ID", name: "Preparacion", desc: "Aqui el CPU esta en etapa ID: el chef identifica ingredientes, equivalente a decodificar la instruccion.", icon: "knife", color: "#ec4899" },
+    { stage: "EX", name: "Cocina", desc: "Aqui el CPU esta en etapa EX: se cocina el plato, equivalente a ejecutar la operacion matematica.", icon: "fire", color: "#f97316" },
+    { stage: "MEM", name: "Almacen", desc: "Aqui el CPU esta en etapa MEM: se accede al almacen de salsas, equivalente a acceder a memoria.", icon: "fridge", color: "#06b6d4" },
+    { stage: "WB", name: "Despacho", desc: "Aqui el CPU esta en etapa WB: se entrega el plato al cliente, equivalente a escribir el resultado.", icon: "bell", color: "#22c55e" },
+  ]
 
   // Calculate completed instructions and throughput
   const completedInstructions = Math.max(0, currentCycle - PIPELINE_STAGES.length + 1)
   const throughput = currentCycle > 0 ? (completedInstructions / currentCycle).toFixed(2) : "0.00"
-  const progress = (currentCycle / totalCycles) * 100
+  const efficiency = currentCycle >= 5 ? Math.min(100, Math.round((completedInstructions / currentCycle) * 100)) : Math.round((currentCycle / 5) * 100)
 
-  // Active instructions in current cycle
-  const activeInstructions = PIPELINE_INSTRUCTIONS.filter((_, idx) => {
-    const stageIdx = currentCycle - idx - 1
-    return stageIdx >= 0 && stageIdx < PIPELINE_STAGES.length
-  }).length
+  // Get active plates at each station
+  const getPlatesAtStation = (stationIdx: number) => {
+    const plates: { instrIdx: number; name: string; color: string }[] = []
+    PIPELINE_INSTRUCTIONS.forEach((_, instrIdx) => {
+      const stageIdx = currentCycle - instrIdx - 1
+      if (stageIdx === stationIdx) {
+        plates.push({ instrIdx, name: PLATE_NAMES[instrIdx], color: PLATE_COLORS[instrIdx] })
+      }
+    })
+    return plates
+  }
+
+  // Detect hazards
+  const hasDataHazard = currentCycle >= 2 && currentCycle <= 4
 
   const startSimulation = useCallback(() => {
     if (currentCycle >= totalCycles) setCurrentCycle(0)
@@ -1138,451 +1157,504 @@ export function EnmanuelSlide({ isPrintMode = false }: { isPrintMode?: boolean }
     return null
   }
 
-  // Detect hazards
-  const hasDataHazard = currentCycle >= 2 && currentCycle <= 4
+  // SVG Components for stations
+  const TabletIcon = ({ active }: { active: boolean }) => (
+    <svg viewBox="0 0 40 50" className="w-8 h-10">
+      <rect x="5" y="2" width="30" height="46" rx="3" fill={active ? "#8b5cf6" : "#94a3b8"} opacity={active ? 1 : 0.4} />
+      <rect x="8" y="6" width="24" height="32" rx="1" fill={active ? "#c4b5fd" : "#cbd5e1"} />
+      <circle cx="20" cy="44" r="2" fill={active ? "#ede9fe" : "#e2e8f0"} />
+      {active && (
+        <>
+          <rect x="10" y="10" width="20" height="3" fill="#8b5cf6" opacity="0.8" className="animate-pulse" />
+          <rect x="10" y="16" width="15" height="2" fill="#a78bfa" opacity="0.6" />
+          <rect x="10" y="20" width="18" height="2" fill="#a78bfa" opacity="0.6" />
+        </>
+      )}
+    </svg>
+  )
+
+  const KnifeIcon = ({ active }: { active: boolean }) => (
+    <svg viewBox="0 0 50 40" className="w-10 h-8">
+      <rect x="5" y="25" width="40" height="12" rx="2" fill={active ? "#fbbf24" : "#94a3b8"} opacity={active ? 1 : 0.4} />
+      <path d="M10 25 L10 10 Q25 5 40 10 L40 25 Z" fill={active ? "#ec4899" : "#94a3b8"} opacity={active ? 1 : 0.4} />
+      {active && (
+        <g className="animate-[chop_0.3s_ease-in-out_infinite]">
+          <line x1="15" y1="8" x2="15" y2="3" stroke="#fbbf24" strokeWidth="2" />
+          <line x1="25" y1="5" x2="25" y2="0" stroke="#fbbf24" strokeWidth="2" />
+          <line x1="35" y1="8" x2="35" y2="3" stroke="#fbbf24" strokeWidth="2" />
+        </g>
+      )}
+    </svg>
+  )
+
+  const FireIcon = ({ active }: { active: boolean }) => (
+    <svg viewBox="0 0 50 50" className="w-10 h-10">
+      <rect x="5" y="35" width="40" height="12" rx="2" fill={active ? "#374151" : "#94a3b8"} opacity={active ? 1 : 0.4} />
+      <ellipse cx="25" cy="38" rx="15" ry="3" fill={active ? "#1f2937" : "#64748b"} />
+      {active && (
+        <>
+          <path d="M15 35 Q12 25 18 20 Q15 28 20 30 Q18 22 25 15 Q22 25 28 28 Q25 20 32 18 Q28 28 35 30 Q32 22 38 25 Q35 30 35 35" 
+            fill="#f97316" className="animate-[flame_0.5s_ease-in-out_infinite]" />
+          <path d="M20 35 Q18 28 22 24 Q20 30 28 28 Q25 32 30 35" 
+            fill="#fbbf24" className="animate-[flame_0.4s_ease-in-out_infinite]" style={{ animationDelay: "0.1s" }} />
+          <circle cx="18" cy="32" r="1" fill="#fef3c7" className="animate-ping" style={{ animationDuration: "1s" }} />
+          <circle cx="32" cy="30" r="1" fill="#fef3c7" className="animate-ping" style={{ animationDuration: "0.8s", animationDelay: "0.2s" }} />
+        </>
+      )}
+    </svg>
+  )
+
+  const FridgeIcon = ({ active }: { active: boolean }) => (
+    <svg viewBox="0 0 40 55" className="w-8 h-11">
+      <rect x="5" y="2" width="30" height="50" rx="3" fill={active ? "#06b6d4" : "#94a3b8"} opacity={active ? 1 : 0.4} />
+      <rect x="8" y="5" width="24" height="18" rx="1" fill={active ? "#0891b2" : "#64748b"} />
+      <rect x="8" y="26" width="24" height="23" rx="1" fill={active ? "#0891b2" : "#64748b"} />
+      <rect x="28" y="12" width="3" height="6" rx="1" fill={active ? "#cffafe" : "#cbd5e1"} />
+      <rect x="28" y="35" width="3" height="8" rx="1" fill={active ? "#cffafe" : "#cbd5e1"} />
+      {active && (
+        <>
+          <rect x="10" y="8" width="8" height="4" rx="1" fill="#67e8f9" className="animate-pulse" />
+          <rect x="10" y="30" width="10" height="6" rx="1" fill="#67e8f9" className="animate-pulse" style={{ animationDelay: "0.2s" }} />
+          <circle cx="15" cy="40" r="3" fill="#a5f3fc" opacity="0.6" className="animate-ping" style={{ animationDuration: "2s" }} />
+        </>
+      )}
+    </svg>
+  )
+
+  const BellIcon = ({ active }: { active: boolean }) => (
+    <svg viewBox="0 0 50 45" className="w-10 h-9">
+      <ellipse cx="25" cy="40" rx="20" ry="4" fill={active ? "#374151" : "#94a3b8"} opacity={active ? 1 : 0.4} />
+      <path d="M10 40 Q10 15 25 10 Q40 15 40 40" fill={active ? "#fbbf24" : "#94a3b8"} opacity={active ? 1 : 0.4} />
+      <circle cx="25" cy="8" r="4" fill={active ? "#fbbf24" : "#94a3b8"} opacity={active ? 1 : 0.4} />
+      {active && (
+        <>
+          <ellipse cx="25" cy="25" rx="10" ry="8" fill="#fef3c7" opacity="0.3" className="animate-pulse" />
+          <circle cx="42" cy="15" r="2" fill="#22c55e" className="animate-ping" />
+          <text x="38" y="12" fontSize="8" fill="#22c55e" fontWeight="bold" className="animate-bounce">!</text>
+        </>
+      )}
+    </svg>
+  )
+
+  const StationIcon = ({ type, active }: { type: string; active: boolean }) => {
+    switch (type) {
+      case "tablet": return <TabletIcon active={active} />
+      case "knife": return <KnifeIcon active={active} />
+      case "fire": return <FireIcon active={active} />
+      case "fridge": return <FridgeIcon active={active} />
+      case "bell": return <BellIcon active={active} />
+      default: return null
+    }
+  }
+
+  // Chef SVG component
+  const ChefAvatar = ({ active, confused }: { active: boolean; confused?: boolean }) => (
+    <svg viewBox="0 0 30 35" className={`w-6 h-7 ${active ? "animate-[work_0.5s_ease-in-out_infinite]" : ""}`}>
+      {/* Chef hat */}
+      <ellipse cx="15" cy="8" rx="10" ry="6" fill="white" stroke="#e2e8f0" strokeWidth="1" />
+      <rect x="8" y="6" width="14" height="8" fill="white" />
+      {/* Face */}
+      <circle cx="15" cy="18" r="7" fill="#fcd9b6" />
+      {/* Eyes */}
+      {confused ? (
+        <>
+          <text x="11" y="18" fontSize="5" fill="#374151">?</text>
+          <text x="17" y="18" fontSize="5" fill="#374151">?</text>
+        </>
+      ) : (
+        <>
+          <circle cx="12" cy="17" r="1.5" fill="#374151" />
+          <circle cx="18" cy="17" r="1.5" fill="#374151" />
+        </>
+      )}
+      {/* Smile/expression */}
+      {active && !confused && (
+        <path d="M12 21 Q15 24 18 21" stroke="#374151" strokeWidth="1" fill="none" />
+      )}
+      {confused && (
+        <path d="M12 22 Q15 20 18 22" stroke="#374151" strokeWidth="1" fill="none" />
+      )}
+      {/* Body */}
+      <rect x="10" y="25" width="10" height="8" rx="2" fill="white" stroke="#e2e8f0" strokeWidth="1" />
+    </svg>
+  )
+
+  // Plate component
+  const Plate = ({ name, color, exiting }: { name: string; color: string; exiting?: boolean }) => (
+    <div 
+      className={`absolute flex flex-col items-center transition-all duration-500 ${exiting ? "animate-[fadeOut_0.5s_ease-out_forwards]" : "animate-[slideIn_0.3s_ease-out]"}`}
+      style={{ bottom: "100%", left: "50%", transform: "translateX(-50%)" }}
+    >
+      {/* Speech bubble with instruction name */}
+      <div 
+        className="px-2 py-0.5 rounded-full text-white text-xs font-bold mb-1 shadow-lg"
+        style={{ backgroundColor: color }}
+      >
+        {name}
+      </div>
+      {/* Plate */}
+      <div className="relative">
+        <svg viewBox="0 0 40 20" className="w-10 h-5">
+          <ellipse cx="20" cy="15" rx="18" ry="5" fill="#d1d5db" />
+          <ellipse cx="20" cy="12" rx="16" ry="8" fill="#f3f4f6" />
+          <ellipse cx="20" cy="10" rx="12" ry="5" fill={color} opacity="0.3" />
+        </svg>
+      </div>
+    </div>
+  )
 
   return (
-    <div className="w-full h-full bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 flex flex-col p-4 relative overflow-hidden">
+    <div className={`w-full h-full flex flex-col p-4 relative overflow-hidden transition-all duration-500 ${hasDataHazard ? "bg-red-50" : "bg-gradient-to-br from-purple-50 via-white to-pink-50"}`}>
       <Presenter name="Enmanuel Santos Diaz" />
 
-      {/* Animated background particles */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" />
-        <div className="absolute top-40 right-20 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-15 animate-pulse" style={{ animationDelay: "1s" }} />
-        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-teal-500 rounded-full mix-blend-multiply filter blur-3xl opacity-15 animate-pulse" style={{ animationDelay: "2s" }} />
-      </div>
-
-      {/* Grid pattern overlay */}
+      {/* Subtle grid pattern */}
       <div
-        className="absolute inset-0 opacity-10"
+        className="absolute inset-0 opacity-30"
         style={{
-          backgroundImage: "linear-gradient(rgba(139,92,246,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,246,0.3) 1px, transparent 1px)",
-          backgroundSize: "40px 40px",
+          backgroundImage: "linear-gradient(rgba(139,92,246,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,246,0.05) 1px, transparent 1px)",
+          backgroundSize: "30px 30px",
         }}
       />
 
       {/* Header */}
-      <div className="mb-3 z-10">
+      <div className="mb-2 z-10">
         <div className="flex items-center gap-2 mb-1">
-          <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
-          <span className="text-purple-400 font-mono text-xs tracking-widest uppercase font-semibold">Seccion 03</span>
+          <div className="w-2 h-2 rounded-full bg-purple-500" />
+          <span className="text-purple-600 font-mono text-xs tracking-widest uppercase font-semibold">Seccion 03</span>
         </div>
-        <h2 className="text-2xl font-bold text-white">Simulacion del Pipeline de 5 Etapas</h2>
-        <div className="h-1 w-32 bg-gradient-to-r from-purple-500 via-pink-500 to-teal-500 mt-2 rounded-full" />
+        <h2 className="text-2xl font-bold text-slate-800">Pipeline de 5 Etapas: La Cocina Industrial</h2>
+        <div className="h-1 w-40 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 mt-1 rounded-full" />
       </div>
 
-      <div className="flex gap-4 flex-1 min-h-0 z-10">
-        {/* Left Panel */}
-        <div className="w-64 flex flex-col gap-2">
-          {/* Educational Section */}
-          <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-3 border border-white/10 shadow-2xl">
-            <h3 className="text-purple-300 font-bold text-xs mb-2 flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                <Cpu className="w-3.5 h-3.5 text-purple-400" />
+      {/* Main content */}
+      <div className="flex gap-3 flex-1 min-h-0 z-10">
+        {/* Left sidebar - HUD Panel */}
+        <div className="w-48 flex flex-col gap-2">
+          {/* Restaurant HUD */}
+          <div className="bg-white rounded-xl p-3 border-2 border-purple-200 shadow-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                <Zap className="w-3.5 h-3.5 text-white" />
               </div>
-              Que es un Pipeline?
-            </h3>
-            <p className="text-slate-300 text-xs leading-relaxed">
-              Divide la ejecucion en etapas independientes, permitiendo ejecutar multiples instrucciones simultaneamente.
-            </p>
-          </div>
-
-          {/* Stage Legend - Visual Pipeline Flow */}
-          <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-3 border border-white/10 shadow-2xl">
-            <h3 className="text-purple-300 font-bold text-xs mb-3 flex items-center gap-2">
-              <Layers className="w-3.5 h-3.5" />
-              Etapas del Pipeline
-            </h3>
-            <div className="flex flex-col gap-1">
-              {PIPELINE_STAGES.map((stage, idx) => (
-                <div key={stage} className="flex items-center gap-2 group">
-                  <div
-                    className="w-10 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold shadow-lg transition-all duration-300 group-hover:scale-105"
-                    style={{ 
-                      backgroundColor: STAGE_COLORS[stage as keyof typeof STAGE_COLORS],
-                      boxShadow: `0 4px 15px ${STAGE_COLORS[stage as keyof typeof STAGE_COLORS]}40`
-                    }}
-                  >
-                    {stage}
-                  </div>
-                  <div className="flex-1">
-                    <span className="text-white text-xs font-medium">
-                      {STAGE_NAMES[stage as keyof typeof STAGE_NAMES]}
-                    </span>
-                  </div>
-                  {idx < PIPELINE_STAGES.length - 1 && (
-                    <ChevronRight className="w-3 h-3 text-slate-500" />
-                  )}
-                </div>
-              ))}
+              <span className="text-slate-800 font-bold text-xs">Panel de Control</span>
             </div>
-          </div>
-
-          {/* Stats Panel - Glass morphism cards */}
-          <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-2xl p-3 border border-white/10 shadow-2xl">
-            <div className="grid grid-cols-2 gap-2 text-center mb-2">
-              <div className="bg-white/10 backdrop-blur rounded-xl p-2 border border-white/5">
-                <div className="text-slate-400 text-xs mb-1">Ciclo</div>
-                <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 font-mono">
-                  {currentCycle}
-                </div>
+            
+            <div className="space-y-2">
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-2 border border-purple-100">
+                <div className="text-slate-500 text-xs">Pedidos Completados</div>
+                <div className="text-2xl font-black text-purple-600 font-mono">{completedInstructions}</div>
               </div>
-              <div className="bg-white/10 backdrop-blur rounded-xl p-2 border border-white/5">
-                <div className="text-slate-400 text-xs mb-1">Tiempo</div>
-                <div className="text-lg font-bold text-white font-mono">
-                  {currentCycle * cycleTimePipeline}<span className="text-xs text-slate-400">ns</span>
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-2 text-center">
-              <div className="bg-white/10 backdrop-blur rounded-xl p-2 border border-white/5">
-                <div className="text-slate-400 text-xs mb-1">Completadas</div>
-                <div className="text-xl font-bold text-teal-400 font-mono">{completedInstructions}</div>
-              </div>
-              <div className="bg-white/10 backdrop-blur rounded-xl p-2 border border-white/5">
-                <div className="text-slate-400 text-xs mb-1">Throughput</div>
-                <div className="text-xl font-bold text-pink-400 font-mono">{throughput}</div>
-              </div>
-            </div>
-            {/* Active instructions indicator */}
-            <div className="mt-2 bg-white/5 rounded-xl p-2 border border-white/5">
-              <div className="flex items-center justify-between">
-                <span className="text-slate-400 text-xs">Activas</span>
-                <div className="flex gap-1">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className={`w-2 h-4 rounded-sm transition-all duration-300 ${
-                        i < activeInstructions 
-                          ? "bg-gradient-to-t from-purple-500 to-pink-500 shadow-lg shadow-purple-500/50" 
-                          : "bg-slate-700"
-                      }`}
+              <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-lg p-2 border border-teal-100">
+                <div className="text-slate-500 text-xs">Eficiencia Cocina</div>
+                <div className="flex items-center gap-2">
+                  <div className="text-xl font-bold text-teal-600 font-mono">{efficiency}%</div>
+                  <div className="flex-1 bg-slate-200 rounded-full h-2 overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-teal-400 to-cyan-400 rounded-full transition-all duration-500"
+                      style={{ width: `${efficiency}%` }}
                     />
-                  ))}
+                  </div>
                 </div>
+              </div>
+              <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg p-2 border border-orange-100">
+                <div className="text-slate-500 text-xs">Throughput</div>
+                <div className="text-xl font-bold text-orange-600 font-mono">{throughput} <span className="text-xs text-slate-400">platos/ciclo</span></div>
+              </div>
+              <div className="bg-slate-50 rounded-lg p-2 border border-slate-200">
+                <div className="text-slate-500 text-xs">Ciclo Actual</div>
+                <div className="text-3xl font-black text-slate-800 font-mono">{currentCycle}<span className="text-sm text-slate-400">/{totalCycles}</span></div>
               </div>
             </div>
           </div>
 
-          {/* Progress & Speed Control */}
-          <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-3 border border-white/10 shadow-2xl">
-            {/* Progress */}
-            <div className="mb-3">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-slate-400 text-xs">Progreso</span>
-                <span className="text-purple-400 font-mono text-xs font-bold">{Math.round(progress)}%</span>
+          {/* Controls */}
+          <div className="bg-white rounded-xl p-3 border-2 border-purple-200 shadow-lg">
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {!isRunning ? (
+                <button onClick={startSimulation} className="flex-1 px-2 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-lg flex items-center justify-center gap-1 text-xs transition-all">
+                  <Play className="w-3 h-3" /> Play
+                </button>
+              ) : (
+                <button onClick={pauseSimulation} className="flex-1 px-2 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-lg flex items-center justify-center gap-1 text-xs transition-all">
+                  <Pause className="w-3 h-3" /> Pausa
+                </button>
+              )}
+              <button onClick={resetSimulation} className="px-2 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs transition-all">
+                <RotateCcw className="w-3 h-3" />
+              </button>
+            </div>
+            <div className="flex gap-1">
+              <button onClick={stepBackward} disabled={isRunning || currentCycle <= 0} className="flex-1 px-2 py-1 bg-slate-100 hover:bg-slate-200 disabled:opacity-30 text-slate-700 rounded-lg text-xs transition-all">
+                <ChevronLeft className="w-3 h-3 mx-auto" />
+              </button>
+              <button onClick={stepForward} disabled={isRunning || currentCycle >= totalCycles} className="flex-1 px-2 py-1 bg-slate-100 hover:bg-slate-200 disabled:opacity-30 text-slate-700 rounded-lg text-xs transition-all">
+                <ChevronRight className="w-3 h-3 mx-auto" />
+              </button>
+            </div>
+            <div className="mt-2">
+              <div className="flex justify-between text-xs text-slate-500 mb-1">
+                <span>Velocidad</span>
+                <span>{speed}ms</span>
               </div>
-              <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-teal-500 rounded-full transition-all duration-300"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
+              <input
+                type="range"
+                min="300"
+                max="1500"
+                step="100"
+                value={speed}
+                onChange={(e) => setSpeed(Number(e.target.value))}
+                className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-500"
+              />
             </div>
-            {/* Speed */}
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-slate-400 text-xs flex items-center gap-1">
-                <Gauge className="w-3 h-3" /> Velocidad
-              </span>
-              <span className="text-white font-mono text-xs">{speed}ms</span>
-            </div>
-            <input
-              type="range"
-              min="200"
-              max="2000"
-              step="100"
-              value={speed}
-              onChange={(e) => setSpeed(Number(e.target.value))}
-              className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
-            />
-            <div className="flex justify-between text-xs text-slate-500 mt-1">
-              <span>Rapido</span>
-              <span>Lento</span>
-            </div>
+          </div>
+
+          {/* Visual Sound Labels */}
+          <div className="bg-white rounded-xl p-2 border border-slate-200 shadow-sm">
+            <div className="text-xs text-slate-500 mb-1">Estado de la Cocina</div>
+            {currentCycle === 0 ? (
+              <div className="text-sm font-bold text-slate-400">Esperando ordenes...</div>
+            ) : currentCycle >= 5 ? (
+              <div className="text-sm font-bold text-green-600 animate-pulse">Plato sale!</div>
+            ) : (
+              <div className="text-sm font-bold text-orange-500">Oido cocina!</div>
+            )}
           </div>
         </div>
 
-        {/* Right Panel - Pipeline Table */}
-        <div className="flex-1 bg-white/5 backdrop-blur-xl rounded-2xl p-4 border border-white/10 shadow-2xl flex flex-col">
-          {/* Controls Header */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
-                <Zap className="w-4 h-4 text-white" />
+        {/* Main Kitchen Visualization */}
+        <div className="flex-1 flex flex-col gap-2">
+          {/* Kitchen Floor */}
+          <div className={`flex-1 bg-gradient-to-b from-amber-50 to-orange-50 rounded-2xl border-2 ${hasDataHazard ? "border-red-300 shadow-red-200" : "border-amber-200"} shadow-lg p-4 relative overflow-hidden transition-all duration-500`}>
+            
+            {/* Hazard Alert Overlay */}
+            {hasDataHazard && (
+              <div className="absolute inset-0 bg-red-500/10 pointer-events-none z-20 animate-pulse" style={{ animationDuration: "1s" }} />
+            )}
+
+            {/* Kitchen Title */}
+            <div className="absolute top-2 left-3 flex items-center gap-2">
+              <div className="px-3 py-1 bg-white rounded-full shadow-md border border-amber-200">
+                <span className="text-amber-700 font-bold text-xs">COCINA PIPELINE - 5 ESTACIONES</span>
               </div>
-              <div>
-                <span className="text-white font-bold text-sm">Diagrama de Gantt</span>
-                <div className="text-slate-400 text-xs">Ejecucion paralela en tiempo real</div>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              {!isRunning ? (
-                <button 
-                  onClick={startSimulation} 
-                  className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-purple-500/30 text-sm transition-all hover:scale-105"
-                >
-                  <Play className="w-4 h-4" /> Play
-                </button>
-              ) : (
-                <button 
-                  onClick={pauseSimulation} 
-                  className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-amber-500/30 text-sm transition-all hover:scale-105"
-                >
-                  <Pause className="w-4 h-4" /> Pausar
-                </button>
+              {hasDataHazard && (
+                <div className="px-2 py-1 bg-red-500 text-white rounded-full text-xs font-bold animate-bounce flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" /> ALERTA HAZARD
+                </div>
               )}
-              <button 
-                onClick={stepBackward} 
-                disabled={isRunning || currentCycle <= 0} 
-                className="px-3 py-2 bg-white/10 hover:bg-white/20 disabled:opacity-30 text-white font-semibold rounded-xl flex items-center border border-white/10 text-sm transition-all disabled:cursor-not-allowed"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button 
-                onClick={stepForward} 
-                disabled={isRunning || currentCycle >= totalCycles} 
-                className="px-3 py-2 bg-white/10 hover:bg-white/20 disabled:opacity-30 text-white font-semibold rounded-xl flex items-center border border-white/10 text-sm transition-all disabled:cursor-not-allowed"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-              <button 
-                onClick={resetSimulation} 
-                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl flex items-center gap-2 border border-white/10 text-sm transition-all"
-              >
-                <RotateCcw className="w-4 h-4" /> Reset
-              </button>
             </div>
-          </div>
 
-          {/* Gantt Table */}
-          <div className="flex-1 overflow-x-auto">
-            <div className="space-y-2">
-              {/* Header Row */}
-              <div className="flex items-center gap-1.5 sticky top-0 pb-2">
-                <div className="w-40 text-slate-500 text-xs font-medium shrink-0 pl-2">Instruccion</div>
-                {Array.from({ length: totalCycles }).map((_, i) => (
-                  <div 
-                    key={i} 
-                    className={`w-14 h-7 flex items-center justify-center text-xs font-mono shrink-0 rounded-lg transition-all duration-300 ${
-                      i + 1 === currentCycle 
-                        ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold shadow-lg shadow-purple-500/40 scale-110" 
-                        : i + 1 < currentCycle 
-                          ? "text-purple-300 bg-purple-500/20" 
-                          : "text-slate-500 bg-white/5"
-                    }`}
-                  >
-                    C{i + 1}
-                  </div>
-                ))}
-              </div>
+            {/* Conveyor Belt */}
+            <div className="absolute bottom-16 left-8 right-8 h-4 bg-gradient-to-r from-slate-400 via-slate-300 to-slate-400 rounded-full shadow-inner overflow-hidden">
+              {/* Metallic reflection */}
+              <div className="absolute inset-0 bg-gradient-to-b from-white/40 to-transparent h-1/2" />
+              {/* Moving belt texture */}
+              <div 
+                className="absolute inset-0 opacity-30"
+                style={{
+                  backgroundImage: "repeating-linear-gradient(90deg, #64748b 0px, #64748b 10px, transparent 10px, transparent 20px)",
+                  animation: isRunning ? "conveyorBelt 1s linear infinite" : "none"
+                }}
+              />
+            </div>
 
-              {/* Instruction Rows */}
-              {PIPELINE_INSTRUCTIONS.map((instr, instrIdx) => {
-                const instrColor = INSTRUCTION_COLORS[instrIdx]
-                const currentStage = getInstructionStage(instrIdx, currentCycle)
+            {/* Kitchen Stations */}
+            <div className="flex justify-between items-end h-full pt-8 pb-20 px-4 relative">
+              {KITCHEN_STATIONS.map((station, idx) => {
+                const plates = getPlatesAtStation(idx)
+                const isActive = plates.length > 0
+                const isConfused = hasDataHazard && (idx === 1 || idx === 2) // ID and EX stages affected by hazard
                 
                 return (
-                  <div key={instrIdx} className="flex items-center gap-1.5 group">
+                  <div 
+                    key={station.stage} 
+                    className="flex flex-col items-center relative group"
+                    onMouseEnter={() => setHoveredStation(station.stage)}
+                    onMouseLeave={() => setHoveredStation(null)}
+                  >
+                    {/* Tooltip */}
+                    {hoveredStation === station.stage && (
+                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-48 p-2 bg-slate-800 text-white text-xs rounded-lg shadow-xl z-30 pointer-events-none">
+                        <div className="font-bold text-amber-400 mb-1">{station.name} ({station.stage})</div>
+                        <p className="leading-relaxed">{station.desc}</p>
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-slate-800" />
+                      </div>
+                    )}
+
+                    {/* Plates on this station */}
+                    {plates.map((plate, pIdx) => (
+                      <Plate key={pIdx} name={plate.name} color={plate.color} />
+                    ))}
+
+                    {/* Chef Avatar */}
+                    <div className="mb-1">
+                      <ChefAvatar active={isActive} confused={isConfused} />
+                    </div>
+
+                    {/* Station */}
                     <div 
-                      className="w-40 font-mono text-xs text-white truncate shrink-0 px-3 py-2 rounded-xl border-2 transition-all duration-300 flex items-center gap-2"
-                      style={{ 
-                        borderColor: currentStage ? instrColor : `${instrColor}40`,
-                        backgroundColor: currentStage ? `${instrColor}20` : `${instrColor}10`,
-                        boxShadow: currentStage ? `0 0 20px ${instrColor}30` : "none"
+                      className={`relative p-3 rounded-xl border-2 transition-all duration-500 cursor-pointer ${
+                        isActive 
+                          ? "scale-110 shadow-xl" 
+                          : "opacity-60 scale-95"
+                      } ${isConfused ? "border-red-400 bg-red-50" : ""}`}
+                      style={{
+                        backgroundColor: isActive && !isConfused ? `${station.color}15` : isConfused ? undefined : "white",
+                        borderColor: isConfused ? undefined : isActive ? station.color : "#e2e8f0",
+                        boxShadow: isActive && !isConfused ? `0 8px 30px ${station.color}30` : undefined
                       }}
                     >
-                      <div 
-                        className="w-2 h-2 rounded-full shrink-0"
-                        style={{ backgroundColor: instrColor }}
-                      />
-                      <span className="truncate">{instr}</span>
-                    </div>
-                    {Array.from({ length: totalCycles }).map((_, cycleIdx) => {
-                      const stage = getInstructionStage(instrIdx, cycleIdx + 1)
-                      const isActive = cycleIdx + 1 <= currentCycle
-                      const isCurrentCycle = cycleIdx + 1 === currentCycle
-                      
-                      if (!stage) return (
-                        <div 
-                          key={cycleIdx} 
-                          className="w-14 h-9 bg-white/5 rounded-lg shrink-0 border border-white/5 transition-all duration-300" 
-                        />
-                      )
-                      
-                      const stageColor = STAGE_COLORS[stage as keyof typeof STAGE_COLORS]
-                      
-                      return (
-                        <div 
-                          key={cycleIdx} 
-                          className="w-14 h-9 rounded-lg flex items-center justify-center text-xs font-bold text-white shrink-0 transition-all duration-500 relative overflow-hidden"
-                          style={{
-                            backgroundColor: isActive ? stageColor : `${stageColor}20`,
-                            boxShadow: isCurrentCycle && isActive ? `0 0 25px ${stageColor}60, inset 0 0 20px ${stageColor}30` : "none",
-                            transform: isCurrentCycle && isActive ? "scale(1.1)" : "scale(1)",
-                            opacity: isActive ? 1 : 0.3,
-                          }}
-                        >
-                          {/* Shimmer effect for current cycle */}
-                          {isCurrentCycle && isActive && (
+                      {/* Particle effects */}
+                      {isActive && station.stage === "EX" && !isConfused && (
+                        <div className="absolute -top-2 left-1/2 -translate-x-1/2">
+                          {[...Array(5)].map((_, i) => (
                             <div 
-                              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"
-                              style={{ animationDuration: "1.5s" }}
+                              key={i}
+                              className="absolute w-1 h-1 bg-orange-400 rounded-full animate-ping"
+                              style={{ 
+                                left: `${(i - 2) * 8}px`, 
+                                animationDelay: `${i * 0.1}s`,
+                                animationDuration: "0.8s"
+                              }}
                             />
-                          )}
-                          <span className="relative z-10">{stage}</span>
+                          ))}
                         </div>
-                      )
-                    })}
+                      )}
+                      {isActive && station.stage === "MEM" && !isConfused && (
+                        <div className="absolute inset-0 rounded-xl bg-cyan-400/20 animate-pulse" style={{ animationDuration: "0.5s" }} />
+                      )}
+                      {isActive && station.stage === "WB" && !isConfused && (
+                        <div className="absolute inset-0 rounded-xl bg-green-400/30 animate-pulse" />
+                      )}
+
+                      <StationIcon type={station.icon} active={isActive} />
+                    </div>
+
+                    {/* Station Label */}
+                    <div className="mt-2 text-center">
+                      <div 
+                        className={`text-xs font-bold transition-colors duration-300 ${isConfused ? "text-red-600" : isActive ? "text-slate-800" : "text-slate-400"}`}
+                        style={{ color: isActive && !isConfused ? station.color : undefined }}
+                      >
+                        {station.stage}
+                      </div>
+                      <div className={`text-xs transition-colors duration-300 ${isActive ? "text-slate-600" : "text-slate-400"}`}>
+                        {station.name}
+                      </div>
+                    </div>
+
+                    {/* Stage color indicator */}
+                    <div 
+                      className={`mt-1 w-full h-1 rounded-full transition-all duration-300 ${isActive ? "opacity-100" : "opacity-30"}`}
+                      style={{ backgroundColor: station.color }}
+                    />
                   </div>
                 )
               })}
             </div>
           </div>
 
-          {/* Hazard Detection Panel */}
-          {hasDataHazard && (
-            <div 
-              className="mt-3 bg-gradient-to-r from-red-500/20 to-orange-500/20 backdrop-blur border-2 border-red-500/40 rounded-2xl p-3 transition-all duration-500 animate-pulse"
-              style={{ animationDuration: "2s" }}
-            >
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center shrink-0">
-                  <AlertTriangle className="w-5 h-5 text-red-400" />
+          {/* Gantt Chart - Compact */}
+          <div className="bg-white rounded-xl p-3 border-2 border-purple-200 shadow-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <Layers className="w-4 h-4 text-purple-500" />
+              <span className="text-slate-800 font-bold text-xs">Diagrama de Gantt - Ejecucion Paralela</span>
+            </div>
+            <div className="overflow-x-auto">
+              <div className="space-y-1">
+                {/* Header */}
+                <div className="flex items-center gap-0.5">
+                  <div className="w-24 text-slate-400 text-xs shrink-0">Instruccion</div>
+                  {Array.from({ length: totalCycles }).map((_, i) => (
+                    <div 
+                      key={i} 
+                      className={`w-8 h-5 flex items-center justify-center text-xs font-mono shrink-0 rounded transition-all ${
+                        i + 1 === currentCycle 
+                          ? "bg-purple-500 text-white font-bold scale-110" 
+                          : i + 1 < currentCycle 
+                            ? "text-purple-400 bg-purple-50" 
+                            : "text-slate-300 bg-slate-50"
+                      }`}
+                    >
+                      {i + 1}
+                    </div>
+                  ))}
                 </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-red-300 font-bold text-sm">Data Hazard RAW Detectado</span>
-                    <span className="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full animate-pulse">RAW</span>
+                {/* Instructions */}
+                {PIPELINE_INSTRUCTIONS.map((instr, instrIdx) => (
+                  <div key={instrIdx} className="flex items-center gap-0.5">
+                    <div 
+                      className="w-24 font-mono text-xs truncate shrink-0 px-1 py-0.5 rounded border"
+                      style={{ 
+                        borderColor: PLATE_COLORS[instrIdx],
+                        backgroundColor: `${PLATE_COLORS[instrIdx]}10`
+                      }}
+                    >
+                      {instr.split(" ")[0]}
+                    </div>
+                    {Array.from({ length: totalCycles }).map((_, cycleIdx) => {
+                      const stage = getInstructionStage(instrIdx, cycleIdx + 1)
+                      const isActive = cycleIdx + 1 <= currentCycle
+                      if (!stage) return <div key={cycleIdx} className="w-8 h-5 bg-slate-50 rounded shrink-0" />
+                      const stageColor = STAGE_COLORS[stage as keyof typeof STAGE_COLORS]
+                      return (
+                        <div 
+                          key={cycleIdx} 
+                          className="w-8 h-5 rounded flex items-center justify-center text-xs font-bold text-white shrink-0 transition-all"
+                          style={{
+                            backgroundColor: isActive ? stageColor : `${stageColor}30`,
+                            opacity: isActive ? 1 : 0.3,
+                          }}
+                        >
+                          {stage}
+                        </div>
+                      )
+                    })}
                   </div>
-                  <p className="text-red-200/80 text-xs leading-relaxed">
-                    <strong className="text-red-300">LOAD R4</strong> seguido de <strong className="text-red-300">SUB R5, R4, R2</strong>: 
-                    SUB necesita R4 que aun no esta disponible. Solucion: <strong className="text-teal-400">forwarding</strong> o <strong className="text-amber-400">stalls</strong>.
-                  </p>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Hazard Info Panel */}
+          {hasDataHazard && (
+            <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-xl p-2 border-2 border-red-200 shadow-lg">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" />
+                <div className="flex-1">
+                  <span className="text-red-700 font-bold text-xs">Data Hazard RAW: </span>
+                  <span className="text-red-600 text-xs">LOAD R4 seguido de SUB R5, R4, R2. El chef de preparacion espera ingredientes que aun no estan listos.</span>
                 </div>
               </div>
             </div>
           )}
-
-          {/* Kitchen Analogy Section */}
-          <div className="mt-3 bg-gradient-to-br from-orange-500/10 via-amber-500/5 to-orange-500/10 backdrop-blur border border-orange-500/30 rounded-2xl p-3 relative overflow-hidden">
-            {/* Neon glow effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 via-transparent to-orange-500/5 pointer-events-none" />
-            
-            {/* Header */}
-            <div className="flex items-center gap-2 mb-3 relative z-10">
-              <div className="w-6 h-6 rounded-lg bg-orange-500/20 flex items-center justify-center">
-                <span className="text-sm">🍔</span>
-              </div>
-              <span className="text-orange-300 font-bold text-xs">Analogia: Cocina Industrial de Sandwiches</span>
-            </div>
-
-            {/* Conveyor Belt with Stations */}
-            <div className="relative z-10">
-              {/* Conveyor belt line */}
-              <div className="absolute top-1/2 left-8 right-8 h-1 bg-gradient-to-r from-slate-700 via-slate-600 to-slate-700 rounded-full transform -translate-y-1/2 z-0">
-                <div 
-                  className="absolute inset-0 bg-gradient-to-r from-orange-500/50 via-amber-500/50 to-orange-500/50 rounded-full transition-all duration-500"
-                  style={{ 
-                    width: `${Math.min(100, (currentCycle / totalCycles) * 100)}%`,
-                    boxShadow: isRunning ? "0 0 10px rgba(251, 146, 60, 0.5)" : "none"
-                  }}
-                />
-                {/* Moving dots on conveyor */}
-                {isRunning && (
-                  <>
-                    <div className="absolute w-2 h-2 bg-orange-400 rounded-full top-1/2 -translate-y-1/2 animate-[conveyor_2s_linear_infinite]" style={{ left: "10%" }} />
-                    <div className="absolute w-2 h-2 bg-orange-400 rounded-full top-1/2 -translate-y-1/2 animate-[conveyor_2s_linear_infinite]" style={{ left: "40%", animationDelay: "0.5s" }} />
-                    <div className="absolute w-2 h-2 bg-orange-400 rounded-full top-1/2 -translate-y-1/2 animate-[conveyor_2s_linear_infinite]" style={{ left: "70%", animationDelay: "1s" }} />
-                  </>
-                )}
-              </div>
-
-              {/* Stations */}
-              <div className="flex justify-between items-center relative z-10">
-                {[
-                  { stage: "IF", emoji: "📋", action: "Pedido", desc: "Mesero toma orden" },
-                  { stage: "ID", emoji: "🔪", action: "Preparar", desc: "Cortar ingredientes" },
-                  { stage: "EX", emoji: "🔥", action: "Cocinar", desc: "Coccion en plancha" },
-                  { stage: "MEM", emoji: "🧀", action: "Extras", desc: "Agregar aderezos" },
-                  { stage: "WB", emoji: "🥡", action: "Entregar", desc: "Empacar y facturar" },
-                ].map((station, idx) => {
-                  // Check if this stage is active in current cycle
-                  const isStageActive = PIPELINE_INSTRUCTIONS.some((_, instrIdx) => {
-                    const stageIdx = currentCycle - instrIdx - 1
-                    return stageIdx === idx
-                  })
-                  const stageColor = STAGE_COLORS[station.stage as keyof typeof STAGE_COLORS]
-                  
-                  return (
-                    <div key={station.stage} className="flex flex-col items-center">
-                      {/* Station box */}
-                      <div 
-                        className={`w-14 h-14 rounded-xl flex flex-col items-center justify-center transition-all duration-500 border-2 ${
-                          isStageActive 
-                            ? "scale-110 shadow-lg" 
-                            : "opacity-40 scale-95"
-                        }`}
-                        style={{
-                          backgroundColor: isStageActive ? `${stageColor}30` : "rgba(255,255,255,0.05)",
-                          borderColor: isStageActive ? stageColor : "rgba(255,255,255,0.1)",
-                          boxShadow: isStageActive ? `0 0 20px ${stageColor}40, 0 0 40px ${stageColor}20` : "none"
-                        }}
-                      >
-                        <span className={`text-xl transition-all duration-300 ${isStageActive ? "animate-bounce" : ""}`} style={{ animationDuration: "1s" }}>
-                          {station.emoji}
-                        </span>
-                        <span 
-                          className="text-xs font-bold mt-0.5"
-                          style={{ color: isStageActive ? stageColor : "rgb(148, 163, 184)" }}
-                        >
-                          {station.stage}
-                        </span>
-                      </div>
-                      {/* Label */}
-                      <div className="mt-1.5 text-center">
-                        <div className={`text-xs font-semibold transition-colors duration-300 ${isStageActive ? "text-white" : "text-slate-500"}`}>
-                          {station.action}
-                        </div>
-                        <div className="text-xs text-slate-600 hidden sm:block">{station.desc}</div>
-                      </div>
-                      {/* Active indicator dot */}
-                      {isStageActive && (
-                        <div className="absolute -top-1 w-2 h-2 rounded-full bg-orange-400 animate-ping" />
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Dynamic explanation text */}
-            <div className="mt-3 bg-white/5 rounded-xl p-2 border border-white/10 relative z-10">
-              <p className="text-slate-300 text-xs text-center leading-relaxed">
-                {currentCycle === 0 ? (
-                  <span className="text-slate-400">Presiona <strong className="text-orange-400">Play</strong> para ver como la cocina procesa multiples pedidos simultaneamente.</span>
-                ) : currentCycle >= 5 ? (
-                  <span>
-                    <strong className="text-orange-400">Paralelismo activo:</strong> Mientras un sandwich se <strong className="text-teal-400">entrega</strong>, 
-                    otro se <strong className="text-pink-400">cocina</strong> y uno nuevo se <strong className="text-purple-400">ordena</strong>. 
-                    <span className="text-amber-400"> Todas las estaciones trabajan a la vez.</span>
-                  </span>
-                ) : (
-                  <span>
-                    <strong className="text-orange-400">Llenando el pipeline:</strong> Las estaciones se activan secuencialmente. 
-                    <span className="text-slate-400"> ({5 - currentCycle} ciclos para alcanzar maxima eficiencia)</span>
-                  </span>
-                )}
-              </p>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* Conveyor animation keyframes */}
+      {/* Animation keyframes */}
       <style jsx>{`
-        @keyframes conveyor {
-          0% { transform: translateX(0) translateY(-50%); opacity: 1; }
-          100% { transform: translateX(100px) translateY(-50%); opacity: 0; }
+        @keyframes conveyorBelt {
+          0% { background-position: 0 0; }
+          100% { background-position: 20px 0; }
+        }
+        @keyframes work {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-2px); }
+        }
+        @keyframes chop {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-3px); }
+        }
+        @keyframes flame {
+          0%, 100% { transform: scaleY(1); }
+          50% { transform: scaleY(1.1); }
+        }
+        @keyframes slideIn {
+          0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
+          100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        @keyframes fadeOut {
+          0% { opacity: 1; transform: translateX(-50%) scale(1); }
+          100% { opacity: 0; transform: translateX(-50%) scale(0.8) translateY(-10px); }
         }
       `}</style>
 
