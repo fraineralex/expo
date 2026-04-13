@@ -1181,181 +1181,209 @@ export function OliverSlide({ isPrintMode = false }: { isPrintMode?: boolean }) 
         <div className="h-1 w-24 bg-red-500 mt-2 rounded-full" />
       </div>
 
-      <div className="flex flex-col flex-1 min-h-0 z-10">
-        {/* Full-width Pipeline Visualization */}
-        <div className="flex-1 bg-white rounded-xl p-6 border-2 border-red-200 shadow-md flex flex-col">
-          {/* Header with Scenario Tabs and Controls */}
-          <div className="flex items-center justify-between mb-6">
+      <div className="flex gap-3 flex-1 min-h-0 z-10">
+        {/* Left side: Pipeline Visualization */}
+        <div className="flex-1 bg-white rounded-xl p-5 border-2 border-red-200 shadow-md flex flex-col min-w-0">
+          {/* Scenario Tabs */}
+          <div className="flex gap-2 mb-3">
+            <button 
+              onClick={() => changeScenario("normal")}
+              className={`px-5 py-2.5 rounded-lg font-semibold text-sm transition-all ${
+                scenario === "normal" 
+                  ? "bg-emerald-500 text-white shadow-md" 
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              Normal
+            </button>
+            <button 
+              onClick={() => changeScenario("data")}
+              className={`px-5 py-2.5 rounded-lg font-semibold text-sm transition-all ${
+                scenario === "data" 
+                  ? "bg-amber-500 text-white shadow-md" 
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              Riesgo de Datos
+            </button>
+            <button 
+              onClick={() => changeScenario("control")}
+              className={`px-5 py-2.5 rounded-lg font-semibold text-sm transition-all ${
+                scenario === "control" 
+                  ? "bg-red-500 text-white shadow-md" 
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              Riesgo de Control
+            </button>
+          </div>
+
+          {/* Pipeline Stages Header */}
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-44" />
+            {PIPELINE_STAGES.map((stage) => (
+              <div 
+                key={stage}
+                className="w-20 h-12 rounded-lg flex items-center justify-center font-bold text-base text-white shadow-md"
+                style={{ backgroundColor: STAGE_COLORS[stage as keyof typeof STAGE_COLORS] }}
+              >
+                {stage}
+              </div>
+            ))}
+          </div>
+
+          {/* Instructions with Pipeline State */}
+          <div className="flex-1 flex flex-col justify-center gap-3">
+            {config.instructions.map((instr, idx) => {
+              const state = getPipelineState(idx, cycle)
+              return (
+                <div key={idx} className="flex items-center gap-3">
+                  <code className={`font-mono text-sm w-44 px-3 py-3 rounded-lg transition-all ${
+                    state.status === "flush" 
+                      ? "bg-red-100 text-red-400 line-through" 
+                      : state.status === "stall"
+                        ? "bg-amber-100 text-amber-700"
+                        : "bg-slate-100 text-slate-700"
+                  }`}>
+                    {instr}
+                  </code>
+                  {PIPELINE_STAGES.map((stage) => {
+                    const isCurrentStage = state.stage === stage
+                    const isStall = state.status === "stall" && stage === "ID"
+                    const isFlushed = state.status === "flush"
+                    
+                    return (
+                      <div 
+                        key={stage}
+                        className={`w-20 h-12 rounded-lg flex items-center justify-center text-sm font-bold transition-all duration-300 ${
+                          isFlushed 
+                            ? "bg-red-200 border-2 border-dashed border-red-400"
+                            : isStall
+                              ? "bg-amber-300 border-2 border-dashed border-amber-500 animate-pulse"
+                              : isCurrentStage 
+                                ? "text-white shadow-lg scale-105" 
+                                : "bg-slate-100 border border-slate-200"
+                        }`}
+                        style={{
+                          backgroundColor: isCurrentStage && !isStall && !isFlushed 
+                            ? STAGE_COLORS[stage as keyof typeof STAGE_COLORS] 
+                            : undefined
+                        }}
+                      >
+                        {isFlushed ? "X" : isStall ? "STALL" : isCurrentStage ? stage : ""}
+                      </div>
+                    )
+                  })}
+                </div>
+              )
+            })}
+
+            {/* Bubble/NOP indicator for data hazard */}
+            {scenario === "data" && (cycle === 3 || cycle === 4) && (
+              <div className="flex items-center gap-3 animate-pulse">
+                <div className="w-44 px-3 py-3 rounded-lg bg-amber-200 text-amber-700 font-mono text-sm font-bold text-center">
+                  BURBUJA
+                </div>
+                <div className="w-20 h-12 rounded-lg bg-amber-300 border-2 border-dashed border-amber-500 flex items-center justify-center text-sm font-bold text-amber-700">
+                  NOP
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Controls */}
+          <div className="flex items-center justify-between pt-3 border-t border-slate-200">
+            <div className="flex items-center gap-3">
+              <span className="text-slate-500 text-sm">Ciclo:</span>
+              <span className="font-mono text-xl font-bold text-slate-800">{cycle}</span>
+              <span className="text-slate-400 text-sm">/ {config.maxCycles}</span>
+            </div>
             <div className="flex gap-2">
-              <button 
-                onClick={() => changeScenario("normal")}
-                className={`px-5 py-2.5 rounded-lg font-semibold text-sm transition-all ${
-                  scenario === "normal" 
-                    ? "bg-emerald-500 text-white shadow-md" 
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                }`}
-              >
-                Normal
-              </button>
-              <button 
-                onClick={() => changeScenario("data")}
-                className={`px-5 py-2.5 rounded-lg font-semibold text-sm transition-all ${
-                  scenario === "data" 
-                    ? "bg-amber-500 text-white shadow-md" 
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                }`}
-              >
-                Riesgo de Datos
-              </button>
-              <button 
-                onClick={() => changeScenario("control")}
-                className={`px-5 py-2.5 rounded-lg font-semibold text-sm transition-all ${
-                  scenario === "control" 
-                    ? "bg-red-500 text-white shadow-md" 
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                }`}
-              >
-                Riesgo de Control
-              </button>
-            </div>
-            
-            {/* Scenario Info Badge */}
-            <div className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
-              scenario === "normal" ? "bg-emerald-100 text-emerald-700" :
-              scenario === "data" ? "bg-amber-100 text-amber-700" :
-              "bg-red-100 text-red-700"
-            }`}>
-              {scenario === "normal" && <CheckCircle2 className="w-4 h-4" />}
-              {scenario === "data" && <AlertTriangle className="w-4 h-4" />}
-              {scenario === "control" && <AlertTriangle className="w-4 h-4" />}
-              <span className="text-sm font-medium">{config.message}</span>
-            </div>
-          </div>
-
-          {/* Pipeline Visualization Area */}
-          <div className="flex-1 flex flex-col justify-center">
-            {/* Pipeline Stages Header */}
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-44" />
-              {PIPELINE_STAGES.map((stage) => (
-                <div 
-                  key={stage}
-                  className="w-20 h-12 rounded-lg flex items-center justify-center font-bold text-base text-white shadow-md"
-                  style={{ backgroundColor: STAGE_COLORS[stage as keyof typeof STAGE_COLORS] }}
-                >
-                  {stage}
-                </div>
-              ))}
-            </div>
-
-            {/* Instructions with Pipeline State */}
-            <div className="space-y-3">
-              {config.instructions.map((instr, idx) => {
-                const state = getPipelineState(idx, cycle)
-                return (
-                  <div key={idx} className="flex items-center gap-3">
-                    <code className={`font-mono text-sm w-44 px-3 py-3 rounded-lg transition-all ${
-                      state.status === "flush" 
-                        ? "bg-red-100 text-red-400 line-through" 
-                        : state.status === "stall"
-                          ? "bg-amber-100 text-amber-700"
-                          : "bg-slate-100 text-slate-700"
-                    }`}>
-                      {instr}
-                    </code>
-                    {PIPELINE_STAGES.map((stage) => {
-                      const isCurrentStage = state.stage === stage
-                      const isStall = state.status === "stall" && stage === "ID"
-                      const isFlushed = state.status === "flush"
-                      
-                      return (
-                        <div 
-                          key={stage}
-                          className={`w-20 h-12 rounded-lg flex items-center justify-center text-sm font-bold transition-all duration-300 ${
-                            isFlushed 
-                              ? "bg-red-200 border-2 border-dashed border-red-400"
-                              : isStall
-                                ? "bg-amber-300 border-2 border-dashed border-amber-500 animate-pulse"
-                                : isCurrentStage 
-                                  ? "text-white shadow-lg scale-105" 
-                                  : "bg-slate-100 border border-slate-200"
-                          }`}
-                          style={{
-                            backgroundColor: isCurrentStage && !isStall && !isFlushed 
-                              ? STAGE_COLORS[stage as keyof typeof STAGE_COLORS] 
-                              : undefined
-                          }}
-                        >
-                          {isFlushed ? "X" : isStall ? "STALL" : isCurrentStage ? stage : ""}
-                        </div>
-                      )
-                    })}
-                  </div>
-                )
-              })}
-
-              {/* Bubble/NOP indicator for data hazard */}
-              {scenario === "data" && (cycle === 3 || cycle === 4) && (
-                <div className="flex items-center gap-3 animate-pulse">
-                  <div className="w-44 px-3 py-3 rounded-lg bg-amber-200 text-amber-700 font-mono text-sm font-bold text-center">
-                    BURBUJA
-                  </div>
-                  <div className="w-20 h-12 rounded-lg bg-amber-300 border-2 border-dashed border-amber-500 flex items-center justify-center text-sm font-bold text-amber-700">
-                    NOP
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Bottom Bar: Controls + Legend */}
-          <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-200">
-            {/* Controls */}
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-3">
-                <span className="text-slate-500 text-sm">Ciclo:</span>
-                <span className="font-mono text-xl font-bold text-slate-800">{cycle}</span>
-                <span className="text-slate-400 text-sm">/ {config.maxCycles}</span>
-              </div>
-              <div className="flex gap-2">
-                {!isRunning ? (
-                  <button 
-                    onClick={startSimulation} 
-                    className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg flex items-center gap-2 shadow-sm transition-all"
-                  >
-                    <Play className="w-4 h-4" /> Simular
-                  </button>
-                ) : (
-                  <button 
-                    onClick={() => setIsRunning(false)} 
-                    className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg flex items-center gap-2 shadow-sm transition-all"
-                  >
-                    <Pause className="w-4 h-4" /> Pausar
-                  </button>
-                )}
+              {!isRunning ? (
                 <button 
-                  onClick={resetSimulation}
-                  className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg flex items-center gap-2 border border-slate-200 transition-all"
+                  onClick={startSimulation} 
+                  className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg flex items-center gap-2 shadow-sm transition-all"
                 >
-                  <RotateCcw className="w-4 h-4" /> Reset
+                  <Play className="w-4 h-4" /> Simular
                 </button>
+              ) : (
+                <button 
+                  onClick={() => setIsRunning(false)} 
+                  className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg flex items-center gap-2 shadow-sm transition-all"
+                >
+                  <Pause className="w-4 h-4" /> Pausar
+                </button>
+              )}
+              <button 
+                onClick={resetSimulation}
+                className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg flex items-center gap-2 border border-slate-200 transition-all"
+              >
+                <RotateCcw className="w-4 h-4" /> Reset
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Right side: Explanation Panel */}
+        <div className="w-56 flex flex-col gap-2 shrink-0">
+          {/* Current Scenario Info */}
+          <div className={`bg-gradient-to-br ${config.bgGradient} rounded-xl p-3 border ${config.borderColor} shadow-sm`}>
+            <h3 className="text-slate-800 font-bold text-xs mb-1 flex items-center gap-1.5">
+              {scenario === "normal" && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />}
+              {scenario === "data" && <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />}
+              {scenario === "control" && <AlertTriangle className="w-3.5 h-3.5 text-red-600" />}
+              {config.title}
+            </h3>
+            <p className={`text-xs font-medium ${config.messageColor}`}>
+              {config.message}
+            </p>
+          </div>
+
+          {/* Types of Hazards */}
+          <div className="bg-white rounded-xl p-3 border border-slate-200 shadow-sm">
+            <h4 className="text-slate-700 font-semibold text-xs mb-2">Tipos de Riesgos</h4>
+            <div className="space-y-1.5">
+              <div className={`p-1.5 rounded-lg transition-all ${scenario === "data" ? "bg-amber-50 border border-amber-200" : "bg-slate-50"}`}>
+                <div className="text-xs font-semibold text-amber-700">Datos (RAW)</div>
+                <div className="text-[10px] text-slate-500">Dependencia entre instrucciones</div>
+              </div>
+              <div className={`p-1.5 rounded-lg transition-all ${scenario === "control" ? "bg-red-50 border border-red-200" : "bg-slate-50"}`}>
+                <div className="text-xs font-semibold text-red-700">Control</div>
+                <div className="text-[10px] text-slate-500">Saltos condicionales</div>
+              </div>
+              <div className="p-1.5 rounded-lg bg-slate-50">
+                <div className="text-xs font-semibold text-purple-700">Estructural</div>
+                <div className="text-[10px] text-slate-500">Recursos compartidos</div>
               </div>
             </div>
+          </div>
 
-            {/* Legend */}
-            <div className="flex items-center gap-6 text-sm">
+          {/* Legend */}
+          <div className="bg-white rounded-xl p-3 border border-slate-200 shadow-sm">
+            <h4 className="text-slate-700 font-semibold text-xs mb-2">Leyenda</h4>
+            <div className="space-y-1.5 text-[10px]">
               <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded bg-emerald-500" />
+                <div className="w-4 h-4 rounded bg-emerald-500" />
                 <span className="text-slate-600">Etapa activa</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded bg-amber-300 border-2 border-dashed border-amber-500" />
+                <div className="w-4 h-4 rounded bg-amber-300 border-2 border-dashed border-amber-500" />
                 <span className="text-slate-600">Stall / Burbuja</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded bg-red-200 border-2 border-dashed border-red-400 flex items-center justify-center text-red-500 font-bold text-xs">X</div>
-                <span className="text-slate-600">Flush</span>
+                <div className="w-4 h-4 rounded bg-red-200 border-2 border-dashed border-red-400 flex items-center justify-center text-red-500 font-bold text-[8px]">X</div>
+                <span className="text-slate-600">Flush (descartado)</span>
               </div>
+            </div>
+          </div>
+
+          {/* Impact Summary */}
+          <div className="bg-slate-800 rounded-xl p-3 shadow-sm mt-auto">
+            <h4 className="text-slate-300 font-semibold text-[10px] mb-1">Impacto en Rendimiento</h4>
+            <div className="text-white text-xs">
+              {scenario === "normal" && "Maximo throughput: 1 instruccion por ciclo"}
+              {scenario === "data" && "Stalls reducen el CPI efectivo"}
+              {scenario === "control" && "Flush desperdicia ciclos de trabajo"}
             </div>
           </div>
         </div>
