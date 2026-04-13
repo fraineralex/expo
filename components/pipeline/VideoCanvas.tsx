@@ -168,11 +168,9 @@ function drawScene(ctx: CanvasRenderingContext2D, t: number) {
     const cw = lane.carW
     const ch = lane.carH
 
-    // Car body
+    // Car body — use plain rect for maximum compatibility
     ctx.fillStyle = car.color
-    ctx.beginPath()
-    ctx.roundRect(cx, cy - ch, cw, ch, 2)
-    ctx.fill()
+    ctx.fillRect(cx, cy - ch, cw, ch)
 
     // Headlights / tail lights
     const lightX = car.dir === 1 ? cx + cw - 1 : cx
@@ -181,13 +179,12 @@ function drawScene(ctx: CanvasRenderingContext2D, t: number) {
     ctx.arc(lightX, cy - ch * 0.4, 1.5, 0, Math.PI * 2)
     ctx.fill()
 
-    // Light trail on road
+    // Light trail on road — use a simple semi-transparent overlay of the light color
     const trailDir = car.dir === 1 ? -1 : 1
-    const trailGrad = ctx.createLinearGradient(lightX, 0, lightX + trailDir * 35, 0)
-    trailGrad.addColorStop(0, car.lightColor.replace(")", ",0.4)").replace("rgb", "rgba"))
-    trailGrad.addColorStop(1, "rgba(0,0,0,0)")
-    ctx.fillStyle = trailGrad
+    ctx.globalAlpha = 0.35
+    ctx.fillStyle = car.lightColor
     ctx.fillRect(lightX, cy - 1, trailDir * 35, 2)
+    ctx.globalAlpha = 1.0
   })
 
   // Vignette
