@@ -136,12 +136,13 @@ export default function PrintPage() {
             <Clock size={52} color="#22d3ee" />
             <BarChart3 size={52} color="#22d3ee" />
           </div>
-          <h1 style={{ fontSize: 52, fontWeight: 700, marginBottom: 12, color: "#f8fafc" }}>
-            Simulador WebSim
+          <h1 style={{ fontSize: 52, fontWeight: 700, marginBottom: 12, color: "#f8fafc", lineHeight: 1.15 }}>
+            Comparador de Rendimiento:
+            <br />
+            Procesador Monociclo
+            <br />
+            vs Procesador Segmentado (Pipeline de 5 Etapas)
           </h1>
-          <h2 style={{ fontSize: 28, fontWeight: 400, color: "#22d3ee", marginBottom: 8 }}>
-            Procesos CPU-bound y Algoritmos de Planificacion
-          </h2>
         </div>
         <div style={{ marginTop: 40 }}>
           <p style={{ fontSize: 18, color: "#94a3b8", marginBottom: 6 }}>Arquitectura del Computador</p>

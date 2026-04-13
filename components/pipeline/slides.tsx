@@ -170,7 +170,7 @@ export function TitleSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
             <br />
             <span className="text-teal-600">Procesador Monociclo</span>
             <br />
-            vs <span className="text-purple-600">Pipeline de 5 Etapas</span>
+            vs <span className="text-purple-600">Procesador Segmentado (Pipeline de 5 Etapas)</span>
           </h1>
           <div className="h-1.5 w-32 bg-gradient-to-r from-teal-500 to-purple-500 rounded-full" />
         </div>
@@ -3566,15 +3566,14 @@ export function GraciasSlide({ isPrintMode = false }: { isPrintMode?: boolean })
 export function QRSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
   const [qrDataUrl, setQrDataUrl] = useState("")
   const [remoteUrl, setRemoteUrl] = useState("")
-  const [isPreview, setIsPreview] = useState(false)
+  const [hasRestrictedOrigin, setHasRestrictedOrigin] = useState(false)
 
   useEffect(() => {
     if (typeof window === "undefined") return
     const baseUrl = window.location.origin
     const url = `${baseUrl}/remote`
     setRemoteUrl(url)
-    // Check if we're in v0 preview (vusercontent.net) which requires auth
-    setIsPreview(baseUrl.includes("vusercontent.net") || baseUrl.includes("localhost"))
+    setHasRestrictedOrigin(baseUrl.includes("vusercontent.net"))
 
     QRCode.toDataURL(url, {
       width: 300,
@@ -3597,26 +3596,26 @@ export function QRSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
         <h2 className="text-3xl font-bold text-slate-800">Control Remoto</h2>
       </div>
 
-      {isPreview ? (
+      {hasRestrictedOrigin ? (
         <div className="z-10 max-w-xl text-center">
           <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-6 mb-6">
             <div className="flex items-center justify-center gap-2 mb-3">
               <div className="w-3 h-3 bg-amber-400 rounded-full animate-pulse"></div>
-              <span className="font-semibold text-amber-700">Modo Preview</span>
+              <span className="font-semibold text-amber-700">Acceso restringido</span>
             </div>
             <p className="text-amber-800 text-sm mb-4">
-              El control remoto no funcionara desde el preview porque requiere autenticacion de v0.
+              El control remoto no funcionara desde esta URL porque requiere autenticacion para acceder al sitio.
             </p>
             <div className="bg-white rounded-xl p-4 border border-amber-200">
               <p className="text-slate-700 text-sm font-medium mb-2">Para usar el control remoto:</p>
               <ol className="text-left text-sm text-slate-600 space-y-2">
                 <li className="flex items-start gap-2">
                   <span className="bg-indigo-100 text-indigo-700 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shrink-0">1</span>
-                  <span>Haz clic en <strong>&quot;Publish&quot;</strong> en la esquina superior derecha</span>
+                  <span>Abre la version publica del proyecto</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="bg-indigo-100 text-indigo-700 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shrink-0">2</span>
-                  <span>Espera que se despliegue en Vercel</span>
+                  <span>Verifica que la presentacion principal este abierta en esa misma URL</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="bg-indigo-100 text-indigo-700 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shrink-0">3</span>
@@ -3629,7 +3628,7 @@ export function QRSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
           <div className="opacity-50">
             <div className="bg-white rounded-3xl shadow-xl p-6 border border-slate-200 inline-block">
               {qrDataUrl ? (
-                <img src={qrDataUrl} alt="QR (solo funciona despues de publicar)" className="w-48 h-48" />
+                <img src={qrDataUrl} alt="QR para control remoto" className="w-48 h-48" />
               ) : (
                 <div className="w-48 h-48 bg-slate-100 rounded-xl animate-pulse" />
               )}
