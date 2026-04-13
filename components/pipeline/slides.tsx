@@ -370,7 +370,7 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
   )
 }
 
-/* ───────────────────────────────��─────────����───
+/* ───────────────────────────────��─────────�����───
    SLIDE 2: CHRISTOPHER - Procesador Monociclo
    REDESIGNED: Cleaner, more visual, less text
 ───────────────────────────────────────────── */
@@ -925,15 +925,16 @@ export function EnmanuelSlide({ isPrintMode = false }: { isPrintMode?: boolean }
 
 type SimulationTab = "realworld" | "balls" | "throughput" | "calculator"
 
-// Real-world task scenarios - reduced instructions for faster simulation
-const REAL_WORLD_TASKS = [
-  { id: "compress", name: "Comprimir Imagen", icon: Image, monoInstructions: 100, pipeInstructions: 100, description: "Compresion JPEG 1920x1080", visualType: "image" as const },
-  { id: "copy", name: "Copiar Archivo", icon: FileText, monoInstructions: 80, pipeInstructions: 80, description: "Duplicar archivo de 10MB", visualType: "file" as const },
-  { id: "query", name: "Consulta DB", icon: Database, monoInstructions: 60, pipeInstructions: 60, description: "SELECT con JOIN complejo", visualType: "database" as const },
-  { id: "email", name: "Procesar Emails", icon: Mail, monoInstructions: 90, pipeInstructions: 90, description: "Filtrar 100 correos spam", visualType: "email" as const },
-  { id: "video", name: "Renderizar Video", icon: Video, monoInstructions: 120, pipeInstructions: 120, description: "Transcoding 4K 30fps", visualType: "video" as const },
-  { id: "zip", name: "Crear ZIP", icon: Archive, monoInstructions: 100, pipeInstructions: 100, description: "Comprimir 50 archivos", visualType: "archive" as const },
-]
+  // Real-world task scenarios - each task has unique durations for realistic variety
+  // monoDuration/pipeDuration are the simulated wall-clock times in ms
+  const REAL_WORLD_TASKS = [
+  { id: "compress", name: "Comprimir Imagen", icon: Image, monoInstructions: 100, pipeInstructions: 100, description: "Compresion JPEG 1920x1080", visualType: "image" as const,   monoDuration: 7200, pipeDuration: 1800 },
+  { id: "copy",     name: "Copiar Archivo",   icon: FileText, monoInstructions: 80, pipeInstructions: 80,  description: "Duplicar archivo de 10MB",   visualType: "file" as const,     monoDuration: 5600, pipeDuration: 1400 },
+  { id: "query",    name: "Consulta DB",       icon: Database, monoInstructions: 60, pipeInstructions: 60,  description: "SELECT con JOIN complejo",   visualType: "database" as const, monoDuration: 4800, pipeDuration: 1600 },
+  { id: "email",    name: "Procesar Emails",   icon: Mail,     monoInstructions: 90, pipeInstructions: 90,  description: "Filtrar 100 correos spam",   visualType: "email" as const,    monoDuration: 9000, pipeDuration: 1800 },
+  { id: "video",    name: "Renderizar Video",  icon: Video,    monoInstructions: 120, pipeInstructions: 120, description: "Transcoding 4K 30fps",      visualType: "video" as const,    monoDuration: 12000, pipeDuration: 2400 },
+  { id: "zip",      name: "Crear ZIP",         icon: Archive,  monoInstructions: 100, pipeInstructions: 100, description: "Comprimir 50 archivos",     visualType: "archive" as const,  monoDuration: 6400, pipeDuration: 1600 },
+  ]
 
 // Throughput tasks with friendly icons
 const THROUGHPUT_TASKS = [
@@ -1000,62 +1001,71 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
   const MONO_CYCLE_TIME = 800
   const PIPE_CYCLE_TIME = 200
 
-  // Real-world simulation effect - accelerated for presentation
+  // Refs to track progress internally so the interval never needs to recreate
+  const rwMonoProgressRef = useRef(0)
+  const rwPipeProgressRef = useRef(0)
+  const rwPipeFinishedRef = useRef(false)
+  const rwMonoFinishedRef = useRef(false)
+
+  // Real-world simulation effect - uses per-task durations, never recreates mid-run
   useEffect(() => {
     if (!rwIsRunning || isPrintMode) return
-    
-    // Simulation runs fast: pipeline completes in ~2s, mono in ~8s (4x speedup visible)
-    const SIMULATION_DURATION_PIPE = 2000
-    const SPEEDUP_RATIO = 4
-    const SIMULATION_DURATION_MONO = SIMULATION_DURATION_PIPE * SPEEDUP_RATIO
-    
-    const stepTime = 40 // 40ms intervals
-    const pipeStep = (100 / SIMULATION_DURATION_PIPE) * stepTime
-    const monoStep = (100 / SIMULATION_DURATION_MONO) * stepTime
-    
+
+    // Per-task durations from the selected task definition
+    const monoDuration = selectedTask.monoDuration
+    const pipeDuration = selectedTask.pipeDuration
+
+    const stepTime = 40
+    const pipeStep = (100 / pipeDuration) * stepTime
+    const monoStep = (100 / monoDuration) * stepTime
+
+    // Reset internal refs when starting fresh
+    rwMonoProgressRef.current = 0
+    rwPipeProgressRef.current = 0
+    rwPipeFinishedRef.current = false
+    rwMonoFinishedRef.current = false
+
     rwIntervalRef.current = setInterval(() => {
-      // Update elapsed time using ref to capture accurate time
       rwElapsedRef.current += stepTime
       setRwElapsedMs(rwElapsedRef.current)
-      
-      // Update stage tracking based on progress
-      setRwMonoStage(Math.min(4, Math.floor(rwMonoProgress / 20)))
-      setRwPipeStages(prev => {
-        // Pipeline stages move together, each at different progress
-        const newStages = [...prev]
-        for (let i = 0; i < 5; i++) {
-          const stageOffset = i * 15
-          const stageProgress = Math.max(0, Math.min(100, rwPipeProgress + stageOffset))
-          newStages[i] = Math.min(4, Math.floor(stageProgress / 20))
-        }
-        return newStages
-      })
-      
-      setRwPipeProgress(p => {
-        const next = p + pipeStep
-        if (next >= 100) {
-          // Capture the ACTUAL elapsed time from ref
-          setRwPipeFinalTime(prev => prev === 0 ? rwElapsedRef.current : prev)
+
+      // --- Pipeline progress ---
+      if (!rwPipeFinishedRef.current) {
+        const nextPipe = Math.min(100, rwPipeProgressRef.current + pipeStep)
+        rwPipeProgressRef.current = nextPipe
+        setRwPipeProgress(nextPipe)
+        if (nextPipe >= 100) {
+          rwPipeFinishedRef.current = true
+          setRwPipeFinalTime(rwElapsedRef.current)
           setRwPipeFinished(true)
-          return 100
         }
-        return Math.min(100, next)
-      })
-      
-      setRwMonoProgress(p => {
-        const next = p + monoStep
-        if (next >= 100) {
-          // Capture the ACTUAL elapsed time from ref
-          setRwMonoFinalTime(prev => prev === 0 ? rwElapsedRef.current : prev)
+      }
+
+      // --- Mono progress ---
+      if (!rwMonoFinishedRef.current) {
+        const nextMono = Math.min(100, rwMonoProgressRef.current + monoStep)
+        rwMonoProgressRef.current = nextMono
+        setRwMonoProgress(nextMono)
+        // Stage based on progress
+        setRwMonoStage(Math.min(4, Math.floor(nextMono / 20)))
+        if (nextMono >= 100) {
+          rwMonoFinishedRef.current = true
+          setRwMonoFinalTime(rwElapsedRef.current)
           setRwMonoFinished(true)
-          return 100
         }
-        return Math.min(100, next)
-      })
+      }
+
+      // Stop interval once both done
+      if (rwPipeFinishedRef.current && rwMonoFinishedRef.current) {
+        if (rwIntervalRef.current) clearInterval(rwIntervalRef.current)
+        setRwIsRunning(false)
+      }
     }, stepTime)
-    
+
     return () => { if (rwIntervalRef.current) clearInterval(rwIntervalRef.current) }
-  }, [rwIsRunning, isPrintMode, rwPipeFinished, rwMonoFinished, rwElapsedMs, rwMonoProgress, rwPipeProgress])
+  // Only re-run when the user explicitly starts the simulation or changes task
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rwIsRunning, isPrintMode, selectedTask])
 
   // Stop when both complete
   useEffect(() => {
@@ -1163,6 +1173,7 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
   }, [tpIsRunning, tpMonoProcessing, tpMonoQueue])
 
   const resetRealWorld = () => {
+    if (rwIntervalRef.current) clearInterval(rwIntervalRef.current)
     setRwIsRunning(false)
     setRwMonoProgress(0)
     setRwPipeProgress(0)
@@ -1171,10 +1182,13 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
     setRwMonoFinalTime(0)
     setRwPipeFinalTime(0)
     setRwElapsedMs(0)
-    rwElapsedRef.current = 0 // Reset the ref too
     setRwMonoStage(0)
     setRwPipeStages([0, 0, 0, 0, 0])
-    if (rwIntervalRef.current) clearInterval(rwIntervalRef.current)
+    rwElapsedRef.current = 0
+    rwMonoProgressRef.current = 0
+    rwPipeProgressRef.current = 0
+    rwPipeFinishedRef.current = false
+    rwMonoFinishedRef.current = false
   }
 
   const resetBalls = () => {
@@ -1867,10 +1881,10 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                         )}
                       </div>
                       <div className="text-right">
-                        <div className="text-slate-300 text-xs mb-0.5">Speedup en Vivo</div>
-                        <div className="text-3xl font-bold text-white">
-                          {rwPipeProgress > 0 ? (rwMonoProgress > 0 ? (rwPipeProgress / rwMonoProgress).toFixed(2) : "-") : "-"}x
-                        </div>
+  <div className="text-slate-300 text-xs mb-0.5">Speedup en Vivo</div>
+  <div className="text-3xl font-bold text-white">
+  {(selectedTask.monoDuration / selectedTask.pipeDuration).toFixed(2)}x
+  </div>
                       </div>
                     </>
                   ) : (
