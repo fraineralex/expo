@@ -1463,26 +1463,128 @@ export function EnmanuelSlide({ isPrintMode = false }: { isPrintMode?: boolean }
             </div>
           )}
 
-          {/* Summary Footer */}
-          <div className="mt-3 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-teal-500/20 backdrop-blur border border-white/10 rounded-2xl p-3">
-            <div className="flex items-center justify-center gap-6">
-              <div className="flex items-center gap-2">
-                <Activity className="w-4 h-4 text-purple-400" />
-                <span className="text-slate-300 text-xs">
-                  <strong className="text-white">6 instrucciones</strong> en paralelo
-                </span>
+          {/* Kitchen Analogy Section */}
+          <div className="mt-3 bg-gradient-to-br from-orange-500/10 via-amber-500/5 to-orange-500/10 backdrop-blur border border-orange-500/30 rounded-2xl p-3 relative overflow-hidden">
+            {/* Neon glow effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 via-transparent to-orange-500/5 pointer-events-none" />
+            
+            {/* Header */}
+            <div className="flex items-center gap-2 mb-3 relative z-10">
+              <div className="w-6 h-6 rounded-lg bg-orange-500/20 flex items-center justify-center">
+                <span className="text-sm">🍔</span>
               </div>
-              <div className="w-px h-4 bg-white/20" />
-              <div className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-teal-400" />
-                <span className="text-slate-300 text-xs">
-                  Throughput ideal: <strong className="text-teal-400">~1 instr/ciclo</strong>
-                </span>
+              <span className="text-orange-300 font-bold text-xs">Analogia: Cocina Industrial de Sandwiches</span>
+            </div>
+
+            {/* Conveyor Belt with Stations */}
+            <div className="relative z-10">
+              {/* Conveyor belt line */}
+              <div className="absolute top-1/2 left-8 right-8 h-1 bg-gradient-to-r from-slate-700 via-slate-600 to-slate-700 rounded-full transform -translate-y-1/2 z-0">
+                <div 
+                  className="absolute inset-0 bg-gradient-to-r from-orange-500/50 via-amber-500/50 to-orange-500/50 rounded-full transition-all duration-500"
+                  style={{ 
+                    width: `${Math.min(100, (currentCycle / totalCycles) * 100)}%`,
+                    boxShadow: isRunning ? "0 0 10px rgba(251, 146, 60, 0.5)" : "none"
+                  }}
+                />
+                {/* Moving dots on conveyor */}
+                {isRunning && (
+                  <>
+                    <div className="absolute w-2 h-2 bg-orange-400 rounded-full top-1/2 -translate-y-1/2 animate-[conveyor_2s_linear_infinite]" style={{ left: "10%" }} />
+                    <div className="absolute w-2 h-2 bg-orange-400 rounded-full top-1/2 -translate-y-1/2 animate-[conveyor_2s_linear_infinite]" style={{ left: "40%", animationDelay: "0.5s" }} />
+                    <div className="absolute w-2 h-2 bg-orange-400 rounded-full top-1/2 -translate-y-1/2 animate-[conveyor_2s_linear_infinite]" style={{ left: "70%", animationDelay: "1s" }} />
+                  </>
+                )}
               </div>
+
+              {/* Stations */}
+              <div className="flex justify-between items-center relative z-10">
+                {[
+                  { stage: "IF", emoji: "📋", action: "Pedido", desc: "Mesero toma orden" },
+                  { stage: "ID", emoji: "🔪", action: "Preparar", desc: "Cortar ingredientes" },
+                  { stage: "EX", emoji: "🔥", action: "Cocinar", desc: "Coccion en plancha" },
+                  { stage: "MEM", emoji: "🧀", action: "Extras", desc: "Agregar aderezos" },
+                  { stage: "WB", emoji: "🥡", action: "Entregar", desc: "Empacar y facturar" },
+                ].map((station, idx) => {
+                  // Check if this stage is active in current cycle
+                  const isStageActive = PIPELINE_INSTRUCTIONS.some((_, instrIdx) => {
+                    const stageIdx = currentCycle - instrIdx - 1
+                    return stageIdx === idx
+                  })
+                  const stageColor = STAGE_COLORS[station.stage as keyof typeof STAGE_COLORS]
+                  
+                  return (
+                    <div key={station.stage} className="flex flex-col items-center">
+                      {/* Station box */}
+                      <div 
+                        className={`w-14 h-14 rounded-xl flex flex-col items-center justify-center transition-all duration-500 border-2 ${
+                          isStageActive 
+                            ? "scale-110 shadow-lg" 
+                            : "opacity-40 scale-95"
+                        }`}
+                        style={{
+                          backgroundColor: isStageActive ? `${stageColor}30` : "rgba(255,255,255,0.05)",
+                          borderColor: isStageActive ? stageColor : "rgba(255,255,255,0.1)",
+                          boxShadow: isStageActive ? `0 0 20px ${stageColor}40, 0 0 40px ${stageColor}20` : "none"
+                        }}
+                      >
+                        <span className={`text-xl transition-all duration-300 ${isStageActive ? "animate-bounce" : ""}`} style={{ animationDuration: "1s" }}>
+                          {station.emoji}
+                        </span>
+                        <span 
+                          className="text-xs font-bold mt-0.5"
+                          style={{ color: isStageActive ? stageColor : "rgb(148, 163, 184)" }}
+                        >
+                          {station.stage}
+                        </span>
+                      </div>
+                      {/* Label */}
+                      <div className="mt-1.5 text-center">
+                        <div className={`text-xs font-semibold transition-colors duration-300 ${isStageActive ? "text-white" : "text-slate-500"}`}>
+                          {station.action}
+                        </div>
+                        <div className="text-xs text-slate-600 hidden sm:block">{station.desc}</div>
+                      </div>
+                      {/* Active indicator dot */}
+                      {isStageActive && (
+                        <div className="absolute -top-1 w-2 h-2 rounded-full bg-orange-400 animate-ping" />
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Dynamic explanation text */}
+            <div className="mt-3 bg-white/5 rounded-xl p-2 border border-white/10 relative z-10">
+              <p className="text-slate-300 text-xs text-center leading-relaxed">
+                {currentCycle === 0 ? (
+                  <span className="text-slate-400">Presiona <strong className="text-orange-400">Play</strong> para ver como la cocina procesa multiples pedidos simultaneamente.</span>
+                ) : currentCycle >= 5 ? (
+                  <span>
+                    <strong className="text-orange-400">Paralelismo activo:</strong> Mientras un sandwich se <strong className="text-teal-400">entrega</strong>, 
+                    otro se <strong className="text-pink-400">cocina</strong> y uno nuevo se <strong className="text-purple-400">ordena</strong>. 
+                    <span className="text-amber-400"> Todas las estaciones trabajan a la vez.</span>
+                  </span>
+                ) : (
+                  <span>
+                    <strong className="text-orange-400">Llenando el pipeline:</strong> Las estaciones se activan secuencialmente. 
+                    <span className="text-slate-400"> ({5 - currentCycle} ciclos para alcanzar maxima eficiencia)</span>
+                  </span>
+                )}
+              </p>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Conveyor animation keyframes */}
+      <style jsx>{`
+        @keyframes conveyor {
+          0% { transform: translateX(0) translateY(-50%); opacity: 1; }
+          100% { transform: translateX(100px) translateY(-50%); opacity: 0; }
+        }
+      `}</style>
 
       <SlideNavigation slideNumber={4} totalSlides={8} />
     </div>
