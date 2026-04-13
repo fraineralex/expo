@@ -370,7 +370,7 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
   )
 }
 
-/* ───────────────────────────────��─────────��───
+/* ───────────────────────────────��─────────���───
    SLIDE 2: CHRISTOPHER - Procesador Monociclo
    REDESIGNED: Cleaner, more visual, less text
 ───────────────────────────────────────────── */
@@ -1807,8 +1807,11 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                 </div>
               </div>
 
-              {/* Results - only show real data after both finish */}
-              <div className={`mt-3 rounded-xl p-3 shadow-lg transition-all ${rwMonoFinished && rwPipeFinished ? "bg-gradient-to-r from-teal-500 to-emerald-500" : "bg-slate-200"}`}>
+              {/* Results - LIVE stats during simulation, final stats when done */}
+              <div className={`mt-3 rounded-xl p-3 shadow-lg transition-all ${
+                rwMonoFinished && rwPipeFinished ? "bg-gradient-to-r from-teal-500 to-emerald-500" : 
+                rwIsRunning ? "bg-gradient-to-r from-slate-600 to-slate-700" : "bg-slate-200"
+              }`}>
                 <div className="flex items-center justify-between">
                   {rwMonoFinished && rwPipeFinished ? (
                     <>
@@ -1831,9 +1834,42 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                         <div className="text-4xl font-bold text-white">{(rwMonoFinalTime / rwPipeFinalTime).toFixed(2)}x</div>
                       </div>
                     </>
+                  ) : rwIsRunning || rwPipeFinished || rwMonoFinished ? (
+                    <>
+                      <div className="flex items-center gap-4">
+                        <div>
+                          <div className="text-slate-300 text-xs mb-0.5">Tiempo Transcurrido</div>
+                          <div className="font-mono text-white text-lg font-bold">{(rwElapsedMs / 1000).toFixed(2)}s</div>
+                        </div>
+                        <div className={`px-3 py-1 rounded ${rwMonoFinished ? "bg-emerald-500" : "bg-orange-500 animate-pulse"}`}>
+                          <div className="text-white/80 text-xs">Monociclo</div>
+                          <div className="font-mono text-white font-bold">
+                            {rwMonoFinished ? `${(rwMonoFinalTime / 1000).toFixed(2)}s` : `${rwMonoProgress.toFixed(0)}%`}
+                          </div>
+                        </div>
+                        <div className={`px-3 py-1 rounded ${rwPipeFinished ? "bg-emerald-500" : "bg-purple-500 animate-pulse"}`}>
+                          <div className="text-white/80 text-xs">Pipeline</div>
+                          <div className="font-mono text-white font-bold">
+                            {rwPipeFinished ? `${(rwPipeFinalTime / 1000).toFixed(2)}s` : `${rwPipeProgress.toFixed(0)}%`}
+                          </div>
+                        </div>
+                        {rwPipeFinished && !rwMonoFinished && (
+                          <div className="bg-purple-600 px-3 py-1 rounded">
+                            <div className="text-purple-200 text-xs">Pipeline termino</div>
+                            <div className="font-mono text-white font-bold">{((rwElapsedMs - rwPipeFinalTime) / 1000).toFixed(2)}s antes</div>
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <div className="text-slate-300 text-xs mb-0.5">Speedup en Vivo</div>
+                        <div className="text-3xl font-bold text-white">
+                          {rwPipeProgress > 0 ? (rwMonoProgress > 0 ? (rwPipeProgress / rwMonoProgress).toFixed(2) : "-") : "-"}x
+                        </div>
+                      </div>
+                    </>
                   ) : (
                     <div className="flex items-center justify-center w-full py-2">
-                      <span className="text-slate-500 text-sm font-medium">Ejecuta la simulacion para ver los resultados...</span>
+                      <span className="text-slate-500 text-sm font-medium">Ejecuta la simulacion para ver los resultados en tiempo real...</span>
                     </div>
                   )}
                 </div>
