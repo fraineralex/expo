@@ -1066,6 +1066,7 @@ export function EnmanuelSlide({ isPrintMode = false }: { isPrintMode?: boolean }
 
   // Pipeline configuration
   const INSTRUCTION_COLORS = ["#0d9488", "#7c3aed", "#db2777", "#ea580c", "#16a34a", "#2563eb"]
+  const INSTRUCTION_NAMES = ["ADD", "LOAD", "SUB", "STORE", "AND", "OR"]
   const totalCycles = 10
   const cycleTimePipeline = 200
 
@@ -1073,6 +1074,12 @@ export function EnmanuelSlide({ isPrintMode = false }: { isPrintMode?: boolean }
   const completedInstructions = Math.max(0, currentCycle - PIPELINE_STAGES.length + 1)
   const throughput = currentCycle > 0 ? (completedInstructions / currentCycle).toFixed(2) : "0.00"
   const progress = (currentCycle / totalCycles) * 100
+
+  // Active instructions in current cycle
+  const activeInstructions = PIPELINE_INSTRUCTIONS.filter((_, idx) => {
+    const stageIdx = currentCycle - idx - 1
+    return stageIdx >= 0 && stageIdx < PIPELINE_STAGES.length
+  }).length
 
   const startSimulation = useCallback(() => {
     if (currentCycle >= totalCycles) setCurrentCycle(0)
@@ -1135,101 +1142,149 @@ export function EnmanuelSlide({ isPrintMode = false }: { isPrintMode?: boolean }
   const hasDataHazard = currentCycle >= 2 && currentCycle <= 4
 
   return (
-    <div className="w-full h-full bg-gradient-to-br from-purple-50 via-white to-pink-50 flex flex-col p-4 relative overflow-hidden">
+    <div className="w-full h-full bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 flex flex-col p-4 relative overflow-hidden">
       <Presenter name="Enmanuel Santos Diaz" />
 
+      {/* Animated background particles */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" />
+        <div className="absolute top-40 right-20 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-15 animate-pulse" style={{ animationDelay: "1s" }} />
+        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-teal-500 rounded-full mix-blend-multiply filter blur-3xl opacity-15 animate-pulse" style={{ animationDelay: "2s" }} />
+      </div>
+
+      {/* Grid pattern overlay */}
       <div
-        className="absolute inset-0 opacity-20"
+        className="absolute inset-0 opacity-10"
         style={{
-          backgroundImage: "linear-gradient(rgba(124,58,237,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(124,58,237,0.08) 1px, transparent 1px)",
-          backgroundSize: "50px 50px",
+          backgroundImage: "linear-gradient(rgba(139,92,246,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,246,0.3) 1px, transparent 1px)",
+          backgroundSize: "40px 40px",
         }}
       />
 
       {/* Header */}
       <div className="mb-3 z-10">
-        <div className="text-purple-600 font-mono text-xs tracking-widest uppercase mb-1 font-semibold">Seccion 03</div>
-        <h2 className="text-2xl font-bold text-slate-800">Simulacion del Pipeline de 5 Etapas</h2>
-        <div className="h-1 w-24 bg-purple-500 mt-1 rounded-full" />
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
+          <span className="text-purple-400 font-mono text-xs tracking-widest uppercase font-semibold">Seccion 03</span>
+        </div>
+        <h2 className="text-2xl font-bold text-white">Simulacion del Pipeline de 5 Etapas</h2>
+        <div className="h-1 w-32 bg-gradient-to-r from-purple-500 via-pink-500 to-teal-500 mt-2 rounded-full" />
       </div>
 
       <div className="flex gap-4 flex-1 min-h-0 z-10">
         {/* Left Panel */}
         <div className="w-64 flex flex-col gap-2">
           {/* Educational Section */}
-          <div className="bg-white rounded-xl p-3 border-2 border-purple-200 shadow-sm">
-            <h3 className="text-purple-600 font-bold text-xs mb-2 flex items-center gap-2">
-              <Cpu className="w-4 h-4" />
+          <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-3 border border-white/10 shadow-2xl">
+            <h3 className="text-purple-300 font-bold text-xs mb-2 flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                <Cpu className="w-3.5 h-3.5 text-purple-400" />
+              </div>
               Que es un Pipeline?
             </h3>
-            <p className="text-slate-600 text-xs leading-relaxed">
-              El pipeline divide la ejecucion de instrucciones en etapas independientes, permitiendo que multiples instrucciones se ejecuten simultaneamente en diferentes fases.
+            <p className="text-slate-300 text-xs leading-relaxed">
+              Divide la ejecucion en etapas independientes, permitiendo ejecutar multiples instrucciones simultaneamente.
             </p>
           </div>
 
-          {/* Stage Legend */}
-          <div className="bg-white rounded-xl p-3 border-2 border-purple-200 shadow-sm">
-            <h3 className="text-purple-600 font-bold text-xs mb-2">Etapas del Pipeline</h3>
-            <div className="space-y-1.5">
-              {PIPELINE_STAGES.map((stage) => (
-                <div key={stage} className="flex items-center gap-2">
+          {/* Stage Legend - Visual Pipeline Flow */}
+          <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-3 border border-white/10 shadow-2xl">
+            <h3 className="text-purple-300 font-bold text-xs mb-3 flex items-center gap-2">
+              <Layers className="w-3.5 h-3.5" />
+              Etapas del Pipeline
+            </h3>
+            <div className="flex flex-col gap-1">
+              {PIPELINE_STAGES.map((stage, idx) => (
+                <div key={stage} className="flex items-center gap-2 group">
                   <div
-                    className="w-8 h-5 rounded flex items-center justify-center text-white text-xs font-bold shadow-sm"
-                    style={{ backgroundColor: STAGE_COLORS[stage as keyof typeof STAGE_COLORS] }}
+                    className="w-10 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold shadow-lg transition-all duration-300 group-hover:scale-105"
+                    style={{ 
+                      backgroundColor: STAGE_COLORS[stage as keyof typeof STAGE_COLORS],
+                      boxShadow: `0 4px 15px ${STAGE_COLORS[stage as keyof typeof STAGE_COLORS]}40`
+                    }}
                   >
                     {stage}
                   </div>
-                  <span className="text-slate-600 text-xs">
-                    {STAGE_NAMES[stage as keyof typeof STAGE_NAMES]}
-                  </span>
+                  <div className="flex-1">
+                    <span className="text-white text-xs font-medium">
+                      {STAGE_NAMES[stage as keyof typeof STAGE_NAMES]}
+                    </span>
+                  </div>
+                  {idx < PIPELINE_STAGES.length - 1 && (
+                    <ChevronRight className="w-3 h-3 text-slate-500" />
+                  )}
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Stats Panel */}
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-3 border-2 border-purple-200">
+          {/* Stats Panel - Glass morphism cards */}
+          <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-2xl p-3 border border-white/10 shadow-2xl">
             <div className="grid grid-cols-2 gap-2 text-center mb-2">
-              <div className="bg-white rounded-lg p-2 border border-purple-100">
-                <div className="text-slate-500 text-xs">Ciclo</div>
-                <div className="text-purple-600 font-mono font-bold text-xl">{currentCycle}</div>
+              <div className="bg-white/10 backdrop-blur rounded-xl p-2 border border-white/5">
+                <div className="text-slate-400 text-xs mb-1">Ciclo</div>
+                <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 font-mono">
+                  {currentCycle}
+                </div>
               </div>
-              <div className="bg-white rounded-lg p-2 border border-purple-100">
-                <div className="text-slate-500 text-xs">Tiempo</div>
-                <div className="text-slate-800 font-mono font-bold text-lg">{currentCycle * cycleTimePipeline}ns</div>
+              <div className="bg-white/10 backdrop-blur rounded-xl p-2 border border-white/5">
+                <div className="text-slate-400 text-xs mb-1">Tiempo</div>
+                <div className="text-lg font-bold text-white font-mono">
+                  {currentCycle * cycleTimePipeline}<span className="text-xs text-slate-400">ns</span>
+                </div>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2 text-center">
-              <div className="bg-white rounded-lg p-2 border border-purple-100">
-                <div className="text-slate-500 text-xs">Completadas</div>
-                <div className="text-teal-600 font-mono font-bold text-lg">{completedInstructions}</div>
+              <div className="bg-white/10 backdrop-blur rounded-xl p-2 border border-white/5">
+                <div className="text-slate-400 text-xs mb-1">Completadas</div>
+                <div className="text-xl font-bold text-teal-400 font-mono">{completedInstructions}</div>
               </div>
-              <div className="bg-white rounded-lg p-2 border border-purple-100">
-                <div className="text-slate-500 text-xs">Throughput</div>
-                <div className="text-pink-600 font-mono font-bold text-lg">{throughput}</div>
+              <div className="bg-white/10 backdrop-blur rounded-xl p-2 border border-white/5">
+                <div className="text-slate-400 text-xs mb-1">Throughput</div>
+                <div className="text-xl font-bold text-pink-400 font-mono">{throughput}</div>
+              </div>
+            </div>
+            {/* Active instructions indicator */}
+            <div className="mt-2 bg-white/5 rounded-xl p-2 border border-white/5">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-400 text-xs">Activas</span>
+                <div className="flex gap-1">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className={`w-2 h-4 rounded-sm transition-all duration-300 ${
+                        i < activeInstructions 
+                          ? "bg-gradient-to-t from-purple-500 to-pink-500 shadow-lg shadow-purple-500/50" 
+                          : "bg-slate-700"
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Progress Bar */}
-          <div className="bg-white rounded-xl p-3 border border-slate-200 shadow-sm">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-slate-500 text-xs">Progreso</span>
-              <span className="text-purple-600 font-mono text-xs font-bold">{Math.round(progress)}%</span>
+          {/* Progress & Speed Control */}
+          <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-3 border border-white/10 shadow-2xl">
+            {/* Progress */}
+            <div className="mb-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-slate-400 text-xs">Progreso</span>
+                <span className="text-purple-400 font-mono text-xs font-bold">{Math.round(progress)}%</span>
+              </div>
+              <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-teal-500 rounded-full transition-all duration-300"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
             </div>
-            <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-300"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Speed Control */}
-          <div className="bg-white rounded-xl p-3 border border-slate-200 shadow-sm">
+            {/* Speed */}
             <div className="flex items-center justify-between mb-2">
-              <span className="text-slate-500 text-xs">Velocidad</span>
-              <span className="text-slate-700 font-mono text-xs">{speed}ms</span>
+              <span className="text-slate-400 text-xs flex items-center gap-1">
+                <Gauge className="w-3 h-3" /> Velocidad
+              </span>
+              <span className="text-white font-mono text-xs">{speed}ms</span>
             </div>
             <input
               type="range"
@@ -1238,9 +1293,9 @@ export function EnmanuelSlide({ isPrintMode = false }: { isPrintMode?: boolean }
               step="100"
               value={speed}
               onChange={(e) => setSpeed(Number(e.target.value))}
-              className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-purple-500"
+              className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
             />
-            <div className="flex justify-between text-xs text-slate-400 mt-1">
+            <div className="flex justify-between text-xs text-slate-500 mt-1">
               <span>Rapido</span>
               <span>Lento</span>
             </div>
@@ -1248,50 +1303,72 @@ export function EnmanuelSlide({ isPrintMode = false }: { isPrintMode?: boolean }
         </div>
 
         {/* Right Panel - Pipeline Table */}
-        <div className="flex-1 bg-white rounded-xl p-4 border-2 border-purple-200 shadow-md flex flex-col">
+        <div className="flex-1 bg-white/5 backdrop-blur-xl rounded-2xl p-4 border border-white/10 shadow-2xl flex flex-col">
           {/* Controls Header */}
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Zap className="w-5 h-5 text-purple-500" />
-              <span className="text-slate-800 font-bold text-sm">Ejecucion Paralela - Diagrama Gantt</span>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
+                <Zap className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <span className="text-white font-bold text-sm">Diagrama de Gantt</span>
+                <div className="text-slate-400 text-xs">Ejecucion paralela en tiempo real</div>
+              </div>
             </div>
-            <div className="flex gap-1.5">
+            <div className="flex gap-2">
               {!isRunning ? (
-                <button onClick={startSimulation} className="px-3 py-1.5 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-lg flex items-center gap-1.5 shadow-sm text-sm transition-all">
-                  <Play className="w-3.5 h-3.5" /> Play
+                <button 
+                  onClick={startSimulation} 
+                  className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-purple-500/30 text-sm transition-all hover:scale-105"
+                >
+                  <Play className="w-4 h-4" /> Play
                 </button>
               ) : (
-                <button onClick={pauseSimulation} className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg flex items-center gap-1.5 shadow-sm text-sm transition-all">
-                  <Pause className="w-3.5 h-3.5" /> Pausar
+                <button 
+                  onClick={pauseSimulation} 
+                  className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-amber-500/30 text-sm transition-all hover:scale-105"
+                >
+                  <Pause className="w-4 h-4" /> Pausar
                 </button>
               )}
-              <button onClick={stepBackward} disabled={isRunning || currentCycle <= 0} className="px-2 py-1.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 text-slate-700 font-semibold rounded-lg flex items-center gap-1 border border-slate-200 text-sm transition-all">
-                <ChevronLeft className="w-3.5 h-3.5" />
+              <button 
+                onClick={stepBackward} 
+                disabled={isRunning || currentCycle <= 0} 
+                className="px-3 py-2 bg-white/10 hover:bg-white/20 disabled:opacity-30 text-white font-semibold rounded-xl flex items-center border border-white/10 text-sm transition-all disabled:cursor-not-allowed"
+              >
+                <ChevronLeft className="w-4 h-4" />
               </button>
-              <button onClick={stepForward} disabled={isRunning || currentCycle >= totalCycles} className="px-2 py-1.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 text-slate-700 font-semibold rounded-lg flex items-center gap-1 border border-slate-200 text-sm transition-all">
-                <ChevronRight className="w-3.5 h-3.5" />
+              <button 
+                onClick={stepForward} 
+                disabled={isRunning || currentCycle >= totalCycles} 
+                className="px-3 py-2 bg-white/10 hover:bg-white/20 disabled:opacity-30 text-white font-semibold rounded-xl flex items-center border border-white/10 text-sm transition-all disabled:cursor-not-allowed"
+              >
+                <ChevronRight className="w-4 h-4" />
               </button>
-              <button onClick={resetSimulation} className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg flex items-center gap-1.5 border border-slate-200 text-sm transition-all">
-                <RotateCcw className="w-3.5 h-3.5" /> Reset
+              <button 
+                onClick={resetSimulation} 
+                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl flex items-center gap-2 border border-white/10 text-sm transition-all"
+              >
+                <RotateCcw className="w-4 h-4" /> Reset
               </button>
             </div>
           </div>
 
           {/* Gantt Table */}
           <div className="flex-1 overflow-x-auto">
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               {/* Header Row */}
-              <div className="flex items-center gap-1 sticky top-0 bg-white pb-1">
-                <div className="w-36 text-slate-400 text-xs font-medium shrink-0">Instruccion</div>
+              <div className="flex items-center gap-1.5 sticky top-0 pb-2">
+                <div className="w-40 text-slate-500 text-xs font-medium shrink-0 pl-2">Instruccion</div>
                 {Array.from({ length: totalCycles }).map((_, i) => (
                   <div 
                     key={i} 
-                    className={`w-12 h-6 flex items-center justify-center text-xs font-mono shrink-0 rounded transition-all duration-300 ${
+                    className={`w-14 h-7 flex items-center justify-center text-xs font-mono shrink-0 rounded-lg transition-all duration-300 ${
                       i + 1 === currentCycle 
-                        ? "bg-purple-500 text-white font-bold ring-2 ring-purple-300 ring-offset-1" 
+                        ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold shadow-lg shadow-purple-500/40 scale-110" 
                         : i + 1 < currentCycle 
-                          ? "text-purple-400 bg-purple-50" 
-                          : "text-slate-300 bg-slate-50"
+                          ? "text-purple-300 bg-purple-500/20" 
+                          : "text-slate-500 bg-white/5"
                     }`}
                   >
                     C{i + 1}
@@ -1300,64 +1377,86 @@ export function EnmanuelSlide({ isPrintMode = false }: { isPrintMode?: boolean }
               </div>
 
               {/* Instruction Rows */}
-              {PIPELINE_INSTRUCTIONS.map((instr, instrIdx) => (
-                <div key={instrIdx} className="flex items-center gap-1">
-                  <div 
-                    className="w-36 font-mono text-xs text-slate-700 truncate shrink-0 px-2 py-1 rounded-lg border"
-                    style={{ 
-                      borderColor: INSTRUCTION_COLORS[instrIdx],
-                      backgroundColor: `${INSTRUCTION_COLORS[instrIdx]}10`
-                    }}
-                  >
-                    {instr}
-                  </div>
-                  {Array.from({ length: totalCycles }).map((_, cycleIdx) => {
-                    const stage = getInstructionStage(instrIdx, cycleIdx + 1)
-                    const isActive = cycleIdx + 1 <= currentCycle
-                    const isCurrentCycle = cycleIdx + 1 === currentCycle
-                    
-                    if (!stage) return (
+              {PIPELINE_INSTRUCTIONS.map((instr, instrIdx) => {
+                const instrColor = INSTRUCTION_COLORS[instrIdx]
+                const currentStage = getInstructionStage(instrIdx, currentCycle)
+                
+                return (
+                  <div key={instrIdx} className="flex items-center gap-1.5 group">
+                    <div 
+                      className="w-40 font-mono text-xs text-white truncate shrink-0 px-3 py-2 rounded-xl border-2 transition-all duration-300 flex items-center gap-2"
+                      style={{ 
+                        borderColor: currentStage ? instrColor : `${instrColor}40`,
+                        backgroundColor: currentStage ? `${instrColor}20` : `${instrColor}10`,
+                        boxShadow: currentStage ? `0 0 20px ${instrColor}30` : "none"
+                      }}
+                    >
                       <div 
-                        key={cycleIdx} 
-                        className="w-12 h-7 bg-slate-50 rounded shrink-0 border border-slate-100" 
+                        className="w-2 h-2 rounded-full shrink-0"
+                        style={{ backgroundColor: instrColor }}
                       />
-                    )
-                    
-                    const stageColor = STAGE_COLORS[stage as keyof typeof STAGE_COLORS]
-                    
-                    return (
-                      <div 
-                        key={cycleIdx} 
-                        className="w-12 h-7 rounded flex items-center justify-center text-xs font-bold text-white shrink-0 transition-all duration-300"
-                        style={{
-                          backgroundColor: isActive ? stageColor : `${stageColor}30`,
-                          boxShadow: isCurrentCycle ? `0 0 12px ${stageColor}80` : "none",
-                          transform: isCurrentCycle && isActive ? "scale(1.08)" : "scale(1)",
-                          opacity: isActive ? 1 : 0.4,
-                        }}
-                      >
-                        {stage}
-                      </div>
-                    )
-                  })}
-                </div>
-              ))}
+                      <span className="truncate">{instr}</span>
+                    </div>
+                    {Array.from({ length: totalCycles }).map((_, cycleIdx) => {
+                      const stage = getInstructionStage(instrIdx, cycleIdx + 1)
+                      const isActive = cycleIdx + 1 <= currentCycle
+                      const isCurrentCycle = cycleIdx + 1 === currentCycle
+                      
+                      if (!stage) return (
+                        <div 
+                          key={cycleIdx} 
+                          className="w-14 h-9 bg-white/5 rounded-lg shrink-0 border border-white/5 transition-all duration-300" 
+                        />
+                      )
+                      
+                      const stageColor = STAGE_COLORS[stage as keyof typeof STAGE_COLORS]
+                      
+                      return (
+                        <div 
+                          key={cycleIdx} 
+                          className="w-14 h-9 rounded-lg flex items-center justify-center text-xs font-bold text-white shrink-0 transition-all duration-500 relative overflow-hidden"
+                          style={{
+                            backgroundColor: isActive ? stageColor : `${stageColor}20`,
+                            boxShadow: isCurrentCycle && isActive ? `0 0 25px ${stageColor}60, inset 0 0 20px ${stageColor}30` : "none",
+                            transform: isCurrentCycle && isActive ? "scale(1.1)" : "scale(1)",
+                            opacity: isActive ? 1 : 0.3,
+                          }}
+                        >
+                          {/* Shimmer effect for current cycle */}
+                          {isCurrentCycle && isActive && (
+                            <div 
+                              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"
+                              style={{ animationDuration: "1.5s" }}
+                            />
+                          )}
+                          <span className="relative z-10">{stage}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )
+              })}
             </div>
           </div>
 
           {/* Hazard Detection Panel */}
           {hasDataHazard && (
-            <div className="mt-3 bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200 rounded-xl p-3 transition-all duration-300">
-              <div className="flex items-start gap-2">
-                <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-                <div>
+            <div 
+              className="mt-3 bg-gradient-to-r from-red-500/20 to-orange-500/20 backdrop-blur border-2 border-red-500/40 rounded-2xl p-3 transition-all duration-500 animate-pulse"
+              style={{ animationDuration: "2s" }}
+            >
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center shrink-0">
+                  <AlertTriangle className="w-5 h-5 text-red-400" />
+                </div>
+                <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-red-700 font-bold text-sm">Data Hazard RAW Detectado</span>
-                    <span className="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">RAW</span>
+                    <span className="text-red-300 font-bold text-sm">Data Hazard RAW Detectado</span>
+                    <span className="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full animate-pulse">RAW</span>
                   </div>
-                  <p className="text-red-600 text-xs leading-relaxed">
-                    <strong>LOAD R4</strong> seguido de <strong>SUB R5, R4, R2</strong>: SUB necesita el valor de R4 que aun no esta disponible.
-                    Se resuelve con <strong>forwarding</strong> (data bypass) o <strong>stalls</strong> (burbujas).
+                  <p className="text-red-200/80 text-xs leading-relaxed">
+                    <strong className="text-red-300">LOAD R4</strong> seguido de <strong className="text-red-300">SUB R5, R4, R2</strong>: 
+                    SUB necesita R4 que aun no esta disponible. Solucion: <strong className="text-teal-400">forwarding</strong> o <strong className="text-amber-400">stalls</strong>.
                   </p>
                 </div>
               </div>
@@ -1365,10 +1464,22 @@ export function EnmanuelSlide({ isPrintMode = false }: { isPrintMode?: boolean }
           )}
 
           {/* Summary Footer */}
-          <div className="mt-3 bg-gradient-to-r from-purple-100 to-pink-100 border border-purple-200 rounded-xl p-2.5">
-            <p className="text-slate-700 text-xs text-center">
-              <strong className="text-purple-600">6 instrucciones</strong> ejecutandose en paralelo = Throughput ideal de ~1 instruccion/ciclo despues del llenado inicial
-            </p>
+          <div className="mt-3 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-teal-500/20 backdrop-blur border border-white/10 rounded-2xl p-3">
+            <div className="flex items-center justify-center gap-6">
+              <div className="flex items-center gap-2">
+                <Activity className="w-4 h-4 text-purple-400" />
+                <span className="text-slate-300 text-xs">
+                  <strong className="text-white">6 instrucciones</strong> en paralelo
+                </span>
+              </div>
+              <div className="w-px h-4 bg-white/20" />
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-teal-400" />
+                <span className="text-slate-300 text-xs">
+                  Throughput ideal: <strong className="text-teal-400">~1 instr/ciclo</strong>
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
