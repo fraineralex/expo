@@ -1,8 +1,20 @@
 import { NextResponse } from "next/server"
-import { redis, PRESENTATION_STATE_KEY, type PresentationState } from "@/lib/redis"
+import { redis, isRedisConfigured, PRESENTATION_STATE_KEY, type PresentationState } from "@/lib/redis"
+
+const defaultState: PresentationState = { 
+  currentSlide: 0, 
+  totalSlides: 8, 
+  hasSimulation: false, 
+  isPlaying: false,
+  timestamp: Date.now()
+}
 
 // POST - Update state from presentation
 export async function POST(request: Request) {
+  if (!isRedisConfigured || !redis) {
+    return NextResponse.json({ success: true, state: defaultState, warning: "Redis not configured" })
+  }
+  
   try {
     const body = await request.json()
     const state: PresentationState = {
@@ -25,13 +37,15 @@ export async function POST(request: Request) {
 
 // GET - Get current state for remote
 export async function GET() {
+  if (!isRedisConfigured || !redis) {
+    return NextResponse.json({ state: defaultState, warning: "Redis not configured" })
+  }
+  
   try {
     const data = await redis.get(PRESENTATION_STATE_KEY)
     
     if (!data) {
-      return NextResponse.json({ 
-        state: { currentSlide: 0, totalSlides: 8, hasSimulation: false, isPlaying: false } 
-      })
+      return NextResponse.json({ state: defaultState })
     }
     
     const state = typeof data === "string" ? JSON.parse(data) : data as PresentationState

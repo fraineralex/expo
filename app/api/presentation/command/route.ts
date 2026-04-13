@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server"
-import { redis, PRESENTATION_COMMAND_KEY, type PresentationCommand } from "@/lib/redis"
+import { redis, isRedisConfigured, PRESENTATION_COMMAND_KEY, type PresentationCommand } from "@/lib/redis"
 
 // POST - Send a command from remote
 export async function POST(request: Request) {
+  if (!isRedisConfigured || !redis) {
+    return NextResponse.json({ success: false, error: "Redis not configured", command: null })
+  }
+  
   try {
     const body = await request.json()
     const command: PresentationCommand = {
@@ -23,6 +27,10 @@ export async function POST(request: Request) {
 
 // GET - Poll for commands from presentation
 export async function GET(request: Request) {
+  if (!isRedisConfigured || !redis) {
+    return NextResponse.json({ command: null, warning: "Redis not configured" })
+  }
+  
   try {
     const url = new URL(request.url)
     const lastTimestamp = parseInt(url.searchParams.get("since") || "0")
