@@ -206,6 +206,7 @@ export function TitleSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
 
 /* ─────────────────────────────────────────────
    SLIDE 1: ALGENIS - Medición de Rendimiento
+   REDESIGNED: Professional dashboard-style layout
 ───────────────────────────────────────────── */
 export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
   const [instructions, setInstructions] = useState(1000)
@@ -217,9 +218,8 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
   const totalCycles = instructions * cpi
 
   return (
-    <div className="w-full h-full bg-gradient-to-br from-slate-50 via-white to-cyan-50 flex flex-col p-8 relative overflow-hidden">
-      <Presenter name="Algenis De los Santos Lopez" />
-      
+    <div className="w-full h-full bg-gradient-to-br from-slate-50 via-white to-cyan-50 flex flex-col relative overflow-hidden">
+      {/* Subtle grid background */}
       <div
         className="absolute inset-0 opacity-20"
         style={{
@@ -228,139 +228,223 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
         }}
       />
 
-      <div className="mb-6 z-10">
-        <div className="text-teal-600 font-mono text-xs tracking-widest uppercase mb-2 font-semibold">Seccion 01</div>
-        <h2 className="text-4xl font-bold text-slate-800">Como se Mide el Rendimiento de un Procesador</h2>
-        <div className="h-1 w-24 bg-teal-500 mt-3 rounded-full" />
+      {/* ===== HEADER SECTION ===== */}
+      <div className="px-8 pt-6 pb-4 z-10">
+        <div className="flex items-start justify-between">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 bg-teal-100 text-teal-700 px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase">
+              <span className="w-2 h-2 bg-teal-500 rounded-full" />
+              Seccion 01
+            </div>
+            <h2 className="text-3xl font-bold text-slate-800 leading-tight">
+              Como se Mide el Rendimiento de un Procesador
+            </h2>
+            <div className="h-1 w-20 bg-gradient-to-r from-teal-500 to-cyan-400 rounded-full" />
+          </div>
+          {/* Presenter badge - elegant corner placement */}
+          <div className="bg-white/95 backdrop-blur-sm px-4 py-2.5 rounded-xl border border-slate-200 shadow-sm">
+            <span className="text-slate-500 text-xs font-medium block">Presentador</span>
+            <span className="text-slate-800 text-sm font-semibold">Algenis De los Santos Lopez</span>
+          </div>
+        </div>
       </div>
 
-      <div className="flex gap-6 flex-1 min-h-0 z-10">
-        {/* Left: Concepts */}
-        <div className="w-1/3 flex flex-col gap-4">
-          <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
-            <h3 className="text-teal-600 font-semibold mb-3 flex items-center gap-2">
-              <Timer className="w-5 h-5" />
-              Tiempo de Ejecucion
-            </h3>
-            <p className="text-slate-600 text-sm leading-relaxed">
-              El tiempo que tarda un programa en completarse. Es la metrica mas directa del rendimiento.
-            </p>
-          </div>
+      {/* ===== MAIN CONTENT ===== */}
+      <div className="flex gap-5 flex-1 min-h-0 px-8 pb-4 z-10">
+        
+        {/* ===== LEFT PANEL: Theory Cards ===== */}
+        <div className="w-[320px] flex flex-col gap-3">
+          {/* Theory cards - uniform styling */}
+          {[
+            {
+              icon: Timer,
+              title: "Tiempo de Ejecucion",
+              description: "El tiempo que tarda un programa en completarse. Es la metrica mas directa del rendimiento.",
+              color: "teal"
+            },
+            {
+              icon: Activity,
+              title: "CPI (Cycles Per Instruction)",
+              description: "Ciclos promedio necesarios para ejecutar una instruccion. Monociclo: CPI = 1 pero ciclo largo.",
+              color: "purple"
+            },
+            {
+              icon: Gauge,
+              title: "Frecuencia del Reloj",
+              description: "Ciclos por segundo (Hz). Mayor frecuencia = ciclos mas cortos = potencialmente mas rapido.",
+              color: "emerald"
+            }
+          ].map((card, index) => (
+            <div key={index} className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+              <h3 className={`text-${card.color}-600 font-semibold mb-2 flex items-center gap-2 text-sm`}>
+                <div className={`w-8 h-8 rounded-lg bg-${card.color}-50 flex items-center justify-center`}>
+                  <card.icon className={`w-4 h-4 text-${card.color}-500`} />
+                </div>
+                {card.title}
+              </h3>
+              <p className="text-slate-600 text-xs leading-relaxed pl-10">
+                {card.description}
+              </p>
+            </div>
+          ))}
 
-          <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
-            <h3 className="text-purple-600 font-semibold mb-3 flex items-center gap-2">
-              <Activity className="w-5 h-5" />
-              CPI (Cycles Per Instruction)
-            </h3>
-            <p className="text-slate-600 text-sm leading-relaxed">
-              Ciclos promedio necesarios para ejecutar una instruccion. Monociclo: CPI = 1 pero ciclo largo.
-            </p>
-          </div>
-
-          <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
-            <h3 className="text-emerald-600 font-semibold mb-3 flex items-center gap-2">
-              <Gauge className="w-5 h-5" />
-              Frecuencia del Reloj
-            </h3>
-            <p className="text-slate-600 text-sm leading-relaxed">
-              Ciclos por segundo (Hz). Mayor frecuencia = ciclos mas cortos = potencialmente mas rapido.
-            </p>
-          </div>
-
-          {/* Formula box */}
-          <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl p-5 border-2 border-teal-200 mt-auto">
-            <div className="text-slate-800 font-semibold mb-3">Formula del Tiempo de CPU:</div>
-            <div className="bg-white rounded-lg p-4 font-mono text-center border border-teal-100">
-              <div className="text-teal-700 text-lg font-bold">
+          {/* Formula box - important but balanced */}
+          <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl p-4 border-2 border-teal-200 mt-auto">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-teal-500 flex items-center justify-center">
+                <Zap className="w-4 h-4 text-white" />
+              </div>
+              <span className="text-slate-800 font-semibold text-sm">Formula del Tiempo de CPU</span>
+            </div>
+            <div className="bg-white rounded-lg p-3 font-mono text-center border border-teal-100">
+              <div className="text-teal-700 text-base font-bold">
                 T<sub>CPU</sub> = I × CPI × T<sub>ciclo</sub>
               </div>
-              <div className="text-slate-500 text-sm mt-2">
+              <div className="text-slate-500 text-xs mt-1.5 border-t border-slate-100 pt-1.5">
                 T<sub>CPU</sub> = (I × CPI) / f
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right: Interactive Calculator */}
-        <div className="flex-1 bg-white rounded-xl p-6 border border-teal-200 shadow-md">
-          <h3 className="text-slate-800 text-xl font-bold mb-6 flex items-center gap-2">
-            <Cpu className="w-6 h-6 text-teal-600" />
-            Calculadora de Tiempo de CPU
-          </h3>
-
-          <div className="grid grid-cols-3 gap-6 mb-8">
-            <div className="space-y-3">
-              <label className="text-slate-500 text-sm font-medium">Numero de Instrucciones (I)</label>
-              <input
-                type="range"
-                min="100"
-                max="10000"
-                step="100"
-                value={instructions}
-                onChange={(e) => setInstructions(Number(e.target.value))}
-                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-teal-500"
-              />
-              <div className="text-teal-600 font-mono text-2xl font-bold">{instructions.toLocaleString()}</div>
+        {/* ===== RIGHT PANEL: Interactive Calculator ===== */}
+        <div className="flex-1 bg-white rounded-2xl border-2 border-teal-200 shadow-lg flex flex-col overflow-hidden">
+          
+          {/* Calculator Header */}
+          <div className="bg-gradient-to-r from-teal-500 to-cyan-500 px-5 py-3 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <Cpu className="w-5 h-5 text-white" />
             </div>
-
-            <div className="space-y-3">
-              <label className="text-slate-500 text-sm font-medium">CPI (Ciclos por Instruccion)</label>
-              <input
-                type="range"
-                min="1"
-                max="5"
-                step="0.1"
-                value={cpi}
-                onChange={(e) => setCpi(Number(e.target.value))}
-                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-500"
-              />
-              <div className="text-purple-600 font-mono text-2xl font-bold">{cpi.toFixed(1)}</div>
-            </div>
-
-            <div className="space-y-3">
-              <label className="text-slate-500 text-sm font-medium">Frecuencia (MHz)</label>
-              <input
-                type="range"
-                min="100"
-                max="4000"
-                step="100"
-                value={frequency}
-                onChange={(e) => setFrequency(Number(e.target.value))}
-                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-500"
-              />
-              <div className="text-emerald-600 font-mono text-2xl font-bold">{frequency} MHz</div>
+            <div>
+              <h3 className="text-white text-lg font-bold">Calculadora de Tiempo de CPU</h3>
+              <p className="text-teal-100 text-xs">Ajusta los parametros para calcular el tiempo de ejecucion</p>
             </div>
           </div>
 
-          {/* Results */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="bg-slate-50 rounded-xl p-5 text-center border border-slate-200">
-              <div className="text-slate-500 text-sm mb-2">Tiempo de Ciclo</div>
-              <div className="text-slate-800 font-mono text-xl font-bold">
-                {(cycleTime * 1000).toFixed(3)} ns
+          {/* Calculator Body */}
+          <div className="flex-1 p-5 flex flex-col gap-5">
+            
+            {/* ===== CONTROLS ROW ===== */}
+            <div className="grid grid-cols-3 gap-4">
+              {/* Instructions Control */}
+              <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                <label className="text-slate-600 text-xs font-semibold uppercase tracking-wide block mb-3">
+                  Numero de Instrucciones (I)
+                </label>
+                <input
+                  type="range"
+                  min="100"
+                  max="10000"
+                  step="100"
+                  value={instructions}
+                  onChange={(e) => setInstructions(Number(e.target.value))}
+                  className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-teal-500 mb-3"
+                />
+                <div className="text-center">
+                  <span className="text-teal-600 font-mono text-2xl font-bold">{instructions.toLocaleString()}</span>
+                  <span className="text-slate-400 text-sm ml-1">inst</span>
+                </div>
               </div>
-            </div>
-            <div className="bg-slate-50 rounded-xl p-5 text-center border border-slate-200">
-              <div className="text-slate-500 text-sm mb-2">Total de Ciclos</div>
-              <div className="text-slate-800 font-mono text-xl font-bold">
-                {totalCycles.toLocaleString()}
-              </div>
-            </div>
-            <div className="bg-gradient-to-br from-teal-500 to-cyan-500 rounded-xl p-5 text-center shadow-lg">
-              <div className="text-teal-100 text-sm mb-2 font-semibold">Tiempo de CPU</div>
-              <div className="text-white font-mono text-2xl font-bold">
-                {cpuTime >= 1000 ? `${(cpuTime / 1000).toFixed(2)} ms` : `${cpuTime.toFixed(2)} μs`}
-              </div>
-            </div>
-          </div>
 
-          {/* Live calculation display */}
-          <div className="mt-6 bg-slate-50 rounded-lg p-4 font-mono text-sm border border-slate-200">
-            <div className="text-slate-500">
-              T<sub>CPU</sub> = ({instructions.toLocaleString()} × {cpi.toFixed(1)}) / {frequency} MHz
+              {/* CPI Control */}
+              <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                <label className="text-slate-600 text-xs font-semibold uppercase tracking-wide block mb-3">
+                  CPI (Ciclos por Instruccion)
+                </label>
+                <input
+                  type="range"
+                  min="1"
+                  max="5"
+                  step="0.1"
+                  value={cpi}
+                  onChange={(e) => setCpi(Number(e.target.value))}
+                  className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-500 mb-3"
+                />
+                <div className="text-center">
+                  <span className="text-purple-600 font-mono text-2xl font-bold">{cpi.toFixed(1)}</span>
+                  <span className="text-slate-400 text-sm ml-1">ciclos</span>
+                </div>
+              </div>
+
+              {/* Frequency Control */}
+              <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                <label className="text-slate-600 text-xs font-semibold uppercase tracking-wide block mb-3">
+                  Frecuencia del Reloj
+                </label>
+                <input
+                  type="range"
+                  min="100"
+                  max="4000"
+                  step="100"
+                  value={frequency}
+                  onChange={(e) => setFrequency(Number(e.target.value))}
+                  className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-500 mb-3"
+                />
+                <div className="text-center">
+                  <span className="text-emerald-600 font-mono text-2xl font-bold">{frequency}</span>
+                  <span className="text-slate-400 text-sm ml-1">MHz</span>
+                </div>
+              </div>
             </div>
-            <div className="text-teal-600 mt-1">
-              T<sub>CPU</sub> = {totalCycles.toLocaleString()} / {frequency}×10⁶ = <span className="text-slate-800 font-bold">{cpuTime.toFixed(4)} μs</span>
+
+            {/* ===== RESULTS ROW ===== */}
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-slate-50 rounded-xl p-4 text-center border border-slate-200">
+                <div className="text-slate-500 text-xs font-medium uppercase tracking-wide mb-2">Tiempo de Ciclo</div>
+                <div className="text-slate-800 font-mono text-xl font-bold">
+                  {(cycleTime * 1000).toFixed(3)}
+                </div>
+                <div className="text-slate-400 text-xs">nanosegundos</div>
+              </div>
+              <div className="bg-slate-50 rounded-xl p-4 text-center border border-slate-200">
+                <div className="text-slate-500 text-xs font-medium uppercase tracking-wide mb-2">Total de Ciclos</div>
+                <div className="text-slate-800 font-mono text-xl font-bold">
+                  {totalCycles.toLocaleString()}
+                </div>
+                <div className="text-slate-400 text-xs">ciclos</div>
+              </div>
+              {/* Highlighted CPU Time Result */}
+              <div className="bg-gradient-to-br from-teal-500 to-cyan-500 rounded-xl p-4 text-center shadow-lg relative overflow-hidden">
+                <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
+                <div className="relative z-10">
+                  <div className="text-teal-100 text-xs font-semibold uppercase tracking-wide mb-2">Tiempo de CPU</div>
+                  <div className="text-white font-mono text-2xl font-bold">
+                    {cpuTime >= 1000 ? `${(cpuTime / 1000).toFixed(2)}` : `${cpuTime.toFixed(2)}`}
+                  </div>
+                  <div className="text-teal-100 text-xs">{cpuTime >= 1000 ? 'milisegundos' : 'microsegundos'}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* ===== MATHEMATICAL EXPLANATION ===== */}
+            <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 mt-auto">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-6 h-6 rounded-md bg-teal-100 flex items-center justify-center">
+                  <TrendingUp className="w-3.5 h-3.5 text-teal-600" />
+                </div>
+                <span className="text-slate-700 text-sm font-semibold">Calculo Paso a Paso</span>
+              </div>
+              <div className="grid grid-cols-3 gap-4 font-mono text-sm">
+                {/* Formula General */}
+                <div className="bg-white rounded-lg p-3 border border-slate-100">
+                  <div className="text-slate-400 text-xs mb-1">Formula General</div>
+                  <div className="text-slate-700">T<sub>CPU</sub> = (I × CPI) / f</div>
+                </div>
+                {/* Sustitucion */}
+                <div className="bg-white rounded-lg p-3 border border-slate-100">
+                  <div className="text-slate-400 text-xs mb-1">Sustitucion</div>
+                  <div className="text-teal-600">
+                    ({instructions.toLocaleString()} × {cpi.toFixed(1)}) / {frequency}M
+                  </div>
+                </div>
+                {/* Resultado */}
+                <div className="bg-teal-50 rounded-lg p-3 border border-teal-200">
+                  <div className="text-teal-600 text-xs mb-1">Resultado Final</div>
+                  <div className="text-teal-700 font-bold">
+                    {cpuTime >= 1000 ? `${(cpuTime / 1000).toFixed(4)} ms` : `${cpuTime.toFixed(4)} μs`}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -371,7 +455,7 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
   )
 }
 
-/* ───────────────────────────────��─────────�������───
+/* ─────────────────────��─────────��─────────�������───
    SLIDE 2: CHRISTOPHER - Procesador Monociclo
    REDESIGNED: Cleaner, more visual, less text
 ───────────────────────────────────────────── */
