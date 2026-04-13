@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState, useCallback } from "react"
+import VideoCanvas from "@/components/pipeline/VideoCanvas"
 import { 
   Cpu, 
   Clock, 
@@ -370,7 +371,7 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
   )
 }
 
-/* ───────────────────────────────��─────────������───
+/* ───────────────────────────────��─────────�������───
    SLIDE 2: CHRISTOPHER - Procesador Monociclo
    REDESIGNED: Cleaner, more visual, less text
 ───────────────────────────────────────────── */
@@ -1497,98 +1498,62 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                         </div>
                       )}
                       
-                      {/* VIDEO RENDERING MONO - 1 frame at a time = low fps = blurry/blocky output */}
+                      {/* VIDEO RENDERING MONO — real canvas animation at 6 fps = visibly choppy + pixelated */}
                       {selectedTask.visualType === "video" && (() => {
-                        // Monociclo: renders 1 frame per full pipeline cycle → ~6 fps total
-                        // Each frame must wait for all 5 stages to complete before starting next
-                        const MONO_FPS = 6
+                        const MONO_FPS    = 6
                         const TOTAL_FRAMES = 30
+                        // quality 0.13 → internal buffer is ~42×23 px, stretched to full size = very blocky
+                        const MONO_QUALITY = 0.13
                         const renderedFrames = Math.floor((rwMonoProgress / 100) * TOTAL_FRAMES)
-                        // Quality simulation: pixelation & blur start heavy and reduce slowly
-                        // because the encoder has to skip detail to keep up with slow throughput
-                        const qualityRatio = rwMonoProgress / 100  // 0 → 1
-                        const pixelBlockSize = Math.round(20 - qualityRatio * 14)   // 20px → 6px
-                        const blurPx = parseFloat((3.5 - qualityRatio * 3.5).toFixed(1))  // 3.5 → 0
-                        const saturation = 0.4 + qualityRatio * 0.6                  // washed out → vivid
                         return (
                           <div className="absolute inset-0 p-2 flex flex-col gap-1.5">
-                            {/* Main preview — intentionally degraded */}
-                            <div className="flex-1 relative rounded-lg overflow-hidden border-2 border-orange-400 bg-black">
-                              <img
-                                src="/images/video-frame.jpg"
-                                alt="Video frame monociclo"
-                                className="absolute inset-0 w-full h-full object-cover"
-                                style={{
-                                  filter: `blur(${blurPx}px) saturate(${saturation}) brightness(0.85)`,
-                                  imageRendering: pixelBlockSize > 10 ? "pixelated" : "auto",
-                                  // Scale up then back to force pixel-grid effect
-                                  transform: `scale(${1 + pixelBlockSize * 0.01})`,
-                                  transformOrigin: "center",
-                                  opacity: rwMonoProgress === 0 ? 0.2 : 1,
-                                  transition: "filter 0.3s, transform 0.3s",
-                                }}
+                            {/* Canvas preview */}
+                            <div className="flex-1 relative rounded-lg overflow-hidden border-2 border-orange-500 bg-black">
+                              <VideoCanvas
+                                fps={MONO_FPS}
+                                quality={MONO_QUALITY}
+                                running={rwIsRunning && selectedTask.visualType === "video"}
+                                accentColor="#f97316"
+                                label={rwMonoProgress === 0 ? "EN ESPERA" : rwMonoProgress >= 100 ? "LISTO" : "RENDERIZANDO"}
+                                badgeColor={rwMonoProgress >= 100 ? "#ea580c" : "#dc2626"}
                               />
-                              {/* Horizontal scan-line artifact — heavy at start */}
-                              <div
-                                className="absolute inset-0 pointer-events-none"
-                                style={{
-                                  backgroundImage: `repeating-linear-gradient(
-                                    0deg,
-                                    rgba(0,0,0,${Math.max(0, 0.5 - qualityRatio * 0.5)}) 0px,
-                                    transparent ${Math.max(1, pixelBlockSize / 4)}px,
-                                    transparent ${Math.max(2, pixelBlockSize / 2)}px
-                                  )`,
-                                }}
-                              />
-                              {/* Active rendering sweep line */}
-                              {rwIsRunning && (
-                                <div
-                                  className="absolute left-0 right-0 h-0.5 bg-orange-400/80"
-                                  style={{ top: `${(renderedFrames / TOTAL_FRAMES) * 100}%` }}
-                                />
-                              )}
-                              {/* HUD top-left: fps + frame counter */}
-                              <div className="absolute top-2 left-2 flex flex-col gap-1">
-                                <div className="bg-black/75 text-orange-400 font-mono text-sm font-bold px-2 py-0.5 rounded">
-                                  {MONO_FPS} fps — {renderedFrames}/{TOTAL_FRAMES} frames
+                              {/* HUD overlaid on top of canvas */}
+                              <div className="absolute inset-0 pointer-events-none">
+                                <div className="absolute top-2 left-2 flex flex-col gap-1">
+                                  <div className="bg-black/80 text-orange-400 font-mono text-sm font-bold px-2 py-0.5 rounded leading-tight">
+                                    {MONO_FPS} fps
+                                  </div>
+                                  <div className="bg-black/80 text-orange-300 font-mono text-xs px-2 py-0.5 rounded leading-tight">
+                                    {renderedFrames}/{TOTAL_FRAMES} frames
+                                  </div>
+                                  <div className="bg-black/80 text-red-400 font-mono text-xs px-2 py-0.5 rounded leading-tight">
+                                    calidad: {Math.round(MONO_QUALITY * 100)}%
+                                  </div>
                                 </div>
-                                <div className="bg-black/75 text-orange-300 font-mono text-xs px-2 py-0.5 rounded">
-                                  Bloque: {pixelBlockSize}px  Blur: {blurPx}px
+                                <div className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-bold ${
+                                  rwMonoProgress === 0   ? "bg-slate-700 text-slate-300" :
+                                  rwMonoProgress >= 100  ? "bg-orange-600 text-white"   :
+                                                            "bg-red-600 text-white"
+                                }`}>
+                                  {rwMonoProgress === 0 ? "EN ESPERA" :
+                                   rwMonoProgress >= 100 ? "BAJA CALIDAD" : "RENDERIZANDO"}
                                 </div>
-                              </div>
-                              {/* HUD top-right: quality badge */}
-                              <div className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-bold ${
-                                rwMonoProgress === 0   ? "bg-slate-700 text-slate-400" :
-                                rwMonoProgress >= 100  ? "bg-orange-600 text-white"   :
-                                                          "bg-red-600 text-white animate-pulse"
-                              }`}>
-                                {rwMonoProgress === 0 ? "EN ESPERA" :
-                                 rwMonoProgress >= 100 ? "BAJA CALIDAD" : "RENDERIZANDO"}
-                              </div>
-                              {/* HUD bottom: quality warning */}
-                              <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
-                                <div className="bg-black/75 text-red-400 text-xs font-mono font-bold px-2 py-0.5 rounded">
-                                  CALIDAD BAJA — 1 frame/ciclo
-                                </div>
-                                <div className="bg-black/75 text-slate-300 text-xs font-mono px-2 py-0.5 rounded">
-                                  {Math.round(qualityRatio * 100)}% calidad
+                                <div className="absolute bottom-2 left-2 bg-black/80 text-red-400 text-xs font-mono font-bold px-2 py-0.5 rounded">
+                                  BAJA CALIDAD — 1 frame/ciclo
                                 </div>
                               </div>
                             </div>
-                            {/* Frame strip — shows which frames are done */}
-                            <div className="flex gap-0.5 h-7">
+                            {/* Frame strip */}
+                            <div className="flex gap-0.5 h-6">
                               {[...Array(TOTAL_FRAMES)].map((_, i) => {
                                 const done   = i < renderedFrames
                                 const active = i === renderedFrames && rwIsRunning
                                 return (
-                                  <div
-                                    key={i}
-                                    className={`flex-1 rounded-sm border transition-all ${
-                                      active ? "border-orange-500 bg-orange-400" :
-                                      done   ? "border-orange-300 bg-orange-200" :
-                                               "border-slate-200 bg-slate-100"
-                                    }`}
-                                  />
+                                  <div key={i} className={`flex-1 rounded-sm border transition-all ${
+                                    active ? "border-orange-500 bg-orange-400" :
+                                    done   ? "border-orange-300 bg-orange-200" :
+                                             "border-slate-200 bg-slate-100"
+                                  }`} />
                                 )
                               })}
                             </div>
@@ -1821,112 +1786,76 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                         </div>
                       )}
                       
-                      {/* VIDEO RENDERING PIPELINE - 5 stages in parallel = ~5x fps = crisp output */}
+                      {/* VIDEO RENDERING PIPELINE — real canvas at 30 fps = smooth + sharp */}
                       {selectedTask.visualType === "video" && (() => {
-                        // Pipeline: 5 frames in different stages simultaneously → ~30 fps
-                        const PIPE_FPS = 30
+                        const PIPE_FPS    = 30
                         const TOTAL_FRAMES = 30
-                        const renderedFrames = Math.floor((rwPipeProgress / 100) * TOTAL_FRAMES)
-                        // Quality simulation: pipeline finishes fast → full detail from the start
-                        const qualityRatio = Math.min(1, rwPipeProgress / 30)  // reaches full quality quickly
-                        const blurPx = parseFloat((1.2 - qualityRatio * 1.2).toFixed(1))
-                        const saturation = 0.7 + qualityRatio * 0.3
-                        // Which frames are in which pipeline stage right now
-                        const activeFrameBase = Math.max(0, renderedFrames - 4)
+                        // quality 1.0 → internal buffer matches display = pixel-perfect
+                        const PIPE_QUALITY = 1.0
+                        const renderedFrames   = Math.floor((rwPipeProgress / 100) * TOTAL_FRAMES)
+                        const activeFrameBase  = Math.max(0, renderedFrames - 4)
+                        const stageColors = ["bg-purple-500","bg-purple-400","bg-purple-300","bg-purple-200","bg-purple-100"]
                         return (
                           <div className="absolute inset-0 p-2 flex flex-col gap-1.5">
-                            {/* Main preview — high quality, sharp from early on */}
-                            <div className="flex-1 relative rounded-lg overflow-hidden border-2 border-purple-400 bg-black">
-                              <img
-                                src="/images/video-frame.jpg"
-                                alt="Video frame pipeline"
-                                className="absolute inset-0 w-full h-full object-cover"
-                                style={{
-                                  filter: `blur(${blurPx}px) saturate(${saturation}) brightness(0.97)`,
-                                  imageRendering: "auto",
-                                  opacity: rwPipeProgress === 0 ? 0.2 : 1,
-                                  transition: "filter 0.15s",
-                                }}
+                            {/* Canvas preview */}
+                            <div className="flex-1 relative rounded-lg overflow-hidden border-2 border-purple-500 bg-black">
+                              <VideoCanvas
+                                fps={PIPE_FPS}
+                                quality={PIPE_QUALITY}
+                                running={rwIsRunning && selectedTask.visualType === "video"}
+                                accentColor="#a855f7"
+                                label={rwPipeProgress === 0 ? "EN ESPERA" : rwPipeProgress >= 100 ? "LISTO" : "RENDERIZANDO"}
+                                badgeColor={rwPipeProgress >= 100 ? "#16a34a" : "#7c3aed"}
                               />
-                              {/* 5 parallel rendering strips — show all stages active at once */}
-                              {rwIsRunning && (
-                                <div className="absolute inset-0 flex flex-col">
-                                  {[0,1,2,3,4].map(i => {
-                                    const stripTop = ((activeFrameBase + i) / TOTAL_FRAMES) * 100
-                                    return (
-                                      <div
-                                        key={i}
-                                        className="absolute left-0 right-0 h-px"
-                                        style={{
-                                          top: `${Math.min(98, stripTop)}%`,
-                                          backgroundColor: ["#a855f7","#8b5cf6","#7c3aed","#6d28d9","#5b21b6"][i],
-                                          opacity: 0.8,
-                                          boxShadow: `0 0 4px ${["#a855f7","#8b5cf6","#7c3aed","#6d28d9","#5b21b6"][i]}`,
-                                        }}
-                                      />
-                                    )
-                                  })}
+                              {/* HUD overlaid on top */}
+                              <div className="absolute inset-0 pointer-events-none">
+                                <div className="absolute top-2 left-2 flex flex-col gap-1">
+                                  <div className="bg-black/80 text-purple-300 font-mono text-sm font-bold px-2 py-0.5 rounded leading-tight">
+                                    {PIPE_FPS} fps
+                                  </div>
+                                  <div className="bg-black/80 text-purple-200 font-mono text-xs px-2 py-0.5 rounded leading-tight">
+                                    {renderedFrames}/{TOTAL_FRAMES} frames
+                                  </div>
+                                  <div className="bg-black/80 text-emerald-400 font-mono text-xs px-2 py-0.5 rounded leading-tight">
+                                    calidad: {Math.round(PIPE_QUALITY * 100)}%
+                                  </div>
                                 </div>
-                              )}
-                              {/* HUD top-left: fps + frame counter */}
-                              <div className="absolute top-2 left-2 flex flex-col gap-1">
-                                <div className="bg-black/75 text-purple-300 font-mono text-sm font-bold px-2 py-0.5 rounded">
-                                  {PIPE_FPS} fps — {renderedFrames}/{TOTAL_FRAMES} frames
+                                <div className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-bold ${
+                                  rwPipeProgress === 0   ? "bg-slate-700 text-slate-300"   :
+                                  rwPipeProgress >= 100  ? "bg-emerald-600 text-white"     :
+                                                            "bg-purple-600 text-white"
+                                }`}>
+                                  {rwPipeProgress === 0 ? "EN ESPERA" :
+                                   rwPipeProgress >= 100 ? "ALTA CALIDAD" : "RENDERIZANDO"}
                                 </div>
-                                <div className="bg-black/75 text-purple-200 font-mono text-xs px-2 py-0.5 rounded">
-                                  5 etapas en paralelo
-                                </div>
-                              </div>
-                              {/* HUD top-right: quality badge */}
-                              <div className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-bold ${
-                                rwPipeProgress === 0   ? "bg-slate-700 text-slate-400" :
-                                rwPipeProgress >= 100  ? "bg-emerald-600 text-white"  :
-                                                          "bg-purple-600 text-white animate-pulse"
-                              }`}>
-                                {rwPipeProgress === 0 ? "EN ESPERA" :
-                                 rwPipeProgress >= 100 ? "ALTA CALIDAD" : "RENDERIZANDO"}
-                              </div>
-                              {/* HUD bottom: quality badge */}
-                              <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
-                                <div className="bg-black/75 text-emerald-400 text-xs font-mono font-bold px-2 py-0.5 rounded">
+                                <div className="absolute bottom-2 left-2 bg-black/80 text-emerald-400 text-xs font-mono font-bold px-2 py-0.5 rounded">
                                   ALTA CALIDAD — 5 frames/ciclo
-                                </div>
-                                <div className="bg-black/75 text-slate-300 text-xs font-mono px-2 py-0.5 rounded">
-                                  {Math.min(100, Math.round(qualityRatio * 100))}% calidad
                                 </div>
                               </div>
                             </div>
-                            {/* Frame strip — 5 frames highlighted as "in flight" simultaneously */}
-                            <div className="flex gap-0.5 h-7">
+                            {/* Frame strip — 5 in-flight simultaneously */}
+                            <div className="flex gap-0.5 h-6">
                               {[...Array(TOTAL_FRAMES)].map((_, i) => {
-                                const done      = i < activeFrameBase
-                                const inFlight  = i >= activeFrameBase && i < activeFrameBase + 5 && rwIsRunning
-                                const stageIdx  = i - activeFrameBase
-                                const stageColors = ["bg-purple-500","bg-purple-400","bg-purple-300","bg-purple-200","bg-purple-100"]
+                                const done     = i < activeFrameBase
+                                const inFlight = i >= activeFrameBase && i < activeFrameBase + 5 && rwIsRunning
+                                const si       = i - activeFrameBase
                                 return (
-                                  <div
-                                    key={i}
-                                    className={`flex-1 rounded-sm border transition-all ${
-                                      inFlight ? `border-purple-500 ${stageColors[stageIdx] ?? "bg-purple-100"}` :
-                                      done     ? "border-emerald-400 bg-emerald-200" :
-                                                 "border-slate-200 bg-slate-100"
-                                    }`}
-                                  />
+                                  <div key={i} className={`flex-1 rounded-sm border transition-all ${
+                                    inFlight ? `border-purple-500 ${stageColors[si] ?? "bg-purple-100"}` :
+                                    done     ? "border-emerald-400 bg-emerald-200" :
+                                               "border-slate-200 bg-slate-100"
+                                  }`} />
                                 )
                               })}
                             </div>
-                            {/* 5 stage bars — all active simultaneously */}
+                            {/* 5 stage bars — all lit simultaneously while running */}
                             <div className="flex gap-1">
                               {["Decode", "Transf.", "Encode", "Buffer", "Write"].map((s, i) => (
-                                <div
-                                  key={i}
-                                  className={`flex-1 h-6 rounded flex flex-col items-center justify-center text-[10px] font-bold transition-all ${
-                                    rwIsRunning ? "bg-purple-500 text-white animate-pulse" :
-                                    rwPipeProgress >= 100 ? "bg-emerald-500 text-white" :
-                                    "bg-slate-200 text-slate-500"
-                                  }`}
-                                  style={{ animationDelay: `${i * 80}ms` }}
-                                >
+                                <div key={i} className={`flex-1 h-6 rounded flex flex-col items-center justify-center text-[10px] font-bold transition-all ${
+                                  rwIsRunning          ? "bg-purple-500 text-white animate-pulse" :
+                                  rwPipeProgress >= 100 ? "bg-emerald-500 text-white" :
+                                                          "bg-slate-200 text-slate-500"
+                                }`} style={{ animationDelay: `${i * 80}ms` }}>
                                   {s}
                                   {rwIsRunning && (
                                     <span className="text-purple-200 text-[8px]">F{Math.max(1, activeFrameBase + i + 1)}</span>
