@@ -2,14 +2,14 @@
 
 import { useEffect, useRef, useState, useCallback } from "react"
 import VideoCanvas from "@/components/pipeline/VideoCanvas"
-import { 
-  Cpu, 
-  Clock, 
-  Zap, 
-  TrendingUp, 
-  Play, 
-  Pause, 
-  RotateCcw, 
+import {
+  Cpu,
+  Clock,
+  Zap,
+  TrendingUp,
+  Play,
+  Pause,
+  RotateCcw,
   AlertTriangle,
   CheckCircle2,
   Timer,
@@ -75,8 +75,8 @@ function SlideNavigation({ slideNumber, totalSlides }: { slideNumber: number; to
   }
 
   return (
-  <div className="mt-auto pt-2 flex justify-end items-center gap-3">
-  <span className="text-slate-500 text-sm font-mono">{slideNumber}/{totalSlides}</span>
+    <div className="mt-auto pt-2 flex justify-end items-center gap-3">
+      <span className="text-slate-500 text-sm font-mono">{slideNumber}/{totalSlides}</span>
       <button
         onClick={goToPrev}
         disabled={slideNumber === 1}
@@ -102,7 +102,7 @@ function SlideNavigation({ slideNumber, totalSlides }: { slideNumber: number; to
 ───────────────────────────────────────────── */
 export function TitleSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
   const [tick, setTick] = useState(0)
-  
+
   useEffect(() => {
     if (isPrintMode) return
     const id = setInterval(() => setTick((t) => t + 1), 150)
@@ -150,7 +150,7 @@ export function TitleSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
                 {stage}
               </div>
               {i < stages.length - 1 && (
-                <ChevronRight 
+                <ChevronRight
                   className="w-6 h-6 transition-all duration-300"
                   style={{ color: pipelineColors[i], opacity: isActive ? 1 : 0.4 }}
                 />
@@ -215,7 +215,7 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
   const [instructions, setInstructions] = useState(1000)
   const [cpi, setCpi] = useState(1)
   const [frequency, setFrequency] = useState(1000)
-  
+
   // Simulation state
   const [simState, setSimState] = useState<SimulationState>('idle')
   const [currentInstruction, setCurrentInstruction] = useState(0)
@@ -223,18 +223,18 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
   const [elapsedTime, setElapsedTime] = useState(0)
   const [cycleInInstruction, setCycleInInstruction] = useState(0)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
-  
+
   // Calculated values
   const cycleTime = 1 / frequency // microseconds per cycle
   const totalCycles = Math.round(instructions * cpi)
   const finalCpuTime = (instructions * cpi) / frequency // microseconds
-  
+
   // Progress percentage
   const progress = totalCycles > 0 ? (currentCycle / totalCycles) * 100 : 0
-  
+
   // Cycles per instruction (rounded for simulation)
   const cyclesPerInst = Math.round(cpi)
-  
+
   // Speed multiplier for visualization (processes multiple cycles per tick)
   const getSimSpeed = () => {
     if (totalCycles <= 100) return 1
@@ -242,7 +242,7 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
     if (totalCycles <= 10000) return 100
     return 500
   }
-  
+
   // Start simulation
   const startSimulation = useCallback(() => {
     if (simState === 'completed') {
@@ -254,12 +254,12 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
     }
     setSimState('running')
   }, [simState])
-  
+
   // Pause simulation
   const pauseSimulation = useCallback(() => {
     setSimState('paused')
   }, [])
-  
+
   // Reset simulation
   const resetSimulation = useCallback(() => {
     if (intervalRef.current) {
@@ -272,18 +272,18 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
     setElapsedTime(0)
     setCycleInInstruction(0)
   }, [])
-  
+
   // Step forward one cycle
   const stepForward = useCallback(() => {
     if (currentCycle >= totalCycles) {
       setSimState('completed')
       return
     }
-    
+
     const newCycle = currentCycle + 1
     setCurrentCycle(newCycle)
     setElapsedTime(newCycle * cycleTime)
-    
+
     const newCycleInInst = cycleInInstruction + 1
     if (newCycleInInst >= cyclesPerInst) {
       setCurrentInstruction(prev => prev + 1)
@@ -291,14 +291,14 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
     } else {
       setCycleInInstruction(newCycleInInst)
     }
-    
+
     if (newCycle >= totalCycles) {
       setSimState('completed')
     } else if (simState === 'idle') {
       setSimState('paused')
     }
   }, [currentCycle, totalCycles, cycleTime, cycleInInstruction, cyclesPerInst, simState])
-  
+
   // Simulation loop
   useEffect(() => {
     if (simState === 'running') {
@@ -307,12 +307,12 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
         setCurrentCycle(prev => {
           const newCycle = Math.min(prev + speed, totalCycles)
           setElapsedTime(newCycle * cycleTime)
-          
+
           // Calculate current instruction
           const instNum = Math.floor(newCycle / cyclesPerInst)
           setCurrentInstruction(Math.min(instNum, instructions))
           setCycleInInstruction(newCycle % cyclesPerInst)
-          
+
           if (newCycle >= totalCycles) {
             setSimState('completed')
             if (intervalRef.current) clearInterval(intervalRef.current)
@@ -326,21 +326,21 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
         intervalRef.current = null
       }
     }
-    
+
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current)
     }
   }, [simState, totalCycles, cycleTime, cyclesPerInst, instructions])
-  
+
   // Reset when parameters change
   useEffect(() => {
     resetSimulation()
   }, [instructions, cpi, frequency])
-  
+
   // Analysis messages based on parameters
   const getAnalysis = () => {
     const analyses: { type: 'info' | 'warning' | 'success'; message: string }[] = []
-    
+
     // Instructions analysis
     if (instructions >= 5000) {
       analyses.push({ type: 'warning', message: `Alto numero de instrucciones (${instructions.toLocaleString()}): incrementa linealmente el tiempo de CPU.` })
@@ -349,7 +349,7 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
     } else {
       analyses.push({ type: 'info', message: `${instructions.toLocaleString()} instrucciones: carga de trabajo moderada.` })
     }
-    
+
     // CPI analysis
     if (cpi >= 3) {
       analyses.push({ type: 'warning', message: `CPI alto (${cpi.toFixed(1)}): instrucciones complejas que requieren multiples ciclos.` })
@@ -358,7 +358,7 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
     } else {
       analyses.push({ type: 'info', message: `CPI de ${cpi.toFixed(1)}: balance tipico entre simplicidad y complejidad.` })
     }
-    
+
     // Frequency analysis
     if (frequency >= 3000) {
       analyses.push({ type: 'success', message: `Alta frecuencia (${frequency} MHz): ciclos muy cortos, mayor rendimiento.` })
@@ -367,12 +367,12 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
     } else {
       analyses.push({ type: 'info', message: `Frecuencia de ${frequency} MHz: rango tipico de procesadores modernos.` })
     }
-    
+
     return analyses
   }
-  
+
   const analyses = getAnalysis()
-  
+
   // Status text and color
   const getStatusInfo = () => {
     switch (simState) {
@@ -418,7 +418,7 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
 
       {/* ===== MAIN CONTENT ===== */}
       <div className="flex gap-4 flex-1 min-h-0 px-6 pb-3 z-10">
-        
+
         {/* ===== LEFT PANEL: Theory + Analysis ===== */}
         <div className="w-[280px] flex flex-col gap-2">
           {/* Theory cards - compact */}
@@ -433,7 +433,7 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
               El tiempo que tarda un programa en completarse. Es la metrica mas directa del rendimiento.
             </p>
           </div>
-          
+
           <div className="bg-white rounded-xl p-3 border border-slate-200 shadow-sm">
             <h3 className="text-purple-600 font-semibold mb-1.5 flex items-center gap-2 text-xs">
               <div className="w-6 h-6 rounded-lg bg-purple-50 flex items-center justify-center">
@@ -445,7 +445,7 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
               Ciclos promedio necesarios para ejecutar una instruccion. Monociclo: CPI = 1 pero ciclo largo.
             </p>
           </div>
-          
+
           <div className="bg-white rounded-xl p-3 border border-slate-200 shadow-sm">
             <h3 className="text-emerald-600 font-semibold mb-1.5 flex items-center gap-2 text-xs">
               <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center">
@@ -475,7 +475,7 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
               </div>
             </div>
           </div>
-          
+
           {/* Analysis Panel */}
           <div className="bg-white rounded-xl p-3 border border-slate-200 shadow-sm flex-1 flex flex-col">
             <div className="flex items-center gap-2 mb-2">
@@ -486,13 +486,12 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
             </div>
             <div className="space-y-1.5 flex-1 overflow-auto">
               {analyses.map((analysis, idx) => (
-                <div 
+                <div
                   key={idx}
-                  className={`text-xs p-2 rounded-lg flex items-start gap-2 ${
-                    analysis.type === 'success' ? 'bg-emerald-50 text-emerald-700' :
-                    analysis.type === 'warning' ? 'bg-amber-50 text-amber-700' :
-                    'bg-slate-50 text-slate-600'
-                  }`}
+                  className={`text-xs p-2 rounded-lg flex items-start gap-2 ${analysis.type === 'success' ? 'bg-emerald-50 text-emerald-700' :
+                      analysis.type === 'warning' ? 'bg-amber-50 text-amber-700' :
+                        'bg-slate-50 text-slate-600'
+                    }`}
                 >
                   {analysis.type === 'success' && <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />}
                   {analysis.type === 'warning' && <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />}
@@ -506,7 +505,7 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
 
         {/* ===== RIGHT PANEL: Simulator ===== */}
         <div className="flex-1 bg-white rounded-2xl border-2 border-teal-200 shadow-lg flex flex-col overflow-hidden">
-          
+
           {/* Simulator Header */}
           <div className="bg-gradient-to-r from-teal-500 to-cyan-500 px-4 py-2.5 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -528,17 +527,16 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
 
           {/* Simulator Body */}
           <div className="flex-1 p-4 flex flex-col gap-3 overflow-auto">
-            
+
             {/* ===== CONTROL BUTTONS ===== */}
             <div className="flex items-center justify-center gap-3">
               <button
                 onClick={simState === 'running' ? pauseSimulation : startSimulation}
                 disabled={simState === 'completed' && currentCycle >= totalCycles}
-                className={`flex items-center gap-2 px-5 py-2 rounded-xl font-semibold text-sm transition-all ${
-                  simState === 'running'
+                className={`flex items-center gap-2 px-5 py-2 rounded-xl font-semibold text-sm transition-all ${simState === 'running'
                     ? 'bg-amber-500 hover:bg-amber-600 text-white'
                     : 'bg-teal-500 hover:bg-teal-600 text-white'
-                } disabled:opacity-50 disabled:cursor-not-allowed shadow-md`}
+                  } disabled:opacity-50 disabled:cursor-not-allowed shadow-md`}
               >
                 {simState === 'running' ? (
                   <><Pause className="w-4 h-4" /> Pausar</>
@@ -568,7 +566,7 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                 <span className="text-teal-600 font-mono text-sm font-bold">{progress.toFixed(1)}%</span>
               </div>
               <div className="h-4 bg-slate-200 rounded-full overflow-hidden relative">
-                <div 
+                <div
                   className="h-full bg-gradient-to-r from-teal-500 to-cyan-400 rounded-full transition-all duration-100 relative"
                   style={{ width: `${progress}%` }}
                 >
@@ -582,7 +580,7 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                 <span>Ciclo {currentCycle.toLocaleString()} de {totalCycles.toLocaleString()}</span>
               </div>
             </div>
-            
+
             {/* ===== CONTROLS ROW ===== */}
             <div className="grid grid-cols-3 gap-3">
               {/* Instructions Control */}
@@ -671,7 +669,7 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                 <div className="relative z-10">
                   <div className="text-teal-100 text-xs font-semibold uppercase tracking-wide mb-1">Tiempo CPU</div>
                   <div className="text-white font-mono text-lg font-bold">
-                    {simState === 'idle' 
+                    {simState === 'idle'
                       ? (finalCpuTime >= 1000 ? `${(finalCpuTime / 1000).toFixed(2)} ms` : `${finalCpuTime.toFixed(2)} μs`)
                       : (elapsedTime >= 1000 ? `${(elapsedTime / 1000).toFixed(2)} ms` : `${elapsedTime.toFixed(2)} μs`)
                     }
@@ -790,7 +788,7 @@ export function ChristopherSlide({ isPrintMode = false }: { isPrintMode?: boolea
     }
     return () => { window.triggerSimulationAction = undefined }
   }, [startSimulation, pauseSimulation, stepForward, resetSimulation])
-  
+
   useEffect(() => {
     if (isPrintMode || !isRunning) return
 
@@ -813,7 +811,7 @@ export function ChristopherSlide({ isPrintMode = false }: { isPrintMode?: boolea
   return (
     <div className="w-full h-full bg-gradient-to-br from-orange-50 via-white to-amber-50 flex flex-col p-6 relative overflow-hidden">
       <Presenter name="Christopher Enrique Marrero Liriano" />
-      
+
       <div
         className="absolute inset-0 opacity-20"
         style={{
@@ -883,17 +881,15 @@ export function ChristopherSlide({ isPrintMode = false }: { isPrintMode?: boolea
                 const isCompleted = currentCycle > idx
                 const wastedForThis = MONOCYCLE_CYCLE_TIME - instr.realTime
                 const usedPercent = (instr.realTime / MONOCYCLE_CYCLE_TIME) * 100
-                
+
                 return (
-                  <div key={idx} className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 ${
-                    isExecuting ? "bg-orange-50 ring-2 ring-orange-400" : 
-                    isCompleted ? "bg-slate-50" : "bg-white border border-slate-100"
-                  }`}>
+                  <div key={idx} className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 ${isExecuting ? "bg-orange-50 ring-2 ring-orange-400" :
+                      isCompleted ? "bg-slate-50" : "bg-white border border-slate-100"
+                    }`}>
                     {/* Instruction name */}
                     <div className="w-16 shrink-0 text-center">
-                      <div className={`font-mono text-lg font-bold ${
-                        isExecuting ? "text-orange-600" : isCompleted ? "text-slate-600" : "text-slate-300"
-                      }`}>
+                      <div className={`font-mono text-lg font-bold ${isExecuting ? "text-orange-600" : isCompleted ? "text-slate-600" : "text-slate-300"
+                        }`}>
                         {instr.name}
                       </div>
                     </div>
@@ -903,14 +899,14 @@ export function ChristopherSlide({ isPrintMode = false }: { isPrintMode?: boolea
                       {(isCompleted || isExecuting) && (
                         <>
                           {/* Useful time - green */}
-                          <div 
+                          <div
                             className="absolute left-0 top-0 h-full bg-emerald-500 transition-all duration-500"
                             style={{ width: `${usedPercent}%` }}
                           />
                           {/* Wasted time - red with stripes */}
-                          <div 
+                          <div
                             className="absolute top-0 h-full bg-red-400 transition-all duration-500"
-                            style={{ 
+                            style={{
                               left: `${usedPercent}%`,
                               width: `${100 - usedPercent}%`,
                               backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(255,255,255,0.2) 4px, rgba(255,255,255,0.2) 8px)'
@@ -1005,11 +1001,10 @@ export function ChristopherSlide({ isPrintMode = false }: { isPrintMode?: boolea
           </div>
 
           {/* Final result - always visible area, content conditional */}
-          <div className={`rounded-xl p-3 text-center transition-all duration-300 ${
-            currentCycle === totalInstructions 
-              ? "bg-gradient-to-br from-orange-500 to-red-500 text-white shadow-lg" 
+          <div className={`rounded-xl p-3 text-center transition-all duration-300 ${currentCycle === totalInstructions
+              ? "bg-gradient-to-br from-orange-500 to-red-500 text-white shadow-lg"
               : "bg-slate-100 border border-slate-200"
-          }`}>
+            }`}>
             {currentCycle === totalInstructions ? (
               <>
                 <div className="text-orange-100 text-xs mb-1">Resultado Final</div>
@@ -1041,14 +1036,14 @@ export function ChristopherSlide({ isPrintMode = false }: { isPrintMode?: boolea
 const PIPELINE_STAGES = ["IF", "ID", "EX", "MEM", "WB"]
 const STAGE_COLORS = {
   IF: "#0d9488",
-  ID: "#7c3aed", 
+  ID: "#7c3aed",
   EX: "#db2777",
   MEM: "#ea580c",
   WB: "#16a34a",
 }
 const STAGE_NAMES = {
   IF: "Fetch",
-  ID: "Decode", 
+  ID: "Decode",
   EX: "Execute",
   MEM: "Memory",
   WB: "Write",
@@ -1066,16 +1061,23 @@ const PIPELINE_INSTRUCTIONS = [
 export function EnmanuelSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
   const [currentCycle, setCurrentCycle] = useState(0)
   const [isRunning, setIsRunning] = useState(false)
+  const [speed, setSpeed] = useState(600)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
-  const numInstructions = PIPELINE_INSTRUCTIONS.length
-  const totalCycles = numInstructions + PIPELINE_STAGES.length - 1
+  // Pipeline configuration
+  const INSTRUCTION_COLORS = ["#0d9488", "#7c3aed", "#db2777", "#ea580c", "#16a34a", "#2563eb"]
+  const totalCycles = 10
   const cycleTimePipeline = 200
+
+  // Calculate completed instructions and throughput
+  const completedInstructions = Math.max(0, currentCycle - PIPELINE_STAGES.length + 1)
+  const throughput = currentCycle > 0 ? (completedInstructions / currentCycle).toFixed(2) : "0.00"
+  const progress = (currentCycle / totalCycles) * 100
 
   const startSimulation = useCallback(() => {
     if (currentCycle >= totalCycles) setCurrentCycle(0)
     setIsRunning(true)
-  }, [currentCycle, totalCycles])
+  }, [currentCycle])
 
   const pauseSimulation = useCallback(() => {
     setIsRunning(false)
@@ -1090,7 +1092,11 @@ export function EnmanuelSlide({ isPrintMode = false }: { isPrintMode?: boolean }
 
   const stepForward = useCallback(() => {
     if (currentCycle < totalCycles) setCurrentCycle((c) => c + 1)
-  }, [currentCycle, totalCycles])
+  }, [currentCycle])
+
+  const stepBackward = useCallback(() => {
+    if (currentCycle > 0) setCurrentCycle((c) => c - 1)
+  }, [currentCycle])
 
   // Expose simulation actions for remote control
   useEffect(() => {
@@ -1115,9 +1121,9 @@ export function EnmanuelSlide({ isPrintMode = false }: { isPrintMode?: boolean }
         }
         return c + 1
       })
-    }, 600)
+    }, speed)
     return () => { if (intervalRef.current) clearInterval(intervalRef.current) }
-  }, [isPrintMode, isRunning, totalCycles])
+  }, [isPrintMode, isRunning, speed])
 
   const getInstructionStage = (instrIdx: number, cycle: number): string | null => {
     const stageIdx = cycle - instrIdx - 1
@@ -1125,10 +1131,13 @@ export function EnmanuelSlide({ isPrintMode = false }: { isPrintMode?: boolean }
     return null
   }
 
+  // Detect hazards
+  const hasDataHazard = currentCycle >= 2 && currentCycle <= 4
+
   return (
-    <div className="w-full h-full bg-gradient-to-br from-purple-50 via-white to-pink-50 flex flex-col p-6 relative overflow-hidden">
+    <div className="w-full h-full bg-gradient-to-br from-purple-50 via-white to-pink-50 flex flex-col p-4 relative overflow-hidden">
       <Presenter name="Enmanuel Santos Diaz" />
-      
+
       <div
         className="absolute inset-0 opacity-20"
         style={{
@@ -1137,27 +1146,40 @@ export function EnmanuelSlide({ isPrintMode = false }: { isPrintMode?: boolean }
         }}
       />
 
-      <div className="mb-4 z-10">
-        <div className="text-purple-600 font-mono text-xs tracking-widest uppercase mb-2 font-semibold">Seccion 03</div>
-        <h2 className="text-3xl font-bold text-slate-800">Simulacion del Pipeline de 5 Etapas</h2>
-        <div className="h-1 w-24 bg-purple-500 mt-2 rounded-full" />
+      {/* Header */}
+      <div className="mb-3 z-10">
+        <div className="text-purple-600 font-mono text-xs tracking-widest uppercase mb-1 font-semibold">Seccion 03</div>
+        <h2 className="text-2xl font-bold text-slate-800">Simulacion del Pipeline de 5 Etapas</h2>
+        <div className="h-1 w-24 bg-purple-500 mt-1 rounded-full" />
       </div>
 
-      <div className="flex gap-5 flex-1 min-h-0 z-10">
-        {/* Left: Stage legend */}
-        <div className="w-56 flex flex-col gap-3">
-          <div className="bg-white rounded-xl p-4 border-2 border-purple-200 shadow-sm">
-            <h3 className="text-purple-600 font-bold text-sm mb-3">Etapas</h3>
-            <div className="space-y-2">
+      <div className="flex gap-4 flex-1 min-h-0 z-10">
+        {/* Left Panel */}
+        <div className="w-64 flex flex-col gap-2">
+          {/* Educational Section */}
+          <div className="bg-white rounded-xl p-3 border-2 border-purple-200 shadow-sm">
+            <h3 className="text-purple-600 font-bold text-xs mb-2 flex items-center gap-2">
+              <Cpu className="w-4 h-4" />
+              Que es un Pipeline?
+            </h3>
+            <p className="text-slate-600 text-xs leading-relaxed">
+              El pipeline divide la ejecucion de instrucciones en etapas independientes, permitiendo que multiples instrucciones se ejecuten simultaneamente en diferentes fases.
+            </p>
+          </div>
+
+          {/* Stage Legend */}
+          <div className="bg-white rounded-xl p-3 border-2 border-purple-200 shadow-sm">
+            <h3 className="text-purple-600 font-bold text-xs mb-2">Etapas del Pipeline</h3>
+            <div className="space-y-1.5">
               {PIPELINE_STAGES.map((stage) => (
-                <div key={stage} className="flex items-center gap-3">
+                <div key={stage} className="flex items-center gap-2">
                   <div
-                    className="w-10 h-6 rounded flex items-center justify-center text-white text-xs font-bold shadow-sm"
+                    className="w-8 h-5 rounded flex items-center justify-center text-white text-xs font-bold shadow-sm"
                     style={{ backgroundColor: STAGE_COLORS[stage as keyof typeof STAGE_COLORS] }}
                   >
                     {stage}
                   </div>
-                  <span className="text-slate-600 text-sm">
+                  <span className="text-slate-600 text-xs">
                     {STAGE_NAMES[stage as keyof typeof STAGE_NAMES]}
                   </span>
                 </div>
@@ -1165,87 +1187,155 @@ export function EnmanuelSlide({ isPrintMode = false }: { isPrintMode?: boolean }
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 border-2 border-purple-200">
-            <div className="text-xs text-slate-500 mb-2">Tiempo de Ciclo</div>
-            <div className="text-center">
-              <span className="text-purple-700 font-mono text-2xl font-bold">{cycleTimePipeline}ns</span>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm mt-auto">
-            <div className="grid grid-cols-2 gap-2 text-center">
-              <div className="bg-purple-50 rounded-lg p-2 border border-purple-100">
+          {/* Stats Panel */}
+          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-3 border-2 border-purple-200">
+            <div className="grid grid-cols-2 gap-2 text-center mb-2">
+              <div className="bg-white rounded-lg p-2 border border-purple-100">
                 <div className="text-slate-500 text-xs">Ciclo</div>
-                <div className="text-purple-600 font-mono font-bold text-lg">{currentCycle}</div>
+                <div className="text-purple-600 font-mono font-bold text-xl">{currentCycle}</div>
               </div>
-              <div className="bg-slate-50 rounded-lg p-2 border border-slate-200">
+              <div className="bg-white rounded-lg p-2 border border-purple-100">
                 <div className="text-slate-500 text-xs">Tiempo</div>
                 <div className="text-slate-800 font-mono font-bold text-lg">{currentCycle * cycleTimePipeline}ns</div>
               </div>
             </div>
-            {currentCycle === totalCycles && (
-              <div className="mt-3 text-center p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg">
-                <span className="text-white text-sm font-bold">Total: {totalCycles * cycleTimePipeline}ns</span>
+            <div className="grid grid-cols-2 gap-2 text-center">
+              <div className="bg-white rounded-lg p-2 border border-purple-100">
+                <div className="text-slate-500 text-xs">Completadas</div>
+                <div className="text-teal-600 font-mono font-bold text-lg">{completedInstructions}</div>
               </div>
-            )}
+              <div className="bg-white rounded-lg p-2 border border-purple-100">
+                <div className="text-slate-500 text-xs">Throughput</div>
+                <div className="text-pink-600 font-mono font-bold text-lg">{throughput}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="bg-white rounded-xl p-3 border border-slate-200 shadow-sm">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-slate-500 text-xs">Progreso</span>
+              <span className="text-purple-600 font-mono text-xs font-bold">{Math.round(progress)}%</span>
+            </div>
+            <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Speed Control */}
+          <div className="bg-white rounded-xl p-3 border border-slate-200 shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-slate-500 text-xs">Velocidad</span>
+              <span className="text-slate-700 font-mono text-xs">{speed}ms</span>
+            </div>
+            <input
+              type="range"
+              min="200"
+              max="2000"
+              step="100"
+              value={speed}
+              onChange={(e) => setSpeed(Number(e.target.value))}
+              className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-purple-500"
+            />
+            <div className="flex justify-between text-xs text-slate-400 mt-1">
+              <span>Rapido</span>
+              <span>Lento</span>
+            </div>
           </div>
         </div>
 
-        {/* Pipeline Table */}
-        <div className="flex-1 bg-white rounded-xl p-5 border-2 border-purple-200 shadow-md flex flex-col">
-          <div className="flex items-center justify-between mb-4">
+        {/* Right Panel - Pipeline Table */}
+        <div className="flex-1 bg-white rounded-xl p-4 border-2 border-purple-200 shadow-md flex flex-col">
+          {/* Controls Header */}
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Zap className="w-5 h-5 text-purple-500" />
-              <span className="text-slate-800 font-bold">Ejecucion Paralela</span>
+              <span className="text-slate-800 font-bold text-sm">Ejecucion Paralela - Diagrama Gantt</span>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-1.5">
               {!isRunning ? (
-                <button onClick={startSimulation} className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-lg flex items-center gap-2 shadow-sm">
-                  <Play className="w-4 h-4" /> Iniciar
+                <button onClick={startSimulation} className="px-3 py-1.5 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-lg flex items-center gap-1.5 shadow-sm text-sm transition-all">
+                  <Play className="w-3.5 h-3.5" /> Play
                 </button>
               ) : (
-                <button onClick={pauseSimulation} className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg flex items-center gap-2 shadow-sm">
-                  <Pause className="w-4 h-4" /> Pausar
+                <button onClick={pauseSimulation} className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg flex items-center gap-1.5 shadow-sm text-sm transition-all">
+                  <Pause className="w-3.5 h-3.5" /> Pausar
                 </button>
               )}
-              <button onClick={stepForward} disabled={isRunning || currentCycle >= totalCycles} className="px-4 py-2 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 text-slate-700 font-semibold rounded-lg flex items-center gap-2 border border-slate-200">
-                <SkipForward className="w-4 h-4" /> Paso
+              <button onClick={stepBackward} disabled={isRunning || currentCycle <= 0} className="px-2 py-1.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 text-slate-700 font-semibold rounded-lg flex items-center gap-1 border border-slate-200 text-sm transition-all">
+                <ChevronLeft className="w-3.5 h-3.5" />
               </button>
-              <button onClick={resetSimulation} className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg flex items-center gap-2 border border-slate-200">
-                <RotateCcw className="w-4 h-4" /> Reset
+              <button onClick={stepForward} disabled={isRunning || currentCycle >= totalCycles} className="px-2 py-1.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 text-slate-700 font-semibold rounded-lg flex items-center gap-1 border border-slate-200 text-sm transition-all">
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+              <button onClick={resetSimulation} className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg flex items-center gap-1.5 border border-slate-200 text-sm transition-all">
+                <RotateCcw className="w-3.5 h-3.5" /> Reset
               </button>
             </div>
           </div>
 
-          {/* Table */}
+          {/* Gantt Table */}
           <div className="flex-1 overflow-x-auto">
-            <div className="space-y-2">
-              <div className="flex items-center gap-1 sticky top-0 bg-white pb-2">
-                <div className="w-32 text-slate-400 text-xs font-medium shrink-0">Instruccion</div>
+            <div className="space-y-1.5">
+              {/* Header Row */}
+              <div className="flex items-center gap-1 sticky top-0 bg-white pb-1">
+                <div className="w-36 text-slate-400 text-xs font-medium shrink-0">Instruccion</div>
                 {Array.from({ length: totalCycles }).map((_, i) => (
-                  <div key={i} className={`w-10 h-6 flex items-center justify-center text-xs font-mono shrink-0 rounded transition-all ${
-                    i + 1 === currentCycle ? "bg-purple-500 text-white font-bold" : i + 1 < currentCycle ? "text-purple-400 bg-purple-50" : "text-slate-300 bg-slate-50"
-                  }`}>
+                  <div 
+                    key={i} 
+                    className={`w-12 h-6 flex items-center justify-center text-xs font-mono shrink-0 rounded transition-all duration-300 ${
+                      i + 1 === currentCycle 
+                        ? "bg-purple-500 text-white font-bold ring-2 ring-purple-300 ring-offset-1" 
+                        : i + 1 < currentCycle 
+                          ? "text-purple-400 bg-purple-50" 
+                          : "text-slate-300 bg-slate-50"
+                    }`}
+                  >
                     C{i + 1}
                   </div>
                 ))}
               </div>
 
+              {/* Instruction Rows */}
               {PIPELINE_INSTRUCTIONS.map((instr, instrIdx) => (
                 <div key={instrIdx} className="flex items-center gap-1">
-                  <div className="w-32 font-mono text-xs text-slate-600 truncate shrink-0">{instr}</div>
+                  <div 
+                    className="w-36 font-mono text-xs text-slate-700 truncate shrink-0 px-2 py-1 rounded-lg border"
+                    style={{ 
+                      borderColor: INSTRUCTION_COLORS[instrIdx],
+                      backgroundColor: `${INSTRUCTION_COLORS[instrIdx]}10`
+                    }}
+                  >
+                    {instr}
+                  </div>
                   {Array.from({ length: totalCycles }).map((_, cycleIdx) => {
                     const stage = getInstructionStage(instrIdx, cycleIdx + 1)
                     const isActive = cycleIdx + 1 <= currentCycle
-                    if (!stage) return <div key={cycleIdx} className="w-10 h-8 bg-slate-50 rounded shrink-0" />
-                    const color = STAGE_COLORS[stage as keyof typeof STAGE_COLORS]
+                    const isCurrentCycle = cycleIdx + 1 === currentCycle
+                    
+                    if (!stage) return (
+                      <div 
+                        key={cycleIdx} 
+                        className="w-12 h-7 bg-slate-50 rounded shrink-0 border border-slate-100" 
+                      />
+                    )
+                    
+                    const stageColor = STAGE_COLORS[stage as keyof typeof STAGE_COLORS]
+                    
                     return (
-                      <div key={cycleIdx} className="w-10 h-8 rounded flex items-center justify-center text-xs font-bold text-white shrink-0 transition-all duration-300"
+                      <div 
+                        key={cycleIdx} 
+                        className="w-12 h-7 rounded flex items-center justify-center text-xs font-bold text-white shrink-0 transition-all duration-300"
                         style={{
-                          backgroundColor: isActive ? color : `${color}30`,
-                          boxShadow: cycleIdx + 1 === currentCycle ? `0 0 10px ${color}80` : "none",
-                          transform: cycleIdx + 1 === currentCycle ? "scale(1.1)" : "scale(1)",
-                        }}>
+                          backgroundColor: isActive ? stageColor : `${stageColor}30`,
+                          boxShadow: isCurrentCycle ? `0 0 12px ${stageColor}80` : "none",
+                          transform: isCurrentCycle && isActive ? "scale(1.08)" : "scale(1)",
+                          opacity: isActive ? 1 : 0.4,
+                        }}
+                      >
                         {stage}
                       </div>
                     )
@@ -1255,9 +1345,29 @@ export function EnmanuelSlide({ isPrintMode = false }: { isPrintMode?: boolean }
             </div>
           </div>
 
-          <div className="mt-4 bg-gradient-to-r from-purple-100 to-pink-100 border border-purple-200 rounded-xl p-3">
-            <p className="text-slate-700 text-sm text-center">
-              <strong className="text-purple-600">5 instrucciones</strong> ejecutandose en paralelo = Throughput ~1 instruccion/ciclo
+          {/* Hazard Detection Panel */}
+          {hasDataHazard && (
+            <div className="mt-3 bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200 rounded-xl p-3 transition-all duration-300">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-red-700 font-bold text-sm">Data Hazard RAW Detectado</span>
+                    <span className="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">RAW</span>
+                  </div>
+                  <p className="text-red-600 text-xs leading-relaxed">
+                    <strong>LOAD R4</strong> seguido de <strong>SUB R5, R4, R2</strong>: SUB necesita el valor de R4 que aun no esta disponible.
+                    Se resuelve con <strong>forwarding</strong> (data bypass) o <strong>stalls</strong> (burbujas).
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Summary Footer */}
+          <div className="mt-3 bg-gradient-to-r from-purple-100 to-pink-100 border border-purple-200 rounded-xl p-2.5">
+            <p className="text-slate-700 text-xs text-center">
+              <strong className="text-purple-600">6 instrucciones</strong> ejecutandose en paralelo = Throughput ideal de ~1 instruccion/ciclo despues del llenado inicial
             </p>
           </div>
         </div>
@@ -1275,16 +1385,16 @@ export function EnmanuelSlide({ isPrintMode = false }: { isPrintMode?: boolean }
 
 type SimulationTab = "realworld" | "balls" | "throughput" | "calculator"
 
-  // Real-world task scenarios - each task has unique durations for realistic variety
-  // monoDuration/pipeDuration are the simulated wall-clock times in ms
-  const REAL_WORLD_TASKS = [
-  { id: "compress", name: "Comprimir Imagen", icon: Image, monoInstructions: 100, pipeInstructions: 100, description: "Compresion JPEG 1920x1080", visualType: "image" as const,   monoDuration: 7200, pipeDuration: 1800 },
-  { id: "copy",     name: "Copiar Archivo",   icon: FileText, monoInstructions: 80, pipeInstructions: 80,  description: "Duplicar archivo de 10MB",   visualType: "file" as const,     monoDuration: 5600, pipeDuration: 1400 },
-  { id: "query",    name: "Consulta DB",       icon: Database, monoInstructions: 60, pipeInstructions: 60,  description: "SELECT con JOIN complejo",   visualType: "database" as const, monoDuration: 4800, pipeDuration: 1600 },
-  { id: "email",    name: "Procesar Emails",   icon: Mail,     monoInstructions: 90, pipeInstructions: 90,  description: "Filtrar 100 correos spam",   visualType: "email" as const,    monoDuration: 9000, pipeDuration: 1800 },
-  { id: "video",    name: "Renderizar Video",  icon: Video,    monoInstructions: 120, pipeInstructions: 120, description: "Transcoding 4K 30fps",      visualType: "video" as const,    monoDuration: 12000, pipeDuration: 2400 },
-  { id: "zip",      name: "Crear ZIP",         icon: Archive,  monoInstructions: 100, pipeInstructions: 100, description: "Comprimir 50 archivos",     visualType: "archive" as const,  monoDuration: 6400, pipeDuration: 1600 },
-  ]
+// Real-world task scenarios - each task has unique durations for realistic variety
+// monoDuration/pipeDuration are the simulated wall-clock times in ms
+const REAL_WORLD_TASKS = [
+  { id: "compress", name: "Comprimir Imagen", icon: Image, monoInstructions: 100, pipeInstructions: 100, description: "Compresion JPEG 1920x1080", visualType: "image" as const, monoDuration: 7200, pipeDuration: 1800 },
+  { id: "copy", name: "Copiar Archivo", icon: FileText, monoInstructions: 80, pipeInstructions: 80, description: "Duplicar archivo de 10MB", visualType: "file" as const, monoDuration: 5600, pipeDuration: 1400 },
+  { id: "query", name: "Consulta DB", icon: Database, monoInstructions: 60, pipeInstructions: 60, description: "SELECT con JOIN complejo", visualType: "database" as const, monoDuration: 4800, pipeDuration: 1600 },
+  { id: "email", name: "Procesar Emails", icon: Mail, monoInstructions: 90, pipeInstructions: 90, description: "Filtrar 100 correos spam", visualType: "email" as const, monoDuration: 9000, pipeDuration: 1800 },
+  { id: "video", name: "Renderizar Video", icon: Video, monoInstructions: 120, pipeInstructions: 120, description: "Transcoding 4K 30fps", visualType: "video" as const, monoDuration: 12000, pipeDuration: 2400 },
+  { id: "zip", name: "Crear ZIP", icon: Archive, monoInstructions: 100, pipeInstructions: 100, description: "Comprimir 50 archivos", visualType: "archive" as const, monoDuration: 6400, pipeDuration: 1600 },
+]
 
 // Throughput tasks with friendly icons
 const THROUGHPUT_TASKS = [
@@ -1300,7 +1410,7 @@ const THROUGHPUT_TASKS = [
 
 export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
   const [activeTab, setActiveTab] = useState<SimulationTab>("realworld")
-  
+
   // Real-world simulation state
   const [selectedTask, setSelectedTask] = useState(REAL_WORLD_TASKS[0])
   const [rwIsRunning, setRwIsRunning] = useState(false)
@@ -1313,7 +1423,7 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
   const [rwElapsedMs, setRwElapsedMs] = useState(0)
   const rwIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const rwElapsedRef = useRef(0) // Ref to track elapsed time for capture
-  
+
   // Ball simulation state - spread positions initially
   const [ballSpeed, setBallSpeed] = useState(0.5)
   const [ballPipelineStages, setBallPipelineStages] = useState(5)
@@ -1323,7 +1433,7 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
   const [pipeCompleted, setPipeCompleted] = useState(0)
   const [monoCompleted, setMonoCompleted] = useState(0)
   const ballIntervalRef = useRef<NodeJS.Timeout | null>(null)
-  
+
   // Throughput simulation state
   const [tpIsRunning, setTpIsRunning] = useState(false)
   const [tpCycle, setTpCycle] = useState(0)
@@ -1338,11 +1448,11 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
   const [tpPipeFinishCycle, setTpPipeFinishCycle] = useState(0)
   const [tpMonoFinishCycle, setTpMonoFinishCycle] = useState(0)
   const tpIntervalRef = useRef<NodeJS.Timeout | null>(null)
-  
+
   // Real-world stage tracking
   const [rwMonoStage, setRwMonoStage] = useState(0)
   const [rwPipeStages, setRwPipeStages] = useState([0, 0, 0, 0, 0])
-  
+
   // Calculator state
   const [calcInstructions, setCalcInstructions] = useState(10)
   const [calcParallel, setCalcParallel] = useState(0.8)
@@ -1413,8 +1523,8 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
     }, stepTime)
 
     return () => { if (rwIntervalRef.current) clearInterval(rwIntervalRef.current) }
-  // Only re-run when the user explicitly starts the simulation or changes task
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Only re-run when the user explicitly starts the simulation or changes task
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rwIsRunning, isPrintMode, selectedTask])
 
   // Stop when both complete
@@ -1428,15 +1538,15 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
   // Ball simulation effect
   useEffect(() => {
     if (!ballIsRunning || isPrintMode) return
-    
+
     const moveStep = 2 * ballSpeed
-    
+
     ballIntervalRef.current = setInterval(() => {
       setMonoPosition(p => {
         if (p >= 100) { setMonoCompleted(c => c + 1); return 0 }
         return p + moveStep / ballPipelineStages
       })
-      
+
       setPipePositions(positions => {
         const newPositions = [...positions]
         let completed = 0
@@ -1448,19 +1558,19 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
         return newPositions
       })
     }, 50)
-    
+
     return () => { if (ballIntervalRef.current) clearInterval(ballIntervalRef.current) }
   }, [ballIsRunning, ballSpeed, ballPipelineStages, isPrintMode])
 
   // Throughput simulation effect - stops when both complete all tasks
   useEffect(() => {
     if (!tpIsRunning || isPrintMode || tpFinished) return
-    
+
     tpIntervalRef.current = setInterval(() => {
       // Check if simulation should stop
       const monoAllDone = tpMonoCompleted >= 8 && tpMonoProcessing === null
       const pipeAllDone = tpPipeCompleted >= 8 && tpPipelineState.every(s => s === null)
-      
+
       // Track when each completes
       if (tpPipeCompleted >= 8 && tpPipeFinishCycle === 0) {
         setTpPipeFinishCycle(tpCycle)
@@ -1468,15 +1578,15 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
       if (tpMonoCompleted >= 8 && tpMonoFinishCycle === 0) {
         setTpMonoFinishCycle(tpCycle)
       }
-      
+
       if (monoAllDone && pipeAllDone) {
         setTpFinished(true)
         setTpIsRunning(false)
         return
       }
-      
+
       setTpCycle(c => c + 1)
-      
+
       // Monocycle: takes 5 cycles per instruction
       setTpMonoCycleCount(count => {
         const newCount = count + 1
@@ -1496,7 +1606,7 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
         }
         return newCount
       })
-      
+
       // Pipeline: advances every cycle
       setTpPipelineState(state => {
         const newState = [...state]
@@ -1510,7 +1620,7 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
         return newState
       })
     }, 500)
-    
+
     return () => { if (tpIntervalRef.current) clearInterval(tpIntervalRef.current) }
   }, [tpIsRunning, tpMonoProcessing, tpMonoCompleted, tpPipeCompleted, tpPipelineState, tpFinished, isPrintMode])
 
@@ -1589,7 +1699,7 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
   return (
     <div className="w-full h-full bg-gradient-to-br from-teal-50 via-white to-emerald-50 flex flex-col p-5 relative overflow-hidden">
       <Presenter name="Frainer Encarnacion" />
-      
+
       <div className="absolute inset-0 opacity-20" style={{
         backgroundImage: "linear-gradient(rgba(13,148,136,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(13,148,136,0.08) 1px, transparent 1px)",
         backgroundSize: "50px 50px",
@@ -1605,9 +1715,8 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
       <div className="flex gap-2 mb-3 z-10">
         {tabConfig.map(tab => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 ${
-              activeTab === tab.id ? "bg-teal-500 text-white shadow-lg" : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
-            }`}>
+            className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 ${activeTab === tab.id ? "bg-teal-500 text-white shadow-lg" : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+              }`}>
             <tab.icon className="w-4 h-4" />{tab.name}
           </button>
         ))}
@@ -1679,7 +1788,7 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                     </span>
                     {rwMonoFinished && <span className="bg-orange-200 text-orange-700 text-[10px] px-1.5 py-0.5 rounded-full">Listo</span>}
                   </h4>
-                  
+
                   {/* Detailed Visual Simulation */}
                   <div className="flex-1 flex flex-col gap-1 min-h-0">
                     <div className="flex-1 relative bg-white rounded-lg border border-orange-200 overflow-hidden">
@@ -1688,11 +1797,11 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                         <div className="absolute inset-0 p-2 flex flex-col">
                           <div className="flex-1 relative rounded-lg overflow-hidden border-2 border-orange-200">
                             {/* Original image - visible before compression starts */}
-                            <img 
-                              src="/images/sample-landscape.jpg" 
+                            <img
+                              src="/images/sample-landscape.jpg"
                               alt="Original landscape"
                               className="absolute inset-0 w-full h-full object-cover transition-all duration-300"
-                              style={{ 
+                              style={{
                                 filter: rwMonoProgress > 0 ? `blur(${Math.max(0, 8 - rwMonoProgress * 0.08)}px)` : 'none',
                                 opacity: rwMonoProgress > 0 ? 0.3 + (rwMonoProgress * 0.007) : 1
                               }}
@@ -1703,32 +1812,30 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                                 {[...Array(24)].map((_, i) => {
                                   const processed = i < Math.floor(rwMonoProgress * 0.24)
                                   return (
-                                    <div key={i} className={`rounded transition-all duration-200 ${
-                                      processed ? "bg-transparent" : "bg-slate-300/60"
-                                    }`} />
+                                    <div key={i} className={`rounded transition-all duration-200 ${processed ? "bg-transparent" : "bg-slate-300/60"
+                                      }`} />
                                   )
                                 })}
                               </div>
                             )}
                             {/* Status label */}
-                            <div className={`absolute top-2 left-2 px-2 py-1 rounded text-sm font-bold ${
-                              rwMonoProgress === 0 ? "bg-blue-500 text-white" :
-                              rwMonoProgress >= 100 ? "bg-emerald-500 text-white" :
-                              "bg-orange-500 text-white animate-pulse"
-                            }`}>
-                              {rwMonoProgress === 0 ? "ORIGINAL 4K" : 
-                               rwMonoProgress >= 100 ? "COMPRIMIDO" : 
-                               `Comprimiendo ${rwMonoProgress.toFixed(0)}%`}
+                            <div className={`absolute top-2 left-2 px-2 py-1 rounded text-sm font-bold ${rwMonoProgress === 0 ? "bg-blue-500 text-white" :
+                                rwMonoProgress >= 100 ? "bg-emerald-500 text-white" :
+                                  "bg-orange-500 text-white animate-pulse"
+                              }`}>
+                              {rwMonoProgress === 0 ? "ORIGINAL 4K" :
+                                rwMonoProgress >= 100 ? "COMPRIMIDO" :
+                                  `Comprimiendo ${rwMonoProgress.toFixed(0)}%`}
                             </div>
                             {/* File size indicator */}
                             <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-sm font-mono">
-                              {rwMonoProgress === 0 ? "12.4 MB" : 
-                               `${(12.4 - rwMonoProgress * 0.1).toFixed(1)} MB`}
+                              {rwMonoProgress === 0 ? "12.4 MB" :
+                                `${(12.4 - rwMonoProgress * 0.1).toFixed(1)} MB`}
                             </div>
                           </div>
                         </div>
                       )}
-                      
+
                       {/* FILE COPY - Large visual with progress */}
                       {selectedTask.visualType === "file" && (
                         <div className="absolute inset-0 p-2 flex items-center justify-center gap-4">
@@ -1738,11 +1845,11 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                             <span className="text-sm font-bold text-slate-700 mt-1">Origen</span>
                             <span className="text-xs text-slate-500">10 MB</span>
                           </div>
-                          
+
                           {/* Transfer animation */}
                           <div className="flex-1 max-w-[120px] flex flex-col items-center gap-2">
                             <div className="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
-                              <div className="h-full bg-orange-500 transition-all rounded-full" 
+                              <div className="h-full bg-orange-500 transition-all rounded-full"
                                 style={{ width: `${rwMonoProgress}%` }} />
                             </div>
                             <div className="text-lg font-bold text-orange-600">
@@ -1750,8 +1857,8 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                             </div>
                             {rwIsRunning && (
                               <div className="flex gap-1">
-                                {[0,1,2].map(i => (
-                                  <div key={i} className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" 
+                                {[0, 1, 2].map(i => (
+                                  <div key={i} className="w-2 h-2 bg-orange-400 rounded-full animate-bounce"
                                     style={{ animationDelay: `${i * 150}ms` }} />
                                 ))}
                               </div>
@@ -1760,13 +1867,12 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                               {(rwMonoProgress * 0.1).toFixed(1)} MB copiados
                             </span>
                           </div>
-                          
+
                           {/* Destination file */}
                           <div className="flex flex-col items-center">
-                            <FileText className={`w-16 h-16 transition-all ${
-                              rwMonoProgress >= 100 ? "text-emerald-500" : 
-                              rwMonoProgress > 0 ? "text-orange-400" : "text-slate-300"
-                            }`} />
+                            <FileText className={`w-16 h-16 transition-all ${rwMonoProgress >= 100 ? "text-emerald-500" :
+                                rwMonoProgress > 0 ? "text-orange-400" : "text-slate-300"
+                              }`} />
                             <span className="text-sm font-bold text-slate-700 mt-1">Destino</span>
                             <span className="text-xs text-slate-500">
                               {rwMonoProgress >= 100 ? "10 MB" : "---"}
@@ -1774,16 +1880,15 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                           </div>
                         </div>
                       )}
-                      
+
                       {/* DATABASE QUERY - Large stage indicators */}
                       {selectedTask.visualType === "database" && (
                         <div className="absolute inset-0 p-2 flex flex-col gap-2">
                           {/* Current stage - BIG */}
                           <div className="flex-1 flex items-center justify-center">
                             <div className={`text-center transition-all ${rwIsRunning ? "animate-pulse" : ""}`}>
-                              <Database className={`w-16 h-16 mx-auto mb-2 ${
-                                rwMonoProgress >= 100 ? "text-emerald-500" : "text-orange-500"
-                              }`} />
+                              <Database className={`w-16 h-16 mx-auto mb-2 ${rwMonoProgress >= 100 ? "text-emerald-500" : "text-orange-500"
+                                }`} />
                               <div className="text-xl font-bold text-slate-800">
                                 {["Analizando SQL", "Planificando", "Escaneando", "Filtrando", "Retornando"][rwMonoStage]}
                               </div>
@@ -1799,17 +1904,16 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                           {/* Stage progress bar */}
                           <div className="flex gap-1">
                             {["Parse", "Plan", "Scan", "Filter", "Return"].map((stage, i) => (
-                              <div key={i} className={`flex-1 h-8 rounded flex items-center justify-center text-xs font-bold transition-all ${
-                                rwMonoStage === i ? "bg-orange-500 text-white scale-105" : 
-                                rwMonoStage > i ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-500"
-                              }`}>
+                              <div key={i} className={`flex-1 h-8 rounded flex items-center justify-center text-xs font-bold transition-all ${rwMonoStage === i ? "bg-orange-500 text-white scale-105" :
+                                  rwMonoStage > i ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-500"
+                                }`}>
                                 {stage}
                               </div>
                             ))}
                           </div>
                         </div>
                       )}
-                      
+
                       {/* EMAIL PROCESSING - Large counters */}
                       {selectedTask.visualType === "email" && (
                         <div className="absolute inset-0 p-2 flex flex-col">
@@ -1821,7 +1925,7 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                               <span className="text-sm font-bold text-orange-600 mt-1">Procesando</span>
                               <span className="text-xs text-slate-500">1 email a la vez</span>
                             </div>
-                            
+
                             {/* Results */}
                             <div className="flex gap-4">
                               <div className="bg-emerald-100 rounded-xl p-3 text-center min-w-[80px]">
@@ -1846,10 +1950,10 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                           </div>
                         </div>
                       )}
-                      
+
                       {/* VIDEO RENDERING MONO — real canvas animation at 6 fps = visibly choppy + pixelated */}
                       {selectedTask.visualType === "video" && (() => {
-                        const MONO_FPS    = 6
+                        const MONO_FPS = 6
                         const TOTAL_FRAMES = 30
                         // quality 0.13 → internal buffer is ~42×23 px, stretched to full size = very blocky
                         const MONO_QUALITY = 0.13
@@ -1879,13 +1983,12 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                                     calidad: {Math.round(MONO_QUALITY * 100)}%
                                   </div>
                                 </div>
-                                <div className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-bold ${
-                                  rwMonoProgress === 0   ? "bg-slate-700 text-slate-300" :
-                                  rwMonoProgress >= 100  ? "bg-orange-600 text-white"   :
-                                                            "bg-red-600 text-white"
-                                }`}>
+                                <div className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-bold ${rwMonoProgress === 0 ? "bg-slate-700 text-slate-300" :
+                                    rwMonoProgress >= 100 ? "bg-orange-600 text-white" :
+                                      "bg-red-600 text-white"
+                                  }`}>
                                   {rwMonoProgress === 0 ? "EN ESPERA" :
-                                   rwMonoProgress >= 100 ? "BAJA CALIDAD" : "RENDERIZANDO"}
+                                    rwMonoProgress >= 100 ? "BAJA CALIDAD" : "RENDERIZANDO"}
                                 </div>
                                 <div className="absolute bottom-2 left-2 bg-black/80 text-red-400 text-xs font-mono font-bold px-2 py-0.5 rounded">
                                   BAJA CALIDAD — 1 frame/ciclo
@@ -1895,31 +1998,29 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                             {/* Frame strip */}
                             <div className="flex gap-0.5 h-6">
                               {[...Array(TOTAL_FRAMES)].map((_, i) => {
-                                const done   = i < renderedFrames
+                                const done = i < renderedFrames
                                 const active = i === renderedFrames && rwIsRunning
                                 return (
-                                  <div key={i} className={`flex-1 rounded-sm border transition-all ${
-                                    active ? "border-orange-500 bg-orange-400" :
-                                    done   ? "border-orange-300 bg-orange-200" :
-                                             "border-slate-200 bg-slate-100"
-                                  }`} />
+                                  <div key={i} className={`flex-1 rounded-sm border transition-all ${active ? "border-orange-500 bg-orange-400" :
+                                      done ? "border-orange-300 bg-orange-200" :
+                                        "border-slate-200 bg-slate-100"
+                                    }`} />
                                 )
                               })}
                             </div>
                             {/* Stage bar */}
                             <div className="flex gap-1">
                               {["Decode", "Transf.", "Encode", "Buffer", "Write"].map((s, i) => (
-                                <div key={i} className={`flex-1 h-6 rounded flex items-center justify-center text-[10px] font-bold transition-all ${
-                                  rwMonoStage === i ? "bg-orange-500 text-white" :
-                                  rwMonoStage > i   ? "bg-emerald-500 text-white" :
-                                                       "bg-slate-200 text-slate-500"
-                                }`}>{s}</div>
+                                <div key={i} className={`flex-1 h-6 rounded flex items-center justify-center text-[10px] font-bold transition-all ${rwMonoStage === i ? "bg-orange-500 text-white" :
+                                    rwMonoStage > i ? "bg-emerald-500 text-white" :
+                                      "bg-slate-200 text-slate-500"
+                                  }`}>{s}</div>
                               ))}
                             </div>
                           </div>
                         )
                       })()}
-                      
+
                       {/* ZIP ARCHIVE - Large progress view */}
                       {selectedTask.visualType === "archive" && (
                         <div className="absolute inset-0 p-2 flex items-center justify-center gap-6">
@@ -1929,9 +2030,8 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                               {[...Array(9)].map((_, i) => {
                                 const isCompressed = i < Math.floor(rwMonoProgress / 11)
                                 return (
-                                  <FileText key={i} className={`w-6 h-6 transition-all ${
-                                    isCompressed ? "text-slate-300 scale-75" : "text-blue-500"
-                                  }`} />
+                                  <FileText key={i} className={`w-6 h-6 transition-all ${isCompressed ? "text-slate-300 scale-75" : "text-blue-500"
+                                    }`} />
                                 )
                               })}
                             </div>
@@ -1939,16 +2039,15 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                               {50 - Math.floor(rwMonoProgress / 2)} archivos
                             </span>
                           </div>
-                          
+
                           {/* Arrow */}
                           <div className="text-3xl text-orange-500">{"->"}</div>
-                          
+
                           {/* ZIP result */}
                           <div className="flex flex-col items-center">
                             <div className="relative">
-                              <Archive className={`w-16 h-16 ${
-                                rwMonoProgress >= 100 ? "text-emerald-500" : "text-orange-500"
-                              }`} />
+                              <Archive className={`w-16 h-16 ${rwMonoProgress >= 100 ? "text-emerald-500" : "text-orange-500"
+                                }`} />
                               {rwIsRunning && (
                                 <div className="absolute inset-0 flex items-center justify-center">
                                   <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
@@ -1964,7 +2063,7 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                       )}
                     </div>
                   </div>
-                  
+
                   {/* Progress bar with stage indicator */}
                   <div className="relative h-6 bg-orange-100 rounded-lg overflow-hidden mt-1">
                     <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-orange-400 to-red-400 transition-all duration-75"
@@ -1984,7 +2083,7 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                     </span>
                     {rwPipeFinished && <span className="bg-purple-200 text-purple-700 text-[10px] px-1.5 py-0.5 rounded-full">Listo</span>}
                   </h4>
-                  
+
                   {/* Detailed Visual Simulation - Pipeline processes multiple stages simultaneously */}
                   <div className="flex-1 flex flex-col gap-1 min-h-0">
                     <div className="flex-1 relative bg-white rounded-lg border border-purple-200 overflow-hidden">
@@ -1992,11 +2091,11 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                       {selectedTask.visualType === "image" && (
                         <div className="absolute inset-0 p-2 flex flex-col">
                           <div className="flex-1 relative rounded-lg overflow-hidden border-2 border-purple-200">
-                            <img 
-                              src="/images/sample-landscape.jpg" 
+                            <img
+                              src="/images/sample-landscape.jpg"
                               alt="Landscape being compressed"
                               className="absolute inset-0 w-full h-full object-cover transition-all duration-150"
-                              style={{ 
+                              style={{
                                 filter: rwPipeProgress > 0 ? `blur(${Math.max(0, 8 - rwPipeProgress * 0.08)}px)` : 'none',
                                 opacity: rwPipeProgress > 0 ? 0.3 + (rwPipeProgress * 0.007) : 1
                               }}
@@ -2007,31 +2106,29 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                                 {[...Array(24)].map((_, i) => {
                                   const processed = i < Math.floor(rwPipeProgress * 0.24)
                                   return (
-                                    <div key={i} className={`rounded transition-all duration-100 ${
-                                      processed ? "bg-transparent" : "bg-slate-300/60"
-                                    }`} />
+                                    <div key={i} className={`rounded transition-all duration-100 ${processed ? "bg-transparent" : "bg-slate-300/60"
+                                      }`} />
                                   )
                                 })}
                               </div>
                             )}
                             {/* Status - shows parallel processing */}
-                            <div className={`absolute top-2 left-2 px-2 py-1 rounded text-sm font-bold ${
-                              rwPipeProgress === 0 ? "bg-blue-500 text-white" :
-                              rwPipeProgress >= 100 ? "bg-emerald-500 text-white" :
-                              "bg-purple-500 text-white animate-pulse"
-                            }`}>
-                              {rwPipeProgress === 0 ? "ORIGINAL 4K" : 
-                               rwPipeProgress >= 100 ? "COMPRIMIDO" : 
-                               `5 bloques paralelos ${rwPipeProgress.toFixed(0)}%`}
+                            <div className={`absolute top-2 left-2 px-2 py-1 rounded text-sm font-bold ${rwPipeProgress === 0 ? "bg-blue-500 text-white" :
+                                rwPipeProgress >= 100 ? "bg-emerald-500 text-white" :
+                                  "bg-purple-500 text-white animate-pulse"
+                              }`}>
+                              {rwPipeProgress === 0 ? "ORIGINAL 4K" :
+                                rwPipeProgress >= 100 ? "COMPRIMIDO" :
+                                  `5 bloques paralelos ${rwPipeProgress.toFixed(0)}%`}
                             </div>
                             <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-sm font-mono">
-                              {rwPipeProgress === 0 ? "12.4 MB" : 
-                               `${(12.4 - rwPipeProgress * 0.1).toFixed(1)} MB`}
+                              {rwPipeProgress === 0 ? "12.4 MB" :
+                                `${(12.4 - rwPipeProgress * 0.1).toFixed(1)} MB`}
                             </div>
                           </div>
                         </div>
                       )}
-                      
+
                       {/* FILE COPY - Pipeline: 5 parallel transfers */}
                       {selectedTask.visualType === "file" && (
                         <div className="absolute inset-0 p-2 flex items-center justify-center gap-3">
@@ -2039,12 +2136,12 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                             <FileText className={`w-14 h-14 transition-all ${rwPipeProgress > 0 ? "text-slate-300" : "text-blue-500"}`} />
                             <span className="text-sm font-bold text-slate-700 mt-1">Origen</span>
                           </div>
-                          
+
                           {/* 5 parallel transfers */}
                           <div className="flex-1 max-w-[140px] flex flex-col items-center gap-1">
                             <div className="text-xs font-bold text-purple-600">5 Canales Paralelos</div>
                             <div className="w-full space-y-1">
-                              {[0,1,2,3,4].map(i => (
+                              {[0, 1, 2, 3, 4].map(i => (
                                 <div key={i} className="h-2 bg-slate-200 rounded-full overflow-hidden">
                                   <div className={`h-full bg-purple-500 transition-all rounded-full ${rwIsRunning ? "animate-pulse" : ""}`}
                                     style={{ width: `${Math.min(100, rwPipeProgress + i * 5)}%`, animationDelay: `${i * 100}ms` }} />
@@ -2054,25 +2151,23 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                             <div className="text-lg font-bold text-purple-600">{rwPipeProgress.toFixed(0)}%</div>
                             <span className="text-xs text-slate-500">{(rwPipeProgress * 0.1).toFixed(1)} MB</span>
                           </div>
-                          
+
                           <div className="flex flex-col items-center">
-                            <FileText className={`w-14 h-14 transition-all ${
-                              rwPipeProgress >= 100 ? "text-emerald-500" : 
-                              rwPipeProgress > 0 ? "text-purple-400" : "text-slate-300"
-                            }`} />
+                            <FileText className={`w-14 h-14 transition-all ${rwPipeProgress >= 100 ? "text-emerald-500" :
+                                rwPipeProgress > 0 ? "text-purple-400" : "text-slate-300"
+                              }`} />
                             <span className="text-sm font-bold text-slate-700 mt-1">Destino</span>
                           </div>
                         </div>
                       )}
-                      
+
                       {/* DATABASE QUERY - All 5 stages active */}
                       {selectedTask.visualType === "database" && (
                         <div className="absolute inset-0 p-2 flex flex-col gap-2">
                           <div className="flex-1 flex items-center justify-center">
                             <div className="text-center">
-                              <Database className={`w-14 h-14 mx-auto mb-1 ${
-                                rwPipeProgress >= 100 ? "text-emerald-500" : "text-purple-500"
-                              }`} />
+                              <Database className={`w-14 h-14 mx-auto mb-1 ${rwPipeProgress >= 100 ? "text-emerald-500" : "text-purple-500"
+                                }`} />
                               <div className="text-lg font-bold text-slate-800">
                                 5 Etapas Simultaneas
                               </div>
@@ -2088,10 +2183,9 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                               const isActive = stageProgress > 0 && stageProgress < 100
                               const isDone = stageProgress >= 100
                               return (
-                                <div key={i} className={`flex-1 h-10 rounded flex flex-col items-center justify-center text-xs font-bold transition-all ${
-                                  isActive ? "bg-purple-500 text-white animate-pulse" : 
-                                  isDone ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-500"
-                                }`}>
+                                <div key={i} className={`flex-1 h-10 rounded flex flex-col items-center justify-center text-xs font-bold transition-all ${isActive ? "bg-purple-500 text-white animate-pulse" :
+                                    isDone ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-500"
+                                  }`}>
                                   <span>{stage}</span>
                                   {isActive && <div className="w-3/4 h-1 bg-white/30 rounded mt-0.5"><div className="h-full bg-white rounded" style={{ width: `${stageProgress}%` }} /></div>}
                                 </div>
@@ -2100,7 +2194,7 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                           </div>
                         </div>
                       )}
-                      
+
                       {/* EMAIL PROCESSING - 5 emails at once */}
                       {selectedTask.visualType === "email" && (
                         <div className="absolute inset-0 p-2 flex flex-col">
@@ -2108,14 +2202,14 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                             {/* 5 emails processing simultaneously */}
                             <div className="flex flex-col items-center">
                               <div className="flex gap-1">
-                                {[0,1,2,3,4].map(i => (
-                                  <Mail key={i} className={`w-8 h-8 ${rwIsRunning ? "text-purple-500 animate-pulse" : "text-purple-400"}`} 
+                                {[0, 1, 2, 3, 4].map(i => (
+                                  <Mail key={i} className={`w-8 h-8 ${rwIsRunning ? "text-purple-500 animate-pulse" : "text-purple-400"}`}
                                     style={{ animationDelay: `${i * 100}ms` }} />
                                 ))}
                               </div>
                               <span className="text-sm font-bold text-purple-600 mt-1">5 en paralelo</span>
                             </div>
-                            
+
                             <div className="flex gap-3">
                               <div className="bg-emerald-100 rounded-xl p-2 text-center min-w-[70px]">
                                 <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto" />
@@ -2134,16 +2228,16 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                           </div>
                         </div>
                       )}
-                      
+
                       {/* VIDEO RENDERING PIPELINE — real canvas at 30 fps = smooth + sharp */}
                       {selectedTask.visualType === "video" && (() => {
-                        const PIPE_FPS    = 30
+                        const PIPE_FPS = 30
                         const TOTAL_FRAMES = 30
                         // quality 1.0 → internal buffer matches display = pixel-perfect
                         const PIPE_QUALITY = 1.0
-                        const renderedFrames   = Math.floor((rwPipeProgress / 100) * TOTAL_FRAMES)
-                        const activeFrameBase  = Math.max(0, renderedFrames - 4)
-                        const stageColors = ["bg-purple-500","bg-purple-400","bg-purple-300","bg-purple-200","bg-purple-100"]
+                        const renderedFrames = Math.floor((rwPipeProgress / 100) * TOTAL_FRAMES)
+                        const activeFrameBase = Math.max(0, renderedFrames - 4)
+                        const stageColors = ["bg-purple-500", "bg-purple-400", "bg-purple-300", "bg-purple-200", "bg-purple-100"]
                         return (
                           <div className="absolute inset-0 p-2 flex flex-col gap-1.5">
                             {/* Canvas preview */}
@@ -2169,13 +2263,12 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                                     calidad: {Math.round(PIPE_QUALITY * 100)}%
                                   </div>
                                 </div>
-                                <div className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-bold ${
-                                  rwPipeProgress === 0   ? "bg-slate-700 text-slate-300"   :
-                                  rwPipeProgress >= 100  ? "bg-emerald-600 text-white"     :
-                                                            "bg-purple-600 text-white"
-                                }`}>
+                                <div className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-bold ${rwPipeProgress === 0 ? "bg-slate-700 text-slate-300" :
+                                    rwPipeProgress >= 100 ? "bg-emerald-600 text-white" :
+                                      "bg-purple-600 text-white"
+                                  }`}>
                                   {rwPipeProgress === 0 ? "EN ESPERA" :
-                                   rwPipeProgress >= 100 ? "ALTA CALIDAD" : "RENDERIZANDO"}
+                                    rwPipeProgress >= 100 ? "ALTA CALIDAD" : "RENDERIZANDO"}
                                 </div>
                                 <div className="absolute bottom-2 left-2 bg-black/80 text-emerald-400 text-xs font-mono font-bold px-2 py-0.5 rounded">
                                   ALTA CALIDAD — 5 frames/ciclo
@@ -2185,26 +2278,24 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                             {/* Frame strip — 5 in-flight simultaneously */}
                             <div className="flex gap-0.5 h-6">
                               {[...Array(TOTAL_FRAMES)].map((_, i) => {
-                                const done     = i < activeFrameBase
+                                const done = i < activeFrameBase
                                 const inFlight = i >= activeFrameBase && i < activeFrameBase + 5 && rwIsRunning
-                                const si       = i - activeFrameBase
+                                const si = i - activeFrameBase
                                 return (
-                                  <div key={i} className={`flex-1 rounded-sm border transition-all ${
-                                    inFlight ? `border-purple-500 ${stageColors[si] ?? "bg-purple-100"}` :
-                                    done     ? "border-emerald-400 bg-emerald-200" :
-                                               "border-slate-200 bg-slate-100"
-                                  }`} />
+                                  <div key={i} className={`flex-1 rounded-sm border transition-all ${inFlight ? `border-purple-500 ${stageColors[si] ?? "bg-purple-100"}` :
+                                      done ? "border-emerald-400 bg-emerald-200" :
+                                        "border-slate-200 bg-slate-100"
+                                    }`} />
                                 )
                               })}
                             </div>
                             {/* 5 stage bars — all lit simultaneously while running */}
                             <div className="flex gap-1">
                               {["Decode", "Transf.", "Encode", "Buffer", "Write"].map((s, i) => (
-                                <div key={i} className={`flex-1 h-6 rounded flex flex-col items-center justify-center text-[10px] font-bold transition-all ${
-                                  rwIsRunning          ? "bg-purple-500 text-white animate-pulse" :
-                                  rwPipeProgress >= 100 ? "bg-emerald-500 text-white" :
-                                                          "bg-slate-200 text-slate-500"
-                                }`} style={{ animationDelay: `${i * 80}ms` }}>
+                                <div key={i} className={`flex-1 h-6 rounded flex flex-col items-center justify-center text-[10px] font-bold transition-all ${rwIsRunning ? "bg-purple-500 text-white animate-pulse" :
+                                    rwPipeProgress >= 100 ? "bg-emerald-500 text-white" :
+                                      "bg-slate-200 text-slate-500"
+                                  }`} style={{ animationDelay: `${i * 80}ms` }}>
                                   {s}
                                   {rwIsRunning && (
                                     <span className="text-purple-200 text-[8px]">F{Math.max(1, activeFrameBase + i + 1)}</span>
@@ -2215,26 +2306,25 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                           </div>
                         )
                       })()}
-                      
+
                       {/* ZIP ARCHIVE - 5 files at once */}
                       {selectedTask.visualType === "archive" && (
                         <div className="absolute inset-0 p-2 flex items-center justify-center gap-4">
                           {/* 5 files compressing */}
                           <div className="flex flex-col items-center">
                             <div className="flex gap-1">
-                              {[0,1,2,3,4].map(i => (
-                                <FileText key={i} className={`w-7 h-7 ${
-                                  rwIsRunning ? "text-purple-500 animate-pulse" : "text-slate-400"
-                                }`} style={{ animationDelay: `${i * 80}ms` }} />
+                              {[0, 1, 2, 3, 4].map(i => (
+                                <FileText key={i} className={`w-7 h-7 ${rwIsRunning ? "text-purple-500 animate-pulse" : "text-slate-400"
+                                  }`} style={{ animationDelay: `${i * 80}ms` }} />
                               ))}
                             </div>
                             <span className="text-sm font-bold text-slate-700 mt-1">
                               {50 - Math.floor(rwPipeProgress / 2)} restantes
                             </span>
                           </div>
-                          
+
                           <div className="text-2xl text-purple-500">{"->"}</div>
-                          
+
                           <div className="flex flex-col items-center">
                             <div className="relative">
                               <Archive className={`w-14 h-14 ${rwPipeProgress >= 100 ? "text-emerald-500" : "text-purple-500"}`} />
@@ -2251,7 +2341,7 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                       )}
                     </div>
                   </div>
-                  
+
                   {/* Progress bar with stage indicator */}
                   <div className="relative h-6 bg-purple-100 rounded-lg overflow-hidden mt-1">
                     <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-purple-400 to-pink-400 transition-all duration-75"
@@ -2264,10 +2354,9 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
               </div>
 
               {/* Results - LIVE stats during simulation, final stats when done */}
-              <div className={`mt-3 rounded-xl p-3 shadow-lg transition-all ${
-                rwMonoFinished && rwPipeFinished ? "bg-gradient-to-r from-teal-500 to-emerald-500" : 
-                rwIsRunning ? "bg-gradient-to-r from-slate-600 to-slate-700" : "bg-slate-200"
-              }`}>
+              <div className={`mt-3 rounded-xl p-3 shadow-lg transition-all ${rwMonoFinished && rwPipeFinished ? "bg-gradient-to-r from-teal-500 to-emerald-500" :
+                  rwIsRunning ? "bg-gradient-to-r from-slate-600 to-slate-700" : "bg-slate-200"
+                }`}>
                 <div className="flex items-center justify-between">
                   {rwMonoFinished && rwPipeFinished ? (
                     <>
@@ -2317,10 +2406,10 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                         )}
                       </div>
                       <div className="text-right">
-  <div className="text-slate-300 text-xs mb-0.5">Speedup en Vivo</div>
-  <div className="text-3xl font-bold text-white">
-  {(selectedTask.monoDuration / selectedTask.pipeDuration).toFixed(2)}x
-  </div>
+                        <div className="text-slate-300 text-xs mb-0.5">Speedup en Vivo</div>
+                        <div className="text-3xl font-bold text-white">
+                          {(selectedTask.monoDuration / selectedTask.pipeDuration).toFixed(2)}x
+                        </div>
                       </div>
                     </>
                   ) : (
@@ -2428,8 +2517,8 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
               {/* Explanation */}
               <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                 <p className="text-slate-600 text-sm">
-                  <strong className="text-teal-600">Explicacion:</strong> El monociclo debe completar toda la instruccion antes de empezar otra. 
-                  El pipeline tiene {ballPipelineStages} instrucciones moviendose simultaneamente en diferentes etapas, 
+                  <strong className="text-teal-600">Explicacion:</strong> El monociclo debe completar toda la instruccion antes de empezar otra.
+                  El pipeline tiene {ballPipelineStages} instrucciones moviendose simultaneamente en diferentes etapas,
                   por eso termina aproximadamente <strong className="text-purple-600">{ballPipelineStages}x</strong> mas rapido.
                 </p>
               </div>
@@ -2519,7 +2608,7 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                       {tpMonoQueue.length === 0 && <span className="text-slate-400 text-xs italic">Cola vacia</span>}
                     </div>
                   </div>
-                  
+
                   {/* Processing */}
                   <div className="bg-white rounded-lg p-3 border border-orange-200 flex-1 flex flex-col justify-center">
                     <div className="text-slate-500 text-xs mb-2">Cargando ahora:</div>
@@ -2552,7 +2641,7 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                       )}
                     </div>
                   </div>
-                  
+
                   {/* Completed */}
                   <div className="mt-2 bg-orange-100 rounded-lg p-2">
                     <div className="text-orange-600 text-xs mb-1">Apps cargadas:</div>
@@ -2593,7 +2682,7 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                       {tpPipeQueue.length === 0 && <span className="text-slate-400 text-xs italic">Cola vacia</span>}
                     </div>
                   </div>
-                  
+
                   {/* Pipeline stages */}
                   <div className="bg-white rounded-lg p-3 border border-purple-200 flex-1">
                     <div className="text-slate-500 text-xs mb-2">Pipeline (5 etapas en paralelo):</div>
@@ -2614,7 +2703,7 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                       })}
                     </div>
                   </div>
-                  
+
                   {/* Completed */}
                   <div className="mt-2 bg-purple-100 rounded-lg p-2">
                     <div className="text-purple-600 text-xs mb-1">Apps cargadas:</div>
@@ -2719,7 +2808,7 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                     <div className="h-px bg-orange-200 my-2" />
                     <div className="flex justify-between items-center">
                       <span className="text-orange-700 font-semibold">Total:</span>
-                      <span className="text-orange-600 font-mono text-xl font-bold">{(calcMonoTime/1000).toFixed(1)}us</span>
+                      <span className="text-orange-600 font-mono text-xl font-bold">{(calcMonoTime / 1000).toFixed(1)}us</span>
                     </div>
                   </div>
                   <div className="mt-3 h-10 bg-gradient-to-r from-orange-400 to-red-400 rounded-lg flex items-center justify-center text-white font-bold shadow-md">{calcMonoTime}ns</div>
@@ -2733,7 +2822,7 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
                     <div className="h-px bg-purple-200 my-2" />
                     <div className="flex justify-between items-center">
                       <span className="text-purple-700 font-semibold">Total:</span>
-                      <span className="text-purple-600 font-mono text-xl font-bold">{(calcPipeTime/1000).toFixed(1)}us</span>
+                      <span className="text-purple-600 font-mono text-xl font-bold">{(calcPipeTime / 1000).toFixed(1)}us</span>
                     </div>
                   </div>
                   <div className="mt-3 h-10 bg-gradient-to-r from-purple-400 to-pink-400 rounded-lg flex items-center justify-center text-white font-bold shadow-md"
@@ -2816,7 +2905,7 @@ export function OliverSlide({ isPrintMode = false }: { isPrintMode?: boolean }) 
       maxCycles: 10,
       message: "Una dependencia de datos reduce el rendimiento.",
       messageColor: "text-amber-600",
-      bgGradient: "from-amber-100 to-orange-100", 
+      bgGradient: "from-amber-100 to-orange-100",
       borderColor: "border-amber-200"
     },
     control: {
@@ -2841,7 +2930,7 @@ export function OliverSlide({ isPrintMode = false }: { isPrintMode?: boolean }) 
       if (stageIndex >= 5) return { stage: null, status: "done" }
       return { stage: PIPELINE_STAGES[stageIndex], status: "active" }
     }
-    
+
     if (scenario === "data") {
       if (instrIndex === 0) {
         // First instruction flows normally
@@ -2860,7 +2949,7 @@ export function OliverSlide({ isPrintMode = false }: { isPrintMode?: boolean }) 
         return { stage: PIPELINE_STAGES[stageIndex], status: "active" }
       }
     }
-    
+
     if (scenario === "control") {
       if (instrIndex === 0) {
         // Branch instruction
@@ -2877,7 +2966,7 @@ export function OliverSlide({ isPrintMode = false }: { isPrintMode?: boolean }) 
         return { stage: PIPELINE_STAGES[stageIndex], status: "active" }
       }
     }
-    
+
     return { stage: null, status: "waiting" }
   }
 
@@ -2901,9 +2990,9 @@ export function OliverSlide({ isPrintMode = false }: { isPrintMode?: boolean }) 
     if (isPrintMode || !isRunning) return
     intervalRef.current = setInterval(() => {
       setCycle((c) => {
-        if (c >= config.maxCycles) { 
+        if (c >= config.maxCycles) {
           setIsRunning(false)
-          return c 
+          return c
         }
         return c + 1
       })
@@ -2914,7 +3003,7 @@ export function OliverSlide({ isPrintMode = false }: { isPrintMode?: boolean }) 
   return (
     <div className="w-full h-full bg-gradient-to-br from-red-50 via-white to-orange-50 flex flex-col p-5 relative overflow-hidden">
       <Presenter name="Oliver Abreu Mateo" />
-      
+
       <div className="absolute inset-0 opacity-20" style={{
         backgroundImage: "linear-gradient(rgba(239,68,68,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(239,68,68,0.08) 1px, transparent 1px)",
         backgroundSize: "50px 50px",
@@ -2931,33 +3020,30 @@ export function OliverSlide({ isPrintMode = false }: { isPrintMode?: boolean }) 
         <div className="flex-1 bg-white rounded-xl p-5 border-2 border-red-200 shadow-md flex flex-col min-w-0">
           {/* Scenario Tabs */}
           <div className="flex gap-2 mb-3">
-            <button 
+            <button
               onClick={() => changeScenario("normal")}
-              className={`px-5 py-2.5 rounded-lg font-semibold text-sm transition-all ${
-                scenario === "normal" 
-                  ? "bg-emerald-500 text-white shadow-md" 
+              className={`px-5 py-2.5 rounded-lg font-semibold text-sm transition-all ${scenario === "normal"
+                  ? "bg-emerald-500 text-white shadow-md"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-              }`}
+                }`}
             >
               Normal
             </button>
-            <button 
+            <button
               onClick={() => changeScenario("data")}
-              className={`px-5 py-2.5 rounded-lg font-semibold text-sm transition-all ${
-                scenario === "data" 
-                  ? "bg-amber-500 text-white shadow-md" 
+              className={`px-5 py-2.5 rounded-lg font-semibold text-sm transition-all ${scenario === "data"
+                  ? "bg-amber-500 text-white shadow-md"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-              }`}
+                }`}
             >
               Riesgo de Datos
             </button>
-            <button 
+            <button
               onClick={() => changeScenario("control")}
-              className={`px-5 py-2.5 rounded-lg font-semibold text-sm transition-all ${
-                scenario === "control" 
-                  ? "bg-red-500 text-white shadow-md" 
+              className={`px-5 py-2.5 rounded-lg font-semibold text-sm transition-all ${scenario === "control"
+                  ? "bg-red-500 text-white shadow-md"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-              }`}
+                }`}
             >
               Riesgo de Control
             </button>
@@ -2967,7 +3053,7 @@ export function OliverSlide({ isPrintMode = false }: { isPrintMode?: boolean }) 
           <div className="flex items-center gap-3 mb-2">
             <div className="w-44" />
             {PIPELINE_STAGES.map((stage) => (
-              <div 
+              <div
                 key={stage}
                 className="w-20 h-12 rounded-lg flex items-center justify-center font-bold text-base text-white shadow-md"
                 style={{ backgroundColor: STAGE_COLORS[stage as keyof typeof STAGE_COLORS] }}
@@ -2983,35 +3069,33 @@ export function OliverSlide({ isPrintMode = false }: { isPrintMode?: boolean }) 
               const state = getPipelineState(idx, cycle)
               return (
                 <div key={idx} className="flex items-center gap-3">
-                  <code className={`font-mono text-sm w-44 px-3 py-3 rounded-lg transition-all ${
-                    state.status === "flush" 
-                      ? "bg-red-100 text-red-400 line-through" 
+                  <code className={`font-mono text-sm w-44 px-3 py-3 rounded-lg transition-all ${state.status === "flush"
+                      ? "bg-red-100 text-red-400 line-through"
                       : state.status === "stall"
                         ? "bg-amber-100 text-amber-700"
                         : "bg-slate-100 text-slate-700"
-                  }`}>
+                    }`}>
                     {instr}
                   </code>
                   {PIPELINE_STAGES.map((stage) => {
                     const isCurrentStage = state.stage === stage
                     const isStall = state.status === "stall" && stage === "ID"
                     const isFlushed = state.status === "flush"
-                    
+
                     return (
-                      <div 
+                      <div
                         key={stage}
-                        className={`w-20 h-12 rounded-lg flex items-center justify-center text-sm font-bold transition-all duration-300 ${
-                          isFlushed 
+                        className={`w-20 h-12 rounded-lg flex items-center justify-center text-sm font-bold transition-all duration-300 ${isFlushed
                             ? "bg-red-200 border-2 border-dashed border-red-400"
                             : isStall
                               ? "bg-amber-300 border-2 border-dashed border-amber-500 animate-pulse"
-                              : isCurrentStage 
-                                ? "text-white shadow-lg scale-105" 
+                              : isCurrentStage
+                                ? "text-white shadow-lg scale-105"
                                 : "bg-slate-100 border border-slate-200"
-                        }`}
+                          }`}
                         style={{
-                          backgroundColor: isCurrentStage && !isStall && !isFlushed 
-                            ? STAGE_COLORS[stage as keyof typeof STAGE_COLORS] 
+                          backgroundColor: isCurrentStage && !isStall && !isFlushed
+                            ? STAGE_COLORS[stage as keyof typeof STAGE_COLORS]
                             : undefined
                         }}
                       >
@@ -3045,21 +3129,21 @@ export function OliverSlide({ isPrintMode = false }: { isPrintMode?: boolean }) 
             </div>
             <div className="flex gap-2">
               {!isRunning ? (
-                <button 
-                  onClick={startSimulation} 
+                <button
+                  onClick={startSimulation}
                   className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg flex items-center gap-2 shadow-sm transition-all"
                 >
                   <Play className="w-4 h-4" /> Simular
                 </button>
               ) : (
-                <button 
-                  onClick={() => setIsRunning(false)} 
+                <button
+                  onClick={() => setIsRunning(false)}
                   className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg flex items-center gap-2 shadow-sm transition-all"
                 >
                   <Pause className="w-4 h-4" /> Pausar
                 </button>
               )}
-              <button 
+              <button
                 onClick={resetSimulation}
                 className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg flex items-center gap-2 border border-slate-200 transition-all"
               >
@@ -3206,7 +3290,7 @@ export function QRSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
     setRemoteUrl(url)
     // Check if we're in v0 preview (vusercontent.net) which requires auth
     setIsPreview(baseUrl.includes("vusercontent.net") || baseUrl.includes("localhost"))
-    
+
     QRCode.toDataURL(url, {
       width: 300,
       margin: 2,
@@ -3288,7 +3372,7 @@ export function QRSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
 
           <div className="mt-6 bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-slate-200 z-10 max-w-lg">
             <p className="text-slate-600 text-sm text-center">
-              <span className="font-semibold text-indigo-600">Desde tu celular podras:</span> Navegar entre diapositivas, 
+              <span className="font-semibold text-indigo-600">Desde tu celular podras:</span> Navegar entre diapositivas,
               iniciar/pausar simulaciones, y controlar la presentacion en tiempo real.
             </p>
           </div>
