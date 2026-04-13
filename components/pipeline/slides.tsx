@@ -27,7 +27,15 @@ import {
   Circle,
   Settings2,
   BarChart3,
-  Layers
+  Layers,
+  Music,
+  Search,
+  Download,
+  Send,
+  Camera,
+  MessageSquare,
+  ShoppingCart,
+  Heart
 } from "lucide-react"
 import QRCode from "qrcode"
 
@@ -917,14 +925,26 @@ export function EnmanuelSlide({ isPrintMode = false }: { isPrintMode?: boolean }
 
 type SimulationTab = "realworld" | "balls" | "throughput" | "calculator"
 
-// Real-world task scenarios
+// Real-world task scenarios - reduced instructions for faster simulation
 const REAL_WORLD_TASKS = [
-  { id: "compress", name: "Comprimir Imagen", icon: Image, monoInstructions: 5000, pipeInstructions: 5000, description: "Compresion JPEG de una imagen 1920x1080" },
-  { id: "copy", name: "Copiar Archivo", icon: FileText, monoInstructions: 3000, pipeInstructions: 3000, description: "Duplicar archivo de 10MB" },
-  { id: "query", name: "Consulta DB", icon: Database, monoInstructions: 2000, pipeInstructions: 2000, description: "Busqueda en base de datos con JOIN" },
-  { id: "email", name: "Procesar Emails", icon: Mail, monoInstructions: 4000, pipeInstructions: 4000, description: "Filtrado de spam en 100 correos" },
-  { id: "video", name: "Renderizar Video", icon: Video, monoInstructions: 10000, pipeInstructions: 10000, description: "Transcoding de 30 segundos 4K" },
-  { id: "zip", name: "Crear ZIP", icon: Archive, monoInstructions: 6000, pipeInstructions: 6000, description: "Comprimir carpeta con 50 archivos" },
+  { id: "compress", name: "Comprimir Imagen", icon: Image, monoInstructions: 100, pipeInstructions: 100, description: "Compresion JPEG 1920x1080", visualType: "image" as const },
+  { id: "copy", name: "Copiar Archivo", icon: FileText, monoInstructions: 80, pipeInstructions: 80, description: "Duplicar archivo de 10MB", visualType: "file" as const },
+  { id: "query", name: "Consulta DB", icon: Database, monoInstructions: 60, pipeInstructions: 60, description: "SELECT con JOIN complejo", visualType: "database" as const },
+  { id: "email", name: "Procesar Emails", icon: Mail, monoInstructions: 90, pipeInstructions: 90, description: "Filtrar 100 correos spam", visualType: "email" as const },
+  { id: "video", name: "Renderizar Video", icon: Video, monoInstructions: 120, pipeInstructions: 120, description: "Transcoding 4K 30fps", visualType: "video" as const },
+  { id: "zip", name: "Crear ZIP", icon: Archive, monoInstructions: 100, pipeInstructions: 100, description: "Comprimir 50 archivos", visualType: "archive" as const },
+]
+
+// Throughput tasks with friendly icons
+const THROUGHPUT_TASKS = [
+  { id: 1, name: "Spotify", icon: Music, color: "#1DB954" },
+  { id: 2, name: "Google", icon: Search, color: "#4285F4" },
+  { id: 3, name: "WhatsApp", icon: MessageSquare, color: "#25D366" },
+  { id: 4, name: "Instagram", icon: Camera, color: "#E4405F" },
+  { id: 5, name: "Netflix", icon: Video, color: "#E50914" },
+  { id: 6, name: "Amazon", icon: ShoppingCart, color: "#FF9900" },
+  { id: 7, name: "TikTok", icon: Heart, color: "#000000" },
+  { id: 8, name: "Gmail", icon: Mail, color: "#EA4335" },
 ]
 
 export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
@@ -935,16 +955,19 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
   const [rwIsRunning, setRwIsRunning] = useState(false)
   const [rwMonoProgress, setRwMonoProgress] = useState(0)
   const [rwPipeProgress, setRwPipeProgress] = useState(0)
-  const [rwMonoTime, setRwMonoTime] = useState(0)
-  const [rwPipeTime, setRwPipeTime] = useState(0)
+  const [rwMonoFinished, setRwMonoFinished] = useState(false)
+  const [rwPipeFinished, setRwPipeFinished] = useState(false)
+  const [rwMonoFinalTime, setRwMonoFinalTime] = useState(0)
+  const [rwPipeFinalTime, setRwPipeFinalTime] = useState(0)
+  const [rwElapsedMs, setRwElapsedMs] = useState(0)
   const rwIntervalRef = useRef<NodeJS.Timeout | null>(null)
   
-  // Ball simulation state
+  // Ball simulation state - spread positions initially
   const [ballSpeed, setBallSpeed] = useState(1)
   const [ballPipelineStages, setBallPipelineStages] = useState(5)
   const [ballIsRunning, setBallIsRunning] = useState(false)
   const [monoPosition, setMonoPosition] = useState(0)
-  const [pipePositions, setPipePositions] = useState<number[]>([0, 0, 0, 0, 0])
+  const [pipePositions, setPipePositions] = useState<number[]>([0, 20, 40, 60, 80])
   const [pipeCompleted, setPipeCompleted] = useState(0)
   const [monoCompleted, setMonoCompleted] = useState(0)
   const ballIntervalRef = useRef<NodeJS.Timeout | null>(null)
@@ -959,6 +982,7 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
   const [tpPipelineState, setTpPipelineState] = useState<(number | null)[]>([null, null, null, null, null])
   const [tpMonoProcessing, setTpMonoProcessing] = useState<number | null>(null)
   const [tpMonoCycleCount, setTpMonoCycleCount] = useState(0)
+  const [tpFinished, setTpFinished] = useState(false)
   const tpIntervalRef = useRef<NodeJS.Timeout | null>(null)
   
   // Calculator state
@@ -969,31 +993,53 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
   const MONO_CYCLE_TIME = 800
   const PIPE_CYCLE_TIME = 200
 
-  // Real-world simulation effect
+  // Real-world simulation effect - accelerated for presentation (1-2 seconds for pipeline)
   useEffect(() => {
     if (!rwIsRunning || isPrintMode) return
     
-    const monoTotalTime = selectedTask.monoInstructions * MONO_CYCLE_TIME
-    const pipeTotalCycles = selectedTask.pipeInstructions + 4
-    const pipeTotalTime = pipeTotalCycles * PIPE_CYCLE_TIME
+    // Simulation runs fast: pipeline completes in ~1.5s, mono in ~6s (4x speedup visible)
+    const SIMULATION_DURATION_PIPE = 1500 // 1.5 seconds for pipeline
+    const SPEEDUP_RATIO = 4 // Pipeline is 4x faster
+    const SIMULATION_DURATION_MONO = SIMULATION_DURATION_PIPE * SPEEDUP_RATIO
     
-    const stepTime = 50
-    const monoStep = (100 / (monoTotalTime / 1000)) * (stepTime / 1000) * 10
-    const pipeStep = (100 / (pipeTotalTime / 1000)) * (stepTime / 1000) * 10
+    const stepTime = 30 // 30ms intervals for smooth animation
+    const pipeStep = (100 / SIMULATION_DURATION_PIPE) * stepTime
+    const monoStep = (100 / SIMULATION_DURATION_MONO) * stepTime
     
     rwIntervalRef.current = setInterval(() => {
-      setRwMonoProgress(p => Math.min(100, p + monoStep))
-      setRwPipeProgress(p => Math.min(100, p + pipeStep))
-      setRwMonoTime(t => t + stepTime)
-      setRwPipeTime(t => t + stepTime)
+      setRwElapsedMs(t => t + stepTime)
+      
+      setRwPipeProgress(p => {
+        const next = p + pipeStep
+        if (next >= 100 && !rwPipeFinished) {
+          setRwPipeFinished(true)
+          setRwPipeFinalTime(rwElapsedMs + stepTime)
+          return 100
+        }
+        return Math.min(100, next)
+      })
+      
+      setRwMonoProgress(p => {
+        const next = p + monoStep
+        if (next >= 100 && !rwMonoFinished) {
+          setRwMonoFinished(true)
+          setRwMonoFinalTime(rwElapsedMs + stepTime)
+          return 100
+        }
+        return Math.min(100, next)
+      })
     }, stepTime)
     
     return () => { if (rwIntervalRef.current) clearInterval(rwIntervalRef.current) }
-  }, [rwIsRunning, isPrintMode, selectedTask])
+  }, [rwIsRunning, isPrintMode, rwPipeFinished, rwMonoFinished, rwElapsedMs])
 
+  // Stop when both complete
   useEffect(() => {
-    if (rwMonoProgress >= 100 && rwPipeProgress >= 100) setRwIsRunning(false)
-  }, [rwMonoProgress, rwPipeProgress])
+    if (rwMonoFinished && rwPipeFinished) {
+      setRwIsRunning(false)
+      if (rwIntervalRef.current) clearInterval(rwIntervalRef.current)
+    }
+  }, [rwMonoFinished, rwPipeFinished])
 
   // Ball simulation effect
   useEffect(() => {
@@ -1022,11 +1068,21 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
     return () => { if (ballIntervalRef.current) clearInterval(ballIntervalRef.current) }
   }, [ballIsRunning, ballSpeed, ballPipelineStages, isPrintMode])
 
-  // Throughput simulation effect
+  // Throughput simulation effect - stops when both complete all tasks
   useEffect(() => {
-    if (!tpIsRunning || isPrintMode) return
+    if (!tpIsRunning || isPrintMode || tpFinished) return
     
     tpIntervalRef.current = setInterval(() => {
+      // Check if simulation should stop
+      const monoAllDone = tpMonoCompleted >= 8 && tpMonoProcessing === null
+      const pipeAllDone = tpPipeCompleted >= 8 && tpPipelineState.every(s => s === null)
+      
+      if (monoAllDone && pipeAllDone) {
+        setTpFinished(true)
+        setTpIsRunning(false)
+        return
+      }
+      
       setTpCycle(c => c + 1)
       
       // Monocycle: takes 5 cycles per instruction
@@ -1061,10 +1117,10 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
         })
         return newState
       })
-    }, 400)
+    }, 500)
     
     return () => { if (tpIntervalRef.current) clearInterval(tpIntervalRef.current) }
-  }, [tpIsRunning, tpMonoProcessing, isPrintMode])
+  }, [tpIsRunning, tpMonoProcessing, tpMonoCompleted, tpPipeCompleted, tpPipelineState, tpFinished, isPrintMode])
 
   // Start monocycle processing
   useEffect(() => {
@@ -1075,20 +1131,39 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
   }, [tpIsRunning, tpMonoProcessing, tpMonoQueue])
 
   const resetRealWorld = () => {
-    setRwIsRunning(false); setRwMonoProgress(0); setRwPipeProgress(0); setRwMonoTime(0); setRwPipeTime(0)
+    setRwIsRunning(false)
+    setRwMonoProgress(0)
+    setRwPipeProgress(0)
+    setRwMonoFinished(false)
+    setRwPipeFinished(false)
+    setRwMonoFinalTime(0)
+    setRwPipeFinalTime(0)
+    setRwElapsedMs(0)
     if (rwIntervalRef.current) clearInterval(rwIntervalRef.current)
   }
 
   const resetBalls = () => {
-    setBallIsRunning(false); setMonoPosition(0); setPipePositions([0, 0, 0, 0, 0].slice(0, ballPipelineStages))
-    setPipeCompleted(0); setMonoCompleted(0)
+    setBallIsRunning(false)
+    setMonoPosition(0)
+    // Spread balls evenly across the track initially
+    const spread = 100 / ballPipelineStages
+    setPipePositions(Array.from({ length: ballPipelineStages }, (_, i) => i * spread))
+    setPipeCompleted(0)
+    setMonoCompleted(0)
     if (ballIntervalRef.current) clearInterval(ballIntervalRef.current)
   }
 
   const resetThroughput = () => {
-    setTpIsRunning(false); setTpCycle(0); setTpMonoQueue([1, 2, 3, 4, 5, 6, 7, 8]); setTpPipeQueue([1, 2, 3, 4, 5, 6, 7, 8])
-    setTpMonoCompleted(0); setTpPipeCompleted(0); setTpPipelineState([null, null, null, null, null])
-    setTpMonoProcessing(null); setTpMonoCycleCount(0)
+    setTpIsRunning(false)
+    setTpCycle(0)
+    setTpMonoQueue([1, 2, 3, 4, 5, 6, 7, 8])
+    setTpPipeQueue([1, 2, 3, 4, 5, 6, 7, 8])
+    setTpMonoCompleted(0)
+    setTpPipeCompleted(0)
+    setTpPipelineState([null, null, null, null, null])
+    setTpMonoProcessing(null)
+    setTpMonoCycleCount(0)
+    setTpFinished(false)
     if (tpIntervalRef.current) clearInterval(tpIntervalRef.current)
   }
 
@@ -1141,18 +1216,19 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
       <div className="flex-1 min-h-0 z-10">
         {/* REAL WORLD TAB */}
         {activeTab === "realworld" && (
-          <div className="h-full flex gap-4">
-            <div className="w-56 bg-white rounded-xl p-4 border border-slate-200 shadow-sm flex flex-col">
-              <h3 className="text-slate-800 font-bold text-sm mb-3">Selecciona una Tarea</h3>
-              <div className="flex-1 flex flex-col gap-2 overflow-auto">
+          <div className="h-full flex gap-3">
+            {/* Task Selector */}
+            <div className="w-48 bg-white rounded-xl p-3 border border-slate-200 shadow-sm flex flex-col">
+              <h3 className="text-slate-800 font-bold text-sm mb-2">Tarea</h3>
+              <div className="flex-1 flex flex-col gap-1.5 overflow-auto">
                 {REAL_WORLD_TASKS.map(task => {
                   const TaskIcon = task.icon
                   return (
                     <button key={task.id} onClick={() => { setSelectedTask(task); resetRealWorld(); }}
-                      className={`p-3 rounded-lg text-left transition-all ${selectedTask.id === task.id ? "bg-teal-100 border-2 border-teal-400" : "bg-slate-50 border border-slate-200 hover:border-teal-300"}`}>
+                      className={`p-2 rounded-lg text-left transition-all ${selectedTask.id === task.id ? "bg-teal-100 border-2 border-teal-400" : "bg-slate-50 border border-slate-200 hover:border-teal-300"}`}>
                       <div className="flex items-center gap-2">
                         <TaskIcon className={`w-4 h-4 ${selectedTask.id === task.id ? "text-teal-600" : "text-slate-500"}`} />
-                        <span className={`font-medium text-sm ${selectedTask.id === task.id ? "text-teal-700" : "text-slate-700"}`}>{task.name}</span>
+                        <span className={`font-medium text-xs ${selectedTask.id === task.id ? "text-teal-700" : "text-slate-700"}`}>{task.name}</span>
                       </div>
                     </button>
                   )
@@ -1160,79 +1236,231 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
               </div>
             </div>
 
-            <div className="flex-1 bg-white rounded-xl p-5 border-2 border-teal-200 shadow-md flex flex-col">
-              <div className="flex items-center justify-between mb-4">
+            {/* Main Simulation Area */}
+            <div className="flex-1 bg-white rounded-xl p-4 border-2 border-teal-200 shadow-md flex flex-col">
+              <div className="flex items-center justify-between mb-3">
                 <div>
-                  <h3 className="text-slate-800 font-bold text-lg flex items-center gap-2">
-                    <selectedTask.icon className="w-5 h-5 text-teal-600" />{selectedTask.name}
+                  <h3 className="text-slate-800 font-bold text-base flex items-center gap-2">
+                    <selectedTask.icon className="w-4 h-4 text-teal-600" />{selectedTask.name}
+                    <span className="text-slate-400 text-xs font-normal">- {selectedTask.description}</span>
                   </h3>
-                  <p className="text-slate-500 text-sm">{selectedTask.description}</p>
                 </div>
                 <div className="flex gap-2">
-                  {!rwIsRunning ? (
+                  {!rwIsRunning && !rwMonoFinished ? (
                     <button onClick={() => { resetRealWorld(); setTimeout(() => setRwIsRunning(true), 100); }}
-                      className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg transition-all flex items-center gap-2">
-                      <Play className="w-4 h-4" />Ejecutar
+                      className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg transition-all flex items-center gap-1.5 text-sm">
+                      <Play className="w-3.5 h-3.5" />Ejecutar
+                    </button>
+                  ) : rwIsRunning ? (
+                    <button onClick={() => setRwIsRunning(false)}
+                      className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg transition-all flex items-center gap-1.5 text-sm">
+                      <Pause className="w-3.5 h-3.5" />Pausar
                     </button>
                   ) : (
-                    <button onClick={() => setRwIsRunning(false)}
-                      className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg transition-all flex items-center gap-2">
-                      <Pause className="w-4 h-4" />Pausar
-                    </button>
+                    <div className="px-3 py-1.5 bg-emerald-100 text-emerald-700 font-semibold rounded-lg flex items-center gap-1.5 text-sm">
+                      <CheckCircle2 className="w-3.5 h-3.5" />Completado
+                    </div>
                   )}
-                  <button onClick={resetRealWorld} className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all">
-                    <RotateCcw className="w-4 h-4" />
+                  <button onClick={resetRealWorld} className="px-2 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all">
+                    <RotateCcw className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
 
-              <div className="flex-1 grid grid-cols-2 gap-6 mb-4">
+              {/* Side by side processors with visual representation */}
+              <div className="flex-1 grid grid-cols-2 gap-4">
                 {/* Monocycle Side */}
-                <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-4 border-2 border-orange-200 flex flex-col">
-                  <h4 className="text-orange-600 font-bold mb-3 flex items-center gap-2"><Clock className="w-5 h-5" />Procesador Monociclo</h4>
-                  <div className="flex-1 flex flex-col justify-center">
-                    <div className="relative h-16 bg-orange-100 rounded-lg overflow-hidden mb-3">
-                      <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-orange-400 to-red-400 transition-all duration-100 flex items-center justify-end pr-2"
-                        style={{ width: `${rwMonoProgress}%` }}>
-                        {rwMonoProgress > 10 && <span className="text-white font-bold text-sm">{rwMonoProgress.toFixed(0)}%</span>}
-                      </div>
-                      {rwMonoProgress <= 10 && <span className="absolute inset-0 flex items-center justify-center text-orange-600 font-bold">{rwMonoProgress.toFixed(0)}%</span>}
-                    </div>
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div className="bg-white rounded-lg p-3 border border-orange-200"><div className="text-slate-500 text-xs">Ciclo</div><div className="font-mono font-bold text-orange-600">{MONO_CYCLE_TIME}ns</div></div>
-                      <div className="bg-white rounded-lg p-3 border border-orange-200"><div className="text-slate-500 text-xs">Tiempo</div><div className="font-mono font-bold text-orange-600">{(rwMonoTime / 1000).toFixed(1)}s</div></div>
+                <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-3 border-2 border-orange-200 flex flex-col">
+                  <h4 className="text-orange-600 font-bold text-sm mb-2 flex items-center gap-2">
+                    <Clock className="w-4 h-4" />Monociclo
+                    {rwMonoFinished && <span className="ml-auto bg-orange-200 text-orange-700 text-xs px-2 py-0.5 rounded-full">Listo</span>}
+                  </h4>
+                  
+                  {/* Visual representation */}
+                  <div className="flex-1 flex items-center justify-center mb-2">
+                    <div className="relative w-full aspect-video bg-white rounded-lg border border-orange-200 overflow-hidden flex items-center justify-center">
+                      {selectedTask.visualType === "image" && (
+                        <div className="relative w-full h-full">
+                          <div className="absolute inset-0 bg-gradient-to-br from-orange-200 via-amber-100 to-orange-300" />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="grid grid-cols-8 grid-rows-6 gap-px w-full h-full">
+                              {[...Array(48)].map((_, i) => (
+                                <div key={i} className={`transition-all duration-200 ${i < Math.floor(rwMonoProgress * 0.48) ? "bg-orange-400" : "bg-orange-100"}`} />
+                              ))}
+                            </div>
+                          </div>
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Image className="w-8 h-8 text-orange-600/30" />
+                          </div>
+                        </div>
+                      )}
+                      {selectedTask.visualType === "file" && (
+                        <div className="flex flex-col items-center gap-1">
+                          <FileText className="w-10 h-10 text-orange-400" />
+                          <div className="w-20 h-1.5 bg-orange-200 rounded-full overflow-hidden">
+                            <div className="h-full bg-orange-500 transition-all" style={{ width: `${rwMonoProgress}%` }} />
+                          </div>
+                          <span className="text-xs text-orange-600">{rwMonoProgress.toFixed(0)}% copiado</span>
+                        </div>
+                      )}
+                      {selectedTask.visualType === "database" && (
+                        <div className="flex flex-col items-center gap-1">
+                          <Database className="w-10 h-10 text-orange-400" />
+                          <div className="flex gap-0.5">
+                            {[...Array(10)].map((_, i) => (
+                              <div key={i} className={`w-1.5 h-4 rounded-sm transition-all ${i < Math.floor(rwMonoProgress / 10) ? "bg-orange-500" : "bg-orange-200"}`} />
+                            ))}
+                          </div>
+                          <span className="text-xs text-orange-600">{Math.floor(rwMonoProgress / 10)}/10 filas</span>
+                        </div>
+                      )}
+                      {selectedTask.visualType === "email" && (
+                        <div className="flex flex-col items-center gap-1">
+                          <Mail className="w-10 h-10 text-orange-400" />
+                          <span className="text-xs text-orange-600">{Math.floor(rwMonoProgress)}/100 emails</span>
+                        </div>
+                      )}
+                      {selectedTask.visualType === "video" && (
+                        <div className="flex flex-col items-center gap-1">
+                          <Video className="w-10 h-10 text-orange-400" />
+                          <div className="flex gap-0.5">
+                            {[...Array(30)].map((_, i) => (
+                              <div key={i} className={`w-1 h-3 rounded-sm transition-all ${i < Math.floor(rwMonoProgress * 0.3) ? "bg-orange-500" : "bg-orange-200"}`} />
+                            ))}
+                          </div>
+                          <span className="text-xs text-orange-600">{Math.floor(rwMonoProgress * 0.3)}/30 frames</span>
+                        </div>
+                      )}
+                      {selectedTask.visualType === "archive" && (
+                        <div className="flex flex-col items-center gap-1">
+                          <Archive className="w-10 h-10 text-orange-400" />
+                          <span className="text-xs text-orange-600">{Math.floor(rwMonoProgress / 2)}/50 archivos</span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <div className="mt-3 text-center"><span className="text-orange-700 font-semibold">Total Estimado: </span><span className="font-mono font-bold text-orange-600">{(monoTotalTime / 1000000).toFixed(2)}ms</span></div>
+                  
+                  {/* Progress bar */}
+                  <div className="relative h-8 bg-orange-100 rounded-lg overflow-hidden">
+                    <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-orange-400 to-red-400 transition-all duration-75 flex items-center justify-center"
+                      style={{ width: `${rwMonoProgress}%` }}>
+                      <span className="text-white font-bold text-sm">{rwMonoProgress.toFixed(0)}%</span>
+                    </div>
+                    {rwMonoProgress < 15 && <span className="absolute inset-0 flex items-center justify-center text-orange-600 font-bold text-sm">{rwMonoProgress.toFixed(0)}%</span>}
+                  </div>
                 </div>
 
                 {/* Pipeline Side */}
-                <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 border-2 border-purple-200 flex flex-col">
-                  <h4 className="text-purple-600 font-bold mb-3 flex items-center gap-2"><Zap className="w-5 h-5" />Procesador Pipeline</h4>
-                  <div className="flex-1 flex flex-col justify-center">
-                    <div className="relative h-16 bg-purple-100 rounded-lg overflow-hidden mb-3">
-                      <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-purple-400 to-pink-400 transition-all duration-100 flex items-center justify-end pr-2"
-                        style={{ width: `${rwPipeProgress}%` }}>
-                        {rwPipeProgress > 10 && <span className="text-white font-bold text-sm">{rwPipeProgress.toFixed(0)}%</span>}
-                      </div>
-                      {rwPipeProgress <= 10 && <span className="absolute inset-0 flex items-center justify-center text-purple-600 font-bold">{rwPipeProgress.toFixed(0)}%</span>}
-                    </div>
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div className="bg-white rounded-lg p-3 border border-purple-200"><div className="text-slate-500 text-xs">Ciclo</div><div className="font-mono font-bold text-purple-600">{PIPE_CYCLE_TIME}ns</div></div>
-                      <div className="bg-white rounded-lg p-3 border border-purple-200"><div className="text-slate-500 text-xs">Tiempo</div><div className="font-mono font-bold text-purple-600">{(rwPipeTime / 1000).toFixed(1)}s</div></div>
+                <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-3 border-2 border-purple-200 flex flex-col">
+                  <h4 className="text-purple-600 font-bold text-sm mb-2 flex items-center gap-2">
+                    <Zap className="w-4 h-4" />Pipeline
+                    {rwPipeFinished && <span className="ml-auto bg-purple-200 text-purple-700 text-xs px-2 py-0.5 rounded-full">Listo</span>}
+                  </h4>
+                  
+                  {/* Visual representation */}
+                  <div className="flex-1 flex items-center justify-center mb-2">
+                    <div className="relative w-full aspect-video bg-white rounded-lg border border-purple-200 overflow-hidden flex items-center justify-center">
+                      {selectedTask.visualType === "image" && (
+                        <div className="relative w-full h-full">
+                          <div className="absolute inset-0 bg-gradient-to-br from-purple-200 via-pink-100 to-purple-300" />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="grid grid-cols-8 grid-rows-6 gap-px w-full h-full">
+                              {[...Array(48)].map((_, i) => (
+                                <div key={i} className={`transition-all duration-200 ${i < Math.floor(rwPipeProgress * 0.48) ? "bg-purple-400" : "bg-purple-100"}`} />
+                              ))}
+                            </div>
+                          </div>
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Image className="w-8 h-8 text-purple-600/30" />
+                          </div>
+                        </div>
+                      )}
+                      {selectedTask.visualType === "file" && (
+                        <div className="flex flex-col items-center gap-1">
+                          <FileText className="w-10 h-10 text-purple-400" />
+                          <div className="w-20 h-1.5 bg-purple-200 rounded-full overflow-hidden">
+                            <div className="h-full bg-purple-500 transition-all" style={{ width: `${rwPipeProgress}%` }} />
+                          </div>
+                          <span className="text-xs text-purple-600">{rwPipeProgress.toFixed(0)}% copiado</span>
+                        </div>
+                      )}
+                      {selectedTask.visualType === "database" && (
+                        <div className="flex flex-col items-center gap-1">
+                          <Database className="w-10 h-10 text-purple-400" />
+                          <div className="flex gap-0.5">
+                            {[...Array(10)].map((_, i) => (
+                              <div key={i} className={`w-1.5 h-4 rounded-sm transition-all ${i < Math.floor(rwPipeProgress / 10) ? "bg-purple-500" : "bg-purple-200"}`} />
+                            ))}
+                          </div>
+                          <span className="text-xs text-purple-600">{Math.floor(rwPipeProgress / 10)}/10 filas</span>
+                        </div>
+                      )}
+                      {selectedTask.visualType === "email" && (
+                        <div className="flex flex-col items-center gap-1">
+                          <Mail className="w-10 h-10 text-purple-400" />
+                          <span className="text-xs text-purple-600">{Math.floor(rwPipeProgress)}/100 emails</span>
+                        </div>
+                      )}
+                      {selectedTask.visualType === "video" && (
+                        <div className="flex flex-col items-center gap-1">
+                          <Video className="w-10 h-10 text-purple-400" />
+                          <div className="flex gap-0.5">
+                            {[...Array(30)].map((_, i) => (
+                              <div key={i} className={`w-1 h-3 rounded-sm transition-all ${i < Math.floor(rwPipeProgress * 0.3) ? "bg-purple-500" : "bg-purple-200"}`} />
+                            ))}
+                          </div>
+                          <span className="text-xs text-purple-600">{Math.floor(rwPipeProgress * 0.3)}/30 frames</span>
+                        </div>
+                      )}
+                      {selectedTask.visualType === "archive" && (
+                        <div className="flex flex-col items-center gap-1">
+                          <Archive className="w-10 h-10 text-purple-400" />
+                          <span className="text-xs text-purple-600">{Math.floor(rwPipeProgress / 2)}/50 archivos</span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <div className="mt-3 text-center"><span className="text-purple-700 font-semibold">Total Estimado: </span><span className="font-mono font-bold text-purple-600">{(pipeTotalTime / 1000000).toFixed(2)}ms</span></div>
+                  
+                  {/* Progress bar */}
+                  <div className="relative h-8 bg-purple-100 rounded-lg overflow-hidden">
+                    <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-purple-400 to-pink-400 transition-all duration-75 flex items-center justify-center"
+                      style={{ width: `${rwPipeProgress}%` }}>
+                      <span className="text-white font-bold text-sm">{rwPipeProgress.toFixed(0)}%</span>
+                    </div>
+                    {rwPipeProgress < 15 && <span className="absolute inset-0 flex items-center justify-center text-purple-600 font-bold text-sm">{rwPipeProgress.toFixed(0)}%</span>}
+                  </div>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-r from-teal-500 to-emerald-500 rounded-xl p-4 shadow-lg">
+              {/* Results - only show real data after both finish */}
+              <div className={`mt-3 rounded-xl p-3 shadow-lg transition-all ${rwMonoFinished && rwPipeFinished ? "bg-gradient-to-r from-teal-500 to-emerald-500" : "bg-slate-200"}`}>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-6">
-                    <div><div className="text-teal-100 text-xs mb-1">Ahorro de Tiempo</div><div className="font-mono text-white text-lg font-bold">{((monoTotalTime - pipeTotalTime) / 1000000).toFixed(2)}ms</div></div>
-                    <div><div className="text-teal-100 text-xs mb-1">Diferencia</div><div className="font-mono text-white text-lg font-bold">{(((monoTotalTime - pipeTotalTime) / monoTotalTime) * 100).toFixed(0)}% mas rapido</div></div>
-                  </div>
-                  <div className="text-right"><div className="text-teal-100 text-xs mb-1">Speedup</div><div className="text-5xl font-bold text-white">{realWorldSpeedup.toFixed(2)}x</div></div>
+                  {rwMonoFinished && rwPipeFinished ? (
+                    <>
+                      <div className="flex items-center gap-6">
+                        <div>
+                          <div className="text-teal-100 text-xs mb-0.5">Tiempo Monociclo</div>
+                          <div className="font-mono text-white text-base font-bold">{(rwMonoFinalTime / 1000).toFixed(2)}s</div>
+                        </div>
+                        <div>
+                          <div className="text-teal-100 text-xs mb-0.5">Tiempo Pipeline</div>
+                          <div className="font-mono text-white text-base font-bold">{(rwPipeFinalTime / 1000).toFixed(2)}s</div>
+                        </div>
+                        <div>
+                          <div className="text-teal-100 text-xs mb-0.5">Ahorro</div>
+                          <div className="font-mono text-white text-base font-bold">{((rwMonoFinalTime - rwPipeFinalTime) / 1000).toFixed(2)}s ({(((rwMonoFinalTime - rwPipeFinalTime) / rwMonoFinalTime) * 100).toFixed(0)}%)</div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-teal-100 text-xs mb-0.5">Speedup Real</div>
+                        <div className="text-4xl font-bold text-white">{(rwMonoFinalTime / rwPipeFinalTime).toFixed(2)}x</div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex items-center justify-center w-full py-2">
+                      <span className="text-slate-500 text-sm font-medium">Ejecuta la simulacion para ver los resultados...</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -1241,108 +1469,120 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
 
         {/* BALL RACE TAB */}
         {activeTab === "balls" && (
-          <div className="h-full bg-white rounded-xl p-5 border-2 border-teal-200 shadow-md flex flex-col">
-            <div className="flex items-center justify-between mb-4">
+          <div className="h-full bg-white rounded-xl p-4 border-2 border-teal-200 shadow-md flex flex-col">
+            <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-6">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <span className="text-slate-600 text-sm font-medium">Velocidad:</span>
                   <input type="range" min="0.5" max="3" step="0.1" value={ballSpeed} onChange={(e) => setBallSpeed(Number(e.target.value))}
-                    className="w-24 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-teal-500" />
-                  <span className="font-mono text-teal-600 font-bold w-8">{ballSpeed.toFixed(1)}x</span>
+                    className="w-20 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-teal-500" />
+                  <span className="font-mono text-teal-600 font-bold text-sm w-8">{ballSpeed.toFixed(1)}x</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-slate-600 text-sm font-medium">Etapas Pipeline:</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-600 text-sm font-medium">Etapas:</span>
                   <input type="range" min="3" max="7" step="1" value={ballPipelineStages} onChange={(e) => { setBallPipelineStages(Number(e.target.value)); resetBalls(); }}
-                    className="w-24 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-500" />
-                  <span className="font-mono text-purple-600 font-bold w-4">{ballPipelineStages}</span>
+                    className="w-20 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-500" />
+                  <span className="font-mono text-purple-600 font-bold text-sm">{ballPipelineStages}</span>
                 </div>
               </div>
               <div className="flex gap-2">
                 {!ballIsRunning ? (
                   <button onClick={() => setBallIsRunning(true)}
-                    className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg transition-all flex items-center gap-2">
-                    <Play className="w-4 h-4" />Iniciar Carrera
+                    className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg transition-all flex items-center gap-1.5 text-sm">
+                    <Play className="w-3.5 h-3.5" />Iniciar
                   </button>
                 ) : (
                   <button onClick={() => setBallIsRunning(false)}
-                    className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg transition-all flex items-center gap-2">
-                    <Pause className="w-4 h-4" />Pausar
+                    className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg transition-all flex items-center gap-1.5 text-sm">
+                    <Pause className="w-3.5 h-3.5" />Pausar
                   </button>
                 )}
-                <button onClick={resetBalls} className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all">
-                  <RotateCcw className="w-4 h-4" />
+                <button onClick={resetBalls} className="px-2 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all">
+                  <RotateCcw className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
 
-            <div className="flex-1 flex flex-col gap-6 justify-center">
+            <div className="flex-1 flex flex-col gap-4 justify-center">
               {/* Monocycle Track */}
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-orange-500" />
-                    <span className="text-orange-600 font-bold">Monociclo</span>
-                    <span className="text-slate-400 text-sm">(1 instruccion completa por ciclo largo)</span>
+                    <Clock className="w-4 h-4 text-orange-500" />
+                    <span className="text-orange-600 font-bold text-sm">Monociclo</span>
+                    <span className="text-slate-400 text-xs">(procesa 1 instruccion completa antes de la siguiente)</span>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <span className="text-slate-500 text-sm">Completadas:</span>
-                    <span className="font-mono text-2xl font-bold text-orange-600">{monoCompleted}</span>
+                  <div className="flex items-center gap-2 bg-orange-100 rounded-lg px-3 py-1">
+                    <span className="text-orange-600 text-xs">Completadas:</span>
+                    <span className="font-mono text-xl font-bold text-orange-600">{monoCompleted}</span>
                   </div>
                 </div>
-                <div className="relative h-16 bg-gradient-to-r from-orange-100 to-red-100 rounded-xl border-2 border-orange-200 overflow-hidden">
+                <div className="relative h-14 bg-gradient-to-r from-orange-100 to-red-100 rounded-xl border-2 border-orange-200 overflow-hidden">
                   <div className="absolute inset-0 flex">{[...Array(10)].map((_, i) => <div key={i} className="flex-1 border-r border-orange-200/50" />)}</div>
-                  <div className="absolute top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-red-500 shadow-lg flex items-center justify-center transition-all duration-75"
-                    style={{ left: `calc(${monoPosition}% - 24px)` }}>
-                    <span className="text-white font-bold text-xs">CPU</span>
+                  <div className="absolute top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-gradient-to-br from-orange-400 to-red-500 shadow-lg flex items-center justify-center transition-all duration-75"
+                    style={{ left: `calc(${Math.max(5, Math.min(95, monoPosition))}% - 22px)` }}>
+                    <Clock className="w-5 h-5 text-white" />
                   </div>
-                  <div className="absolute right-0 top-0 bottom-0 w-2 bg-gradient-to-b from-slate-800 via-white to-slate-800" />
+                  <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-emerald-600 via-emerald-400 to-emerald-600" />
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 text-emerald-700 text-xs font-bold">META</div>
                 </div>
               </div>
 
               {/* Pipeline Track */}
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Zap className="w-5 h-5 text-purple-500" />
-                    <span className="text-purple-600 font-bold">Pipeline ({ballPipelineStages} etapas)</span>
-                    <span className="text-slate-400 text-sm">({ballPipelineStages} instrucciones simultaneas)</span>
+                    <Zap className="w-4 h-4 text-purple-500" />
+                    <span className="text-purple-600 font-bold text-sm">Pipeline ({ballPipelineStages} etapas)</span>
+                    <span className="text-slate-400 text-xs">({ballPipelineStages} instrucciones en diferentes fases)</span>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <span className="text-slate-500 text-sm">Completadas:</span>
-                    <span className="font-mono text-2xl font-bold text-purple-600">{pipeCompleted}</span>
+                  <div className="flex items-center gap-2 bg-purple-100 rounded-lg px-3 py-1">
+                    <span className="text-purple-600 text-xs">Completadas:</span>
+                    <span className="font-mono text-xl font-bold text-purple-600">{pipeCompleted}</span>
                   </div>
                 </div>
-                <div className="relative h-16 bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl border-2 border-purple-200 overflow-hidden">
+                <div className="relative h-14 bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl border-2 border-purple-200 overflow-hidden">
                   <div className="absolute inset-0 flex">{[...Array(10)].map((_, i) => <div key={i} className="flex-1 border-r border-purple-200/50" />)}</div>
                   {pipePositions.slice(0, ballPipelineStages).map((pos, i) => {
+                    const stageNames = ["IF", "ID", "EX", "MEM", "WB", "S6", "S7"]
                     const stageColors = ["#7c3aed", "#db2777", "#ea580c", "#16a34a", "#0d9488", "#3b82f6", "#6366f1"]
                     return (
-                      <div key={i} className="absolute top-1/2 -translate-y-1/2 w-10 h-10 rounded-full shadow-lg flex items-center justify-center transition-all duration-75"
-                        style={{ left: `calc(${pos}% - 20px)`, backgroundColor: stageColors[i % stageColors.length] }}>
-                        <span className="text-white font-bold text-xs">{i + 1}</span>
+                      <div key={i} className="absolute top-1/2 -translate-y-1/2 w-9 h-9 rounded-full shadow-lg flex items-center justify-center transition-all duration-75 border-2 border-white"
+                        style={{ left: `calc(${Math.max(5, Math.min(95, pos))}% - 18px)`, backgroundColor: stageColors[i % stageColors.length] }}>
+                        <span className="text-white font-bold text-xs">{stageNames[i]}</span>
                       </div>
                     )
                   })}
-                  <div className="absolute right-0 top-0 bottom-0 w-2 bg-gradient-to-b from-slate-800 via-white to-slate-800" />
+                  <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-emerald-600 via-emerald-400 to-emerald-600" />
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 text-emerald-700 text-xs font-bold">META</div>
                 </div>
+              </div>
+
+              {/* Explanation */}
+              <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                <p className="text-slate-600 text-sm">
+                  <strong className="text-teal-600">Explicacion:</strong> El monociclo debe completar toda la instruccion antes de empezar otra. 
+                  El pipeline tiene {ballPipelineStages} instrucciones moviendose simultaneamente en diferentes etapas, 
+                  por eso termina aproximadamente <strong className="text-purple-600">{ballPipelineStages}x</strong> mas rapido.
+                </p>
               </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-3 gap-4">
-              <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 text-center">
-                <div className="text-slate-500 text-sm mb-1">Ventaja Pipeline</div>
+            <div className="mt-3 grid grid-cols-3 gap-3">
+              <div className="bg-gradient-to-br from-teal-50 to-emerald-50 rounded-xl p-3 border border-teal-200 text-center">
+                <div className="text-teal-600 text-xs mb-1 font-medium">Ventaja Pipeline</div>
                 <div className="font-mono text-3xl font-bold text-teal-600">{monoCompleted > 0 ? ((pipeCompleted / monoCompleted)).toFixed(1) : ballPipelineStages.toFixed(1)}x</div>
-                <div className="text-slate-400 text-xs mt-1">mas instrucciones</div>
+                <div className="text-teal-500 text-xs mt-0.5">mas rapido</div>
               </div>
-              <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-4 border border-orange-200 text-center">
-                <div className="text-orange-600 text-sm mb-1 font-medium">Mono Throughput</div>
+              <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-3 border border-orange-200 text-center">
+                <div className="text-orange-600 text-xs mb-1 font-medium">Throughput Mono</div>
                 <div className="font-mono text-2xl font-bold text-orange-600">{monoCompleted}</div>
-                <div className="text-orange-400 text-xs mt-1">instrucciones</div>
+                <div className="text-orange-400 text-xs mt-0.5">instrucciones</div>
               </div>
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 border border-purple-200 text-center">
-                <div className="text-purple-600 text-sm mb-1 font-medium">Pipe Throughput</div>
+              <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-3 border border-purple-200 text-center">
+                <div className="text-purple-600 text-xs mb-1 font-medium">Throughput Pipe</div>
                 <div className="font-mono text-2xl font-bold text-purple-600">{pipeCompleted}</div>
-                <div className="text-purple-400 text-xs mt-1">instrucciones</div>
+                <div className="text-purple-400 text-xs mt-0.5">instrucciones</div>
               </div>
             </div>
           </div>
@@ -1350,107 +1590,207 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
 
         {/* THROUGHPUT TAB */}
         {activeTab === "throughput" && (
-          <div className="h-full bg-white rounded-xl p-5 border-2 border-teal-200 shadow-md flex flex-col">
-            <div className="flex items-center justify-between mb-4">
+          <div className="h-full bg-white rounded-xl p-4 border-2 border-teal-200 shadow-md flex flex-col">
+            <div className="flex items-center justify-between mb-3">
               <div>
-                <h3 className="text-slate-800 font-bold text-lg">Simulacion de Throughput</h3>
-                <p className="text-slate-500 text-sm">Observa como el pipeline procesa instrucciones en paralelo</p>
+                <h3 className="text-slate-800 font-bold text-base">Simulacion de Throughput: Apps del Telefono</h3>
+                <p className="text-slate-500 text-xs">Imagina que cada app necesita cargarse. El pipeline carga varias a la vez.</p>
               </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2"><span className="text-slate-500 text-sm">Ciclo:</span><span className="font-mono text-xl font-bold text-slate-800">{tpCycle}</span></div>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 bg-slate-100 rounded-lg px-3 py-1.5">
+                  <span className="text-slate-500 text-xs">Ciclo:</span>
+                  <span className="font-mono text-lg font-bold text-slate-800">{tpCycle}</span>
+                </div>
                 <div className="flex gap-2">
-                  {!tpIsRunning ? (
+                  {!tpIsRunning && !tpFinished ? (
                     <button onClick={() => setTpIsRunning(true)}
-                      className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg transition-all flex items-center gap-2">
-                      <Play className="w-4 h-4" />Simular
+                      className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg transition-all flex items-center gap-1.5 text-sm">
+                      <Play className="w-3.5 h-3.5" />Simular
+                    </button>
+                  ) : tpIsRunning ? (
+                    <button onClick={() => setTpIsRunning(false)}
+                      className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg transition-all flex items-center gap-1.5 text-sm">
+                      <Pause className="w-3.5 h-3.5" />Pausar
                     </button>
                   ) : (
-                    <button onClick={() => setTpIsRunning(false)}
-                      className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg transition-all flex items-center gap-2">
-                      <Pause className="w-4 h-4" />Pausar
-                    </button>
+                    <div className="px-3 py-1.5 bg-emerald-100 text-emerald-700 font-semibold rounded-lg flex items-center gap-1.5 text-sm">
+                      <CheckCircle2 className="w-3.5 h-3.5" />Listo
+                    </div>
                   )}
-                  <button onClick={resetThroughput} className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all">
-                    <RotateCcw className="w-4 h-4" />
+                  <button onClick={resetThroughput} className="px-2 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all">
+                    <RotateCcw className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
             </div>
 
-            <div className="flex-1 grid grid-cols-2 gap-6">
+            <div className="flex-1 grid grid-cols-2 gap-4">
               {/* Monocycle */}
-              <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-4 border-2 border-orange-200 flex flex-col">
-                <h4 className="text-orange-600 font-bold mb-3 flex items-center gap-2"><Clock className="w-5 h-5" />Monociclo (1 a la vez)</h4>
-                <div className="flex-1 flex flex-col justify-center">
-                  <div className="mb-4">
-                    <div className="text-slate-500 text-xs mb-2">Cola de Instrucciones:</div>
-                    <div className="flex gap-2 flex-wrap">
-                      {tpMonoQueue.map(instr => (
-                        <div key={instr} className="w-8 h-8 rounded bg-orange-200 flex items-center justify-center font-mono text-sm font-bold text-orange-700">I{instr}</div>
-                      ))}
-                      {tpMonoQueue.length === 0 && <span className="text-slate-400 text-sm italic">Cola vacia</span>}
+              <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-3 border-2 border-orange-200 flex flex-col">
+                <h4 className="text-orange-600 font-bold text-sm mb-2 flex items-center gap-2">
+                  <Clock className="w-4 h-4" />Monociclo - Una app a la vez
+                </h4>
+                <div className="flex-1 flex flex-col">
+                  {/* Waiting apps */}
+                  <div className="mb-2">
+                    <div className="text-slate-500 text-xs mb-1.5">Apps esperando:</div>
+                    <div className="flex gap-1.5 flex-wrap">
+                      {tpMonoQueue.map(id => {
+                        const task = THROUGHPUT_TASKS.find(t => t.id === id)!
+                        const TaskIcon = task.icon
+                        return (
+                          <div key={id} className="w-8 h-8 rounded-lg flex items-center justify-center shadow-sm" style={{ backgroundColor: task.color + "20" }}>
+                            <TaskIcon className="w-4 h-4" style={{ color: task.color }} />
+                          </div>
+                        )
+                      })}
+                      {tpMonoQueue.length === 0 && <span className="text-slate-400 text-xs italic">Cola vacia</span>}
                     </div>
                   </div>
-                  <div className="bg-white rounded-lg p-4 border border-orange-200 mb-4">
-                    <div className="text-slate-500 text-xs mb-2">Procesando:</div>
-                    <div className="h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                  
+                  {/* Processing */}
+                  <div className="bg-white rounded-lg p-3 border border-orange-200 flex-1 flex flex-col justify-center">
+                    <div className="text-slate-500 text-xs mb-2">Cargando ahora:</div>
+                    <div className="flex items-center justify-center gap-3">
                       {tpMonoProcessing !== null ? (
-                        <div className="flex items-center gap-2">
-                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-400 to-red-400 flex items-center justify-center text-white font-bold animate-pulse">I{tpMonoProcessing}</div>
-                          <span className="text-orange-600 text-sm">Ciclo {tpMonoCycleCount + 1}/5</span>
-                        </div>
+                        <>
+                          {(() => {
+                            const task = THROUGHPUT_TASKS.find(t => t.id === tpMonoProcessing)!
+                            const TaskIcon = task.icon
+                            return (
+                              <div className="flex flex-col items-center gap-1">
+                                <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg animate-pulse" style={{ backgroundColor: task.color }}>
+                                  <TaskIcon className="w-6 h-6 text-white" />
+                                </div>
+                                <span className="text-xs font-medium" style={{ color: task.color }}>{task.name}</span>
+                              </div>
+                            )
+                          })()}
+                          <div className="flex flex-col items-center">
+                            <div className="flex gap-1">
+                              {[...Array(5)].map((_, i) => (
+                                <div key={i} className={`w-2 h-6 rounded-sm transition-all ${i < tpMonoCycleCount + 1 ? "bg-orange-500" : "bg-orange-200"}`} />
+                              ))}
+                            </div>
+                            <span className="text-orange-600 text-xs mt-1">{tpMonoCycleCount + 1}/5</span>
+                          </div>
+                        </>
                       ) : (
-                        <span className="text-slate-400">Esperando...</span>
+                        <span className="text-slate-400 text-sm">{tpFinished ? "Completado" : "Esperando..."}</span>
                       )}
                     </div>
                   </div>
-                </div>
-                <div className="bg-orange-100 rounded-lg p-3 text-center"><span className="text-orange-600 text-sm">Completadas: </span><span className="font-mono text-2xl font-bold text-orange-700">{tpMonoCompleted}</span></div>
-              </div>
-
-              {/* Pipeline */}
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 border-2 border-purple-200 flex flex-col">
-                <h4 className="text-purple-600 font-bold mb-3 flex items-center gap-2"><Zap className="w-5 h-5" />Pipeline (5 etapas simultaneas)</h4>
-                <div className="flex-1 flex flex-col justify-center">
-                  <div className="mb-4">
-                    <div className="text-slate-500 text-xs mb-2">Cola de Instrucciones:</div>
-                    <div className="flex gap-2 flex-wrap">
-                      {tpPipeQueue.map(instr => (
-                        <div key={instr} className="w-8 h-8 rounded bg-purple-200 flex items-center justify-center font-mono text-sm font-bold text-purple-700">I{instr}</div>
-                      ))}
-                      {tpPipeQueue.length === 0 && <span className="text-slate-400 text-sm italic">Cola vacia</span>}
-                    </div>
-                  </div>
-                  <div className="bg-white rounded-lg p-4 border border-purple-200 mb-4">
-                    <div className="text-slate-500 text-xs mb-2">Pipeline (5 etapas):</div>
-                    <div className="flex gap-2">
-                      {["IF", "ID", "EX", "MEM", "WB"].map((stage, idx) => {
-                        const stageColors = ["#0d9488", "#7c3aed", "#db2777", "#ea580c", "#16a34a"]
-                        const instr = tpPipelineState[idx]
+                  
+                  {/* Completed */}
+                  <div className="mt-2 bg-orange-100 rounded-lg p-2">
+                    <div className="text-orange-600 text-xs mb-1">Apps cargadas:</div>
+                    <div className="flex gap-1.5 flex-wrap min-h-[32px]">
+                      {[...Array(tpMonoCompleted)].map((_, i) => {
+                        const task = THROUGHPUT_TASKS[i]
+                        const TaskIcon = task.icon
                         return (
-                          <div key={stage} className="flex-1 flex flex-col items-center gap-1">
-                            <div className="w-full h-10 rounded-lg flex items-center justify-center font-bold text-sm text-white" style={{ backgroundColor: stageColors[idx] }}>{stage}</div>
-                            <div className={`w-8 h-8 rounded flex items-center justify-center font-mono text-xs font-bold transition-all ${instr ? "bg-purple-200 text-purple-700 scale-110" : "bg-slate-100 text-slate-400"}`}>
-                              {instr ? `I${instr}` : "-"}
-                            </div>
+                          <div key={i} className="w-7 h-7 rounded-lg flex items-center justify-center shadow-sm" style={{ backgroundColor: task.color }}>
+                            <TaskIcon className="w-3.5 h-3.5 text-white" />
                           </div>
                         )
                       })}
                     </div>
                   </div>
                 </div>
-                <div className="bg-purple-100 rounded-lg p-3 text-center"><span className="text-purple-600 text-sm">Completadas: </span><span className="font-mono text-2xl font-bold text-purple-700">{tpPipeCompleted}</span></div>
+              </div>
+
+              {/* Pipeline */}
+              <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-3 border-2 border-purple-200 flex flex-col">
+                <h4 className="text-purple-600 font-bold text-sm mb-2 flex items-center gap-2">
+                  <Zap className="w-4 h-4" />Pipeline - 5 apps simultaneas
+                </h4>
+                <div className="flex-1 flex flex-col">
+                  {/* Waiting apps */}
+                  <div className="mb-2">
+                    <div className="text-slate-500 text-xs mb-1.5">Apps esperando:</div>
+                    <div className="flex gap-1.5 flex-wrap">
+                      {tpPipeQueue.map(id => {
+                        const task = THROUGHPUT_TASKS.find(t => t.id === id)!
+                        const TaskIcon = task.icon
+                        return (
+                          <div key={id} className="w-8 h-8 rounded-lg flex items-center justify-center shadow-sm" style={{ backgroundColor: task.color + "20" }}>
+                            <TaskIcon className="w-4 h-4" style={{ color: task.color }} />
+                          </div>
+                        )
+                      })}
+                      {tpPipeQueue.length === 0 && <span className="text-slate-400 text-xs italic">Cola vacia</span>}
+                    </div>
+                  </div>
+                  
+                  {/* Pipeline stages */}
+                  <div className="bg-white rounded-lg p-3 border border-purple-200 flex-1">
+                    <div className="text-slate-500 text-xs mb-2">Pipeline (5 etapas en paralelo):</div>
+                    <div className="flex gap-1.5 justify-between">
+                      {["Fetch", "Decode", "Exec", "Mem", "Write"].map((stage, idx) => {
+                        const stageColors = ["#0d9488", "#7c3aed", "#db2777", "#ea580c", "#16a34a"]
+                        const taskId = tpPipelineState[idx]
+                        const task = taskId ? THROUGHPUT_TASKS.find(t => t.id === taskId) : null
+                        return (
+                          <div key={stage} className="flex-1 flex flex-col items-center gap-1">
+                            <div className="w-full h-6 rounded flex items-center justify-center font-bold text-xs text-white" style={{ backgroundColor: stageColors[idx] }}>{stage}</div>
+                            <div className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all ${task ? "shadow-md scale-105" : "bg-slate-100"}`}
+                              style={task ? { backgroundColor: task.color } : {}}>
+                              {task ? <task.icon className="w-4 h-4 text-white" /> : <span className="text-slate-300 text-xs">-</span>}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                  
+                  {/* Completed */}
+                  <div className="mt-2 bg-purple-100 rounded-lg p-2">
+                    <div className="text-purple-600 text-xs mb-1">Apps cargadas:</div>
+                    <div className="flex gap-1.5 flex-wrap min-h-[32px]">
+                      {[...Array(tpPipeCompleted)].map((_, i) => {
+                        const task = THROUGHPUT_TASKS[i]
+                        const TaskIcon = task.icon
+                        return (
+                          <div key={i} className="w-7 h-7 rounded-lg flex items-center justify-center shadow-sm" style={{ backgroundColor: task.color }}>
+                            <TaskIcon className="w-3.5 h-3.5 text-white" />
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="mt-4 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-xl p-4 shadow-lg">
+            {/* Results */}
+            <div className={`mt-3 rounded-xl p-3 shadow-lg transition-all ${tpFinished ? "bg-gradient-to-r from-teal-500 to-emerald-500" : "bg-gradient-to-r from-slate-400 to-slate-500"}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-6">
-                  <div><div className="text-teal-100 text-xs">Ciclos Transcurridos</div><div className="font-mono text-white text-xl font-bold">{tpCycle}</div></div>
-                  <div><div className="text-teal-100 text-xs">Throughput Mono</div><div className="font-mono text-white text-xl font-bold">{tpMonoCompleted} instr</div></div>
-                  <div><div className="text-teal-100 text-xs">Throughput Pipe</div><div className="font-mono text-white text-xl font-bold">{tpPipeCompleted} instr</div></div>
+                  <div>
+                    <div className="text-white/70 text-xs">Ciclos Totales</div>
+                    <div className="font-mono text-white text-lg font-bold">{tpCycle}</div>
+                  </div>
+                  <div>
+                    <div className="text-white/70 text-xs">Mono: Ciclos/App</div>
+                    <div className="font-mono text-white text-lg font-bold">5 ciclos</div>
+                  </div>
+                  <div>
+                    <div className="text-white/70 text-xs">Pipe: Ciclos/App</div>
+                    <div className="font-mono text-white text-lg font-bold">{tpPipeCompleted > 0 ? (tpCycle / tpPipeCompleted).toFixed(1) : "-"} ciclos</div>
+                  </div>
+                  <div>
+                    <div className="text-white/70 text-xs">Apps Completadas</div>
+                    <div className="font-mono text-white text-lg font-bold">
+                      <span className="text-orange-200">{tpMonoCompleted}</span> vs <span className="text-purple-200">{tpPipeCompleted}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="text-right"><div className="text-teal-100 text-xs">Ventaja Pipeline</div><div className="text-4xl font-bold text-white">{tpMonoCompleted > 0 ? (tpPipeCompleted / tpMonoCompleted).toFixed(1) : "-"}x</div></div>
+                <div className="text-right">
+                  <div className="text-white/70 text-xs">Ventaja Pipeline</div>
+                  <div className="text-4xl font-bold text-white">
+                    {tpFinished ? (tpMonoCompleted > 0 ? `${(40 / tpCycle * tpPipeCompleted / tpMonoCompleted).toFixed(1)}x` : "-") : (tpPipeCompleted > tpMonoCompleted ? `${(tpPipeCompleted / Math.max(1, tpMonoCompleted)).toFixed(1)}x` : "-")}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
