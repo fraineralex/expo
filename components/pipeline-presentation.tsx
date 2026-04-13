@@ -54,7 +54,9 @@ export default function PipelinePresentation() {
     if (!revealRef.current) return
     
     try {
-      const res = await fetch(`/api/presentation/command?since=${lastCommandTimestamp.current}`)
+      const res = await fetch(`/api/presentation/command?since=${lastCommandTimestamp.current}`, {
+        cache: "no-store",
+      })
       if (!res.ok) return
       
       const data = await res.json()
