@@ -1048,15 +1048,6 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
 
 type PipelineScenario = "normal" | "data" | "control"
 
-const PIPELINE_STAGES = ["IF", "ID", "EX", "MEM", "WB"]
-const STAGE_COLORS = {
-  IF: "#0d9488",
-  ID: "#7c3aed", 
-  EX: "#db2777",
-  MEM: "#ea580c",
-  WB: "#16a34a"
-}
-
 export function OliverSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
   const [scenario, setScenario] = useState<PipelineScenario>("normal")
   const [cycle, setCycle] = useState(0)
