@@ -370,7 +370,7 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
   )
 }
 
-/* ───────────────────────────────��─────────���───
+/* ───────────────────────────────��─────────����───
    SLIDE 2: CHRISTOPHER - Procesador Monociclo
    REDESIGNED: Cleaner, more visual, less text
 ───────────────────────────────────────────── */
@@ -961,6 +961,7 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
   const [rwPipeFinalTime, setRwPipeFinalTime] = useState(0)
   const [rwElapsedMs, setRwElapsedMs] = useState(0)
   const rwIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const rwElapsedRef = useRef(0) // Ref to track elapsed time for capture
   
   // Ball simulation state - spread positions initially
   const [ballSpeed, setBallSpeed] = useState(0.5)
@@ -1013,7 +1014,9 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
     const monoStep = (100 / SIMULATION_DURATION_MONO) * stepTime
     
     rwIntervalRef.current = setInterval(() => {
-      setRwElapsedMs(t => t + stepTime)
+      // Update elapsed time using ref to capture accurate time
+      rwElapsedRef.current += stepTime
+      setRwElapsedMs(rwElapsedRef.current)
       
       // Update stage tracking based on progress
       setRwMonoStage(Math.min(4, Math.floor(rwMonoProgress / 20)))
@@ -1030,9 +1033,10 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
       
       setRwPipeProgress(p => {
         const next = p + pipeStep
-        if (next >= 100 && !rwPipeFinished) {
+        if (next >= 100) {
+          // Capture the ACTUAL elapsed time from ref
+          setRwPipeFinalTime(prev => prev === 0 ? rwElapsedRef.current : prev)
           setRwPipeFinished(true)
-          setRwPipeFinalTime(rwElapsedMs + stepTime)
           return 100
         }
         return Math.min(100, next)
@@ -1040,9 +1044,10 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
       
       setRwMonoProgress(p => {
         const next = p + monoStep
-        if (next >= 100 && !rwMonoFinished) {
+        if (next >= 100) {
+          // Capture the ACTUAL elapsed time from ref
+          setRwMonoFinalTime(prev => prev === 0 ? rwElapsedRef.current : prev)
           setRwMonoFinished(true)
-          setRwMonoFinalTime(rwElapsedMs + stepTime)
           return 100
         }
         return Math.min(100, next)
@@ -1166,6 +1171,7 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
     setRwMonoFinalTime(0)
     setRwPipeFinalTime(0)
     setRwElapsedMs(0)
+    rwElapsedRef.current = 0 // Reset the ref too
     setRwMonoStage(0)
     setRwPipeStages([0, 0, 0, 0, 0])
     if (rwIntervalRef.current) clearInterval(rwIntervalRef.current)
@@ -2333,7 +2339,7 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
 /* ─────────────────────────────────────────────
    SLIDE 5: OLIVER - Limitaciones del Pipeline
    Interactive Simulator with 3 Scenarios
-  ───────────────────────────────────────────── */
+  ─��─────────────────────────────────────────── */
 
 type PipelineScenario = "normal" | "data" | "control"
 
