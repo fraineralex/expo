@@ -47,7 +47,9 @@ export default function RemoteControlPage() {
   // Fetch current state from presentation
   const fetchState = useCallback(async () => {
     try {
-      const res = await fetch("/api/presentation/state")
+      const res = await fetch("/api/presentation/state", {
+        cache: "no-store",
+      })
       if (res.ok) {
         const data = await res.json()
         if (data.state) {
