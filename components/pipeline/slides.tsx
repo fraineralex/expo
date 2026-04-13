@@ -170,7 +170,7 @@ export function TitleSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
             <br />
             <span className="text-teal-600">Procesador Monociclo</span>
             <br />
-            vs <span className="text-purple-600">Pipeline de 5 Etapas</span>
+            vs <span className="text-purple-600">Procesador Segmentado (Pipeline de 5 Etapas)</span>
           </h1>
           <div className="h-1.5 w-32 bg-gradient-to-r from-teal-500 to-purple-500 rounded-full" />
         </div>
