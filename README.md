@@ -7,8 +7,8 @@ Presentacion interactiva hecha en React por el grupo Los Ingenieros para la asig
 ### **Algenis De los Santos Lopez**
 
 - Slides: `2`
-- Archivo principal: `components/pipeline/slides.tsx:232`
-- Archivo impreso: `app/print/page.tsx:381`
+- Archivo principal: [`components/pipeline/slides.tsx:232`](components/pipeline/slides.tsx#L232)
+- Archivo impreso: [`app/print/page.tsx:381`](app/print/page.tsx#L381)
 - Explicó la medición de rendimiento del procesador.
 - Presentó la fórmula `T = (I x CPI) / f`.
 - Explicó el significado de `I` como cantidad de instrucciones.
@@ -19,8 +19,8 @@ Presentacion interactiva hecha en React por el grupo Los Ingenieros para la asig
 ### **Christopher Enrique Marrero Liriano**
 
 - Slides: `3`
-- Archivo principal: `components/pipeline/slides.tsx:756`
-- Archivo impreso: `app/print/page.tsx:428`
+- Archivo principal: [`components/pipeline/slides.tsx:756`](components/pipeline/slides.tsx#L756)
+- Archivo impreso: [`app/print/page.tsx:428`](app/print/page.tsx#L428)
 - Presentó la simulación del procesador monociclo.
 - Explicó cómo funciona un procesador que completa una instrucción por ciclo.
 - Mostró que el ciclo queda condicionado por la instrucción más lenta.
@@ -31,8 +31,8 @@ Presentacion interactiva hecha en React por el grupo Los Ingenieros para la asig
 ### **Enmanuel Santos Diaz**
 
 - Slides: `4`
-- Archivo principal: `components/pipeline/slides.tsx:1082`
-- Archivo impreso: `app/print/page.tsx:473`
+- Archivo principal: [`components/pipeline/slides.tsx:1082`](components/pipeline/slides.tsx#L1082)
+- Archivo impreso: [`app/print/page.tsx:473`](app/print/page.tsx#L473)
 - Presentó el pipeline de 5 etapas.
 - Explicó cada etapa: `IF`, `ID`, `EX`, `MEM` y `WB`.
 - Usó la analogía de cocina industrial para facilitar la comprensión.
@@ -43,8 +43,8 @@ Presentacion interactiva hecha en React por el grupo Los Ingenieros para la asig
 ### **Frainer Encarnacion**
 
 - Slides: `5`
-- Archivo principal: `components/pipeline/slides.tsx:1718`
-- Archivo impreso: `app/print/page.tsx:507`
+- Archivo principal: [`components/pipeline/slides.tsx:1718`](components/pipeline/slides.tsx#L1718)
+- Archivo impreso: [`app/print/page.tsx:507`](app/print/page.tsx#L507)
 - Presentó la comparación directa entre monociclo y pipeline.
 - Explicó el concepto de speedup.
 - Mostró cómo calcular la mejora de rendimiento entre ambas arquitecturas.
@@ -55,8 +55,8 @@ Presentacion interactiva hecha en React por el grupo Los Ingenieros para la asig
 ### **Oliver Abreu Mateo**
 
 - Slides: `6`
-- Archivo principal: `components/pipeline/slides.tsx:3193`
-- Archivo impreso: `app/print/page.tsx:548`
+- Archivo principal: [`components/pipeline/slides.tsx:3193`](components/pipeline/slides.tsx#L3193)
+- Archivo impreso: [`app/print/page.tsx:548`](app/print/page.tsx#L548)
 - Presentó las limitaciones reales del pipeline.
 - Explicó los riesgos de datos.
 - Explicó los riesgos de control.
