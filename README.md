@@ -1,6 +1,6 @@
 # Los Ingenieros - PROYECTO_FINAL
 
-Presentacion interactiva de Los Ingenieros para Arquitectura del Computador.
+Presentacion interactiva hecha en React por el grupo Los Ingenieros para la asignatura Arquitectura del Computador.
 
 ## Participantes
 
