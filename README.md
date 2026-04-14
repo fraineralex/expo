@@ -7,52 +7,62 @@ Presentacion interactiva hecha en React por el grupo Los Ingenieros para la asig
 ### **Algenis De los Santos Lopez**
 
 - Slides: `2`
-- Explico la medicion de rendimiento del procesador.
-- Presento la formula `T = (I x CPI) / f`.
-- Explico el significado de `I` como cantidad de instrucciones.
-- Explico el significado de `CPI` como ciclos por instruccion.
-- Explico el papel de la frecuencia en el tiempo total de ejecucion.
-- Relaciono los cambios de instrucciones, CPI y frecuencia con el rendimiento final.
+- Archivo principal: `components/pipeline/slides.tsx:232`
+- Archivo impreso: `app/print/page.tsx:381`
+- Explicó la medición de rendimiento del procesador.
+- Presentó la fórmula `T = (I x CPI) / f`.
+- Explicó el significado de `I` como cantidad de instrucciones.
+- Explicó el significado de `CPI` como ciclos por instrucción.
+- Explicó el papel de la frecuencia en el tiempo total de ejecución.
+- Relacionó los cambios de instrucciones, CPI y frecuencia con el rendimiento final.
 
 ### **Christopher Enrique Marrero Liriano**
 
 - Slides: `3`
-- Presento la simulacion del procesador monociclo.
-- Explico como funciona un procesador que completa una instruccion por ciclo.
-- Mostro que el ciclo queda condicionado por la instruccion mas lenta.
-- Explico la diferencia entre tiempo util y tiempo desperdiciado.
-- Analizo el impacto de instrucciones como `LOAD`, `STORE`, `ADD` y `SUB`.
-- Mostro por que el monociclo es simple, pero menos eficiente en aprovechamiento del hardware.
+- Archivo principal: `components/pipeline/slides.tsx:756`
+- Archivo impreso: `app/print/page.tsx:428`
+- Presentó la simulación del procesador monociclo.
+- Explicó cómo funciona un procesador que completa una instrucción por ciclo.
+- Mostró que el ciclo queda condicionado por la instrucción más lenta.
+- Explicó la diferencia entre tiempo útil y tiempo desperdiciado.
+- Analizó el impacto de instrucciones como `LOAD`, `STORE`, `ADD` y `SUB`.
+- Mostró por qué el monociclo es simple, pero menos eficiente en aprovechamiento del hardware.
 
 ### **Enmanuel Santos Diaz**
 
 - Slides: `4`
-- Presento el pipeline de 5 etapas.
-- Explico cada etapa: `IF`, `ID`, `EX`, `MEM` y `WB`.
-- Uso la analogia de cocina industrial para facilitar la comprension.
-- Explico como varias instrucciones pueden avanzar al mismo tiempo.
-- Mostro la idea de llenado inicial del pipeline.
-- Explico por que el pipeline mejora el throughput del procesador.
+- Archivo principal: `components/pipeline/slides.tsx:1082`
+- Archivo impreso: `app/print/page.tsx:473`
+- Presentó el pipeline de 5 etapas.
+- Explicó cada etapa: `IF`, `ID`, `EX`, `MEM` y `WB`.
+- Usó la analogía de cocina industrial para facilitar la comprensión.
+- Explicó cómo varias instrucciones pueden avanzar al mismo tiempo.
+- Mostró la idea de llenado inicial del pipeline.
+- Explicó por qué el pipeline mejora el throughput del procesador.
 
 ### **Frainer Encarnacion**
 
 - Slides: `5`
-- Presento la comparacion directa entre monociclo y pipeline.
-- Explico el concepto de speedup.
-- Mostro como calcular la mejora de rendimiento entre ambas arquitecturas.
-- Presento ejemplos del mundo real para comparar ambos enfoques.
-- Explico el concepto de throughput en el pipeline.
-- Relaciono la mejora del pipeline con tareas practicas como imagen, video y procesamiento de datos.
+- Archivo principal: `components/pipeline/slides.tsx:1718`
+- Archivo impreso: `app/print/page.tsx:507`
+- Presentó la comparación directa entre monociclo y pipeline.
+- Explicó el concepto de speedup.
+- Mostró cómo calcular la mejora de rendimiento entre ambas arquitecturas.
+- Presentó ejemplos del mundo real para comparar ambos enfoques.
+- Explicó el concepto de throughput en el pipeline.
+- Relacionó la mejora del pipeline con tareas prácticas como imagen, video y procesamiento de datos.
 
 ### **Oliver Abreu Mateo**
 
 - Slides: `6`
-- Presento las limitaciones reales del pipeline.
-- Explico los riesgos de datos.
-- Explico los riesgos de control.
-- Explico los riesgos estructurales.
-- Describio conceptos como stalls, burbujas y flush.
-- Explico como estos problemas afectan el rendimiento real del pipeline.
+- Archivo principal: `components/pipeline/slides.tsx:3193`
+- Archivo impreso: `app/print/page.tsx:548`
+- Presentó las limitaciones reales del pipeline.
+- Explicó los riesgos de datos.
+- Explicó los riesgos de control.
+- Explicó los riesgos estructurales.
+- Describió conceptos como stalls, burbujas y flush.
+- Explicó cómo estos problemas afectan el rendimiento real del pipeline.
 
 ## Requisitos
 
