@@ -1,32 +1,101 @@
 "use client"
 
+import type { ReactNode } from "react"
 import { useEffect } from "react"
-import { Cpu, HardDrive, Clock, Users, Zap, RotateCcw, BarChart3, Server, Globe, Code, Monitor, Music, Gamepad2, Terminal, ArrowRight, CheckCircle2, XCircle, AlertTriangle } from "lucide-react"
+import { AlertTriangle, ArrowRight, CheckCircle2, Cpu, Gauge, Layers, QrCode, Zap } from "lucide-react"
 
-// Static print-friendly presentation
+const members = [
+  "Algenis De los Santos Lopez",
+  "Christopher Enrique Marrero Liriano",
+  "Enmanuel Santos Diaz",
+  "Frainer Encarnacion",
+  "Oliver Abreu Mateo",
+]
+
+const participantWork = [
+  {
+    name: "Algenis De los Santos Lopez",
+    topic: "Medicion de rendimiento",
+    detail: "Explica la formula T = (I x CPI) / f y como la frecuencia, el CPI y la cantidad de instrucciones afectan el tiempo total.",
+  },
+  {
+    name: "Christopher Enrique Marrero Liriano",
+    topic: "Procesador monociclo",
+    detail: "Muestra que todas las instrucciones esperan el ciclo de la mas lenta, generando tiempo util y tiempo desperdiciado.",
+  },
+  {
+    name: "Enmanuel Santos Diaz",
+    topic: "Pipeline de 5 etapas",
+    detail: "Presenta IF, ID, EX, MEM y WB con la analogia de cocina industrial para explicar el trabajo simultaneo.",
+  },
+  {
+    name: "Frainer Encarnacion",
+    topic: "Comparacion y speedup",
+    detail: "Compara monociclo y pipeline con ejemplos del mundo real, throughput y el calculo del speedup.",
+  },
+  {
+    name: "Oliver Abreu Mateo",
+    topic: "Limitaciones del pipeline",
+    detail: "Describe riesgos de datos, control y estructura, junto con stalls, flush y tecnicas de mitigacion.",
+  },
+]
+
+const pipelineStages = [
+  { id: "IF", name: "Fetch", text: "Busca la instruccion en memoria." },
+  { id: "ID", name: "Decode", text: "Interpreta la instruccion y lee registros." },
+  { id: "EX", name: "Execute", text: "Realiza la operacion aritmetica o logica." },
+  { id: "MEM", name: "Memory", text: "Accede a memoria cuando la instruccion lo necesita." },
+  { id: "WB", name: "Write Back", text: "Escribe el resultado final." },
+]
+
+const stageColors = ["#0d9488", "#7c3aed", "#db2777", "#ea580c", "#16a34a"]
+
+const monocycleRows = [
+  { instruction: "ADD", useful: 200, wasted: 600 },
+  { instruction: "LOAD", useful: 800, wasted: 0 },
+  { instruction: "SUB", useful: 200, wasted: 600 },
+  { instruction: "STORE", useful: 700, wasted: 100 },
+  { instruction: "AND", useful: 150, wasted: 650 },
+  { instruction: "OR", useful: 150, wasted: 650 },
+]
+
+function Slide({
+  number,
+  title,
+  eyebrow,
+  presenter,
+  children,
+}: {
+  number: string
+  title: string
+  eyebrow: string
+  presenter?: string
+  children: ReactNode
+}) {
+  return (
+    <section className="print-slide">
+      <div className="slide-top">
+        <div>
+          <div className="eyebrow">{eyebrow}</div>
+          <h2>{title}</h2>
+        </div>
+        {presenter ? <div className="presenter">{presenter}</div> : null}
+      </div>
+      <div className="slide-body">{children}</div>
+      <div className="slide-number">{number}</div>
+    </section>
+  )
+}
+
 export default function PrintPage() {
   useEffect(() => {
-    // Set document title for PDF filename
-    document.title = "Los_Ingenieros_Asignacion04_Uso de los simuladores de Memoria"
-    
-    // Auto-trigger print dialog after a short delay
-    const timer = setTimeout(() => {
-      window.print()
-    }, 500)
+    document.title = "Los_Ingenieros_PROYECT_FINAL"
+    const timer = setTimeout(() => window.print(), 500)
     return () => clearTimeout(timer)
   }, [])
 
-  const members = [
-    "Algenis De los Santos",
-    "Oliver Abreu",
-    "Enmanuel Santos",
-    "Frainer Encarnacion",
-    "Christopher Marrero",
-  ]
-
   return (
     <div className="print-presentation">
-      {/* Global print styles */}
       <style jsx global>{`
         @page {
           size: landscape;
@@ -36,1196 +105,575 @@ export default function PrintPage() {
         html, body {
           margin: 0;
           padding: 0;
-          background: #0a0a1a !important;
-          -webkit-print-color-adjust: exact !important;
-          print-color-adjust: exact !important;
-          color-adjust: exact !important;
+          background: #06121b;
+          color: #e2e8f0;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+
+        * {
+          box-sizing: border-box;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
         }
 
         .print-presentation {
-          background: #0a0a1a;
-          color: #f8fafc;
+          background: #06121b;
+          color: #e2e8f0;
+          font-family: Arial, Helvetica, sans-serif;
         }
 
         .print-slide {
           width: 100vw;
           height: 100vh;
-          padding: 40px 56px;
-          box-sizing: border-box;
-          page-break-after: always;
-          page-break-inside: avoid;
+          padding: 38px 48px;
           display: flex;
           flex-direction: column;
-          background: #0a0a1a !important;
           position: relative;
           overflow: hidden;
+          page-break-after: always;
+          background:
+            radial-gradient(circle at top right, rgba(20, 184, 166, 0.18), transparent 30%),
+            radial-gradient(circle at bottom left, rgba(124, 58, 237, 0.16), transparent 28%),
+            #06121b;
         }
 
         .print-slide:last-child {
           page-break-after: auto;
         }
 
-        @media print {
-          .print-slide {
-            background: #0a0a1a !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
-
-          * {
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-            color-adjust: exact !important;
-          }
+        .slide-top {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 24px;
+          margin-bottom: 22px;
         }
 
-        .presenter-name {
-          position: absolute;
-          bottom: 20px;
-          right: 40px;
-          color: #64748b;
+        .eyebrow {
+          color: #5eead4;
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: 1.4px;
+          text-transform: uppercase;
+          margin-bottom: 8px;
+        }
+
+        .slide-top h2 {
+          margin: 0;
+          color: #f8fafc;
+          font-size: 34px;
+          line-height: 1.1;
+        }
+
+        .presenter {
+          border: 1px solid rgba(148, 163, 184, 0.25);
+          background: rgba(15, 23, 42, 0.8);
+          color: #cbd5e1;
+          border-radius: 999px;
+          padding: 10px 16px;
           font-size: 13px;
-          font-weight: 500;
+          white-space: nowrap;
+        }
+
+        .slide-body {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 18px;
+          min-height: 0;
         }
 
         .slide-number {
           position: absolute;
-          bottom: 20px;
-          left: 40px;
-          color: #475569;
-          font-size: 11px;
-          font-family: monospace;
-        }
-
-        .slide-header {
-          margin-bottom: 24px;
-        }
-
-        .slide-header .topic-label {
-          color: #22d3ee;
+          bottom: 18px;
+          right: 24px;
+          color: #64748b;
           font-size: 12px;
-          font-family: monospace;
+          font-family: Consolas, monospace;
+        }
+
+        .card-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 18px;
+        }
+
+        .card {
+          background: rgba(15, 23, 42, 0.82);
+          border: 1px solid rgba(148, 163, 184, 0.18);
+          border-radius: 18px;
+          padding: 18px;
+        }
+
+        .card h3,
+        .card h4,
+        .card p {
+          margin-top: 0;
+        }
+
+        .metric-grid {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 14px;
+        }
+
+        .metric {
+          background: rgba(15, 23, 42, 0.82);
+          border: 1px solid rgba(148, 163, 184, 0.18);
+          border-radius: 16px;
+          padding: 16px;
+        }
+
+        .metric-label {
+          font-size: 12px;
+          color: #94a3b8;
+          margin-bottom: 8px;
           text-transform: uppercase;
           letter-spacing: 1px;
+        }
+
+        .metric-value {
+          font-size: 24px;
+          font-weight: 700;
+          color: #f8fafc;
+        }
+
+        .badge-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+        }
+
+        .badge {
+          padding: 8px 14px;
+          border-radius: 999px;
+          background: rgba(15, 23, 42, 0.82);
+          border: 1px solid rgba(148, 163, 184, 0.2);
+          color: #cbd5e1;
+          font-size: 13px;
+        }
+
+        .stage-row {
+          display: grid;
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+          gap: 14px;
+        }
+
+        .stage-card {
+          border-radius: 18px;
+          padding: 16px 14px;
+          color: white;
+          min-height: 146px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+
+        .stage-id {
+          font-size: 28px;
+          font-weight: 800;
           margin-bottom: 6px;
         }
 
-        .slide-header h2 {
-          font-size: 32px;
+        .stage-name {
+          font-size: 15px;
           font-weight: 700;
-          color: #f8fafc;
-          margin: 0;
+          margin-bottom: 10px;
         }
 
-        .slide-header .divider {
-          width: 60px;
-          height: 3px;
-          background: #22d3ee;
-          margin-top: 10px;
-          border-radius: 2px;
+        .stage-text {
+          font-size: 13px;
+          line-height: 1.5;
+          color: rgba(255, 255, 255, 0.92);
+        }
+
+        .timeline-table {
+          display: grid;
+          grid-template-columns: 120px 1fr 110px;
+          gap: 10px;
+          align-items: center;
+        }
+
+        .bar {
+          height: 18px;
+          border-radius: 999px;
+          overflow: hidden;
+          background: #1e293b;
+          display: flex;
+        }
+
+        .bar-useful {
+          background: #22c55e;
+        }
+
+        .bar-wasted {
+          background: repeating-linear-gradient(45deg, #ef4444, #ef4444 8px, #f87171 8px, #f87171 16px);
+        }
+
+        .list {
+          margin: 0;
+          padding-left: 18px;
+          line-height: 1.7;
+          color: #cbd5e1;
+          font-size: 14px;
+        }
+
+        .formula-box {
+          background: rgba(15, 23, 42, 0.88);
+          border: 1px solid rgba(94, 234, 212, 0.3);
+          color: #f8fafc;
+          border-radius: 18px;
+          padding: 22px;
+          font-size: 28px;
+          font-weight: 700;
+          text-align: center;
+        }
+
+        .comparison-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 16px;
+        }
+
+        .comparison-card {
+          border-radius: 20px;
+          padding: 20px;
+          min-height: 260px;
+        }
+
+        .comparison-card h3 {
+          margin: 0 0 10px;
+          font-size: 24px;
+        }
+
+        .footer-note {
+          font-size: 13px;
+          color: #94a3b8;
+          line-height: 1.6;
         }
       `}</style>
 
-      {/* ═══════════════════════════════════════════════════════════════
-          SLIDE 1: TITLE
-      ═══════════════════════════════════════════════════════════════ */}
-      <div className="print-slide" style={{ justifyContent: "center", alignItems: "center", textAlign: "center" }}>
-        <div style={{ marginBottom: 32 }}>
-          <div style={{ display: "flex", justifyContent: "center", gap: 20, marginBottom: 28 }}>
-            <Cpu size={52} color="#22d3ee" />
-            <Clock size={52} color="#22d3ee" />
-            <BarChart3 size={52} color="#22d3ee" />
-          </div>
-          <h1 style={{ fontSize: 52, fontWeight: 700, marginBottom: 12, color: "#f8fafc", lineHeight: 1.15 }}>
-            Comparador de Rendimiento:
-            <br />
-            Procesador Monociclo
-            <br />
-            vs Procesador Segmentado (Pipeline de 5 Etapas)
-          </h1>
+      <section className="print-slide" style={{ justifyContent: "center" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 18, marginBottom: 24 }}>
+          <Cpu size={52} color="#5eead4" />
+          <ArrowRight size={34} color="#94a3b8" />
+          <Layers size={52} color="#c084fc" />
+          <ArrowRight size={34} color="#94a3b8" />
+          <Gauge size={52} color="#fb7185" />
         </div>
-        <div style={{ marginTop: 40 }}>
-          <p style={{ fontSize: 18, color: "#94a3b8", marginBottom: 6 }}>Arquitectura del Computador</p>
-          <p style={{ fontSize: 26, color: "#f8fafc", fontWeight: 600, marginBottom: 24 }}>Grupo: Los Ingenieros</p>
-          <div style={{ display: "flex", justifyContent: "center", gap: 16, flexWrap: "wrap" }}>
-            {members.map((m) => (
-              <span key={m} style={{ fontSize: 13, color: "#94a3b8", padding: "6px 14px", background: "#1e293b", borderRadius: 20, border: "1px solid #334155" }}>
-                {m}
-              </span>
-            ))}
-          </div>
+        <div style={{ maxWidth: 1120 }}>
+          <div className="eyebrow">Proyecto final impreso</div>
+          <h1 style={{ margin: 0, fontSize: 58, lineHeight: 1.04, color: "#f8fafc" }}>Los_Ingenieros_PROYECT_FINAL</h1>
+          <p style={{ fontSize: 23, lineHeight: 1.5, color: "#cbd5e1", marginTop: 22, marginBottom: 26 }}>
+            Comparador de rendimiento entre un procesador monociclo y un procesador segmentado con pipeline de 5 etapas.
+            Esta version impresa resume la explicacion conceptual de la presentacion real.
+          </p>
         </div>
-        <div className="slide-number">1 / 13</div>
-      </div>
+        <div className="badge-row" style={{ maxWidth: 1080 }}>
+          {members.map((member) => (
+            <span key={member} className="badge">{member}</span>
+          ))}
+        </div>
+        <div className="slide-number">1 / 8</div>
+      </section>
 
-      {/* ═══════════════════════════════════════════════════════════════
-          SLIDE 2: TEMA 1 - Introduccion al Simulador (Algenis) - Parte 1
-      ═══════════════════════════════════════════════════════════════ */}
-      <div className="print-slide">
-        <div className="slide-header">
-          <div className="topic-label">Tema 01</div>
-          <h2>Introduccion al Simulador WebSim</h2>
-          <div className="divider" />
+      <Slide number="2 / 8" eyebrow="Seccion 01" title="Medicion de rendimiento" presenter="Algenis De los Santos Lopez">
+        <div className="formula-box">T = (I x CPI) / f</div>
+        <div className="metric-grid">
+          <div className="metric">
+            <div className="metric-label">I</div>
+            <div className="metric-value">Instrucciones</div>
+          </div>
+          <div className="metric">
+            <div className="metric-label">CPI</div>
+            <div className="metric-value">Ciclos por instruccion</div>
+          </div>
+          <div className="metric">
+            <div className="metric-label">f</div>
+            <div className="metric-value">Frecuencia</div>
+          </div>
+          <div className="metric">
+            <div className="metric-label">Resultado</div>
+            <div className="metric-value">Tiempo total</div>
+          </div>
         </div>
-        
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, flex: 1 }}>
-          <div>
-            <h3 style={{ fontSize: 22, fontWeight: 600, marginBottom: 14, color: "#f8fafc" }}>Que es WebSim?</h3>
-            <p style={{ fontSize: 15, color: "#94a3b8", lineHeight: 1.7, marginBottom: 20 }}>
-              WebSim es un simulador interactivo basado en web que permite visualizar como el sistema operativo 
-              gestiona multiples procesos y asigna tiempo de CPU utilizando diferentes algoritmos de planificacion.
-              Es una herramienta educativa que facilita la comprension de conceptos complejos de sistemas operativos.
+        <div className="card-grid">
+          <div className="card">
+            <h3 style={{ color: "#5eead4", fontSize: 22 }}>Idea central</h3>
+            <p style={{ color: "#cbd5e1", lineHeight: 1.7, fontSize: 15 }}>
+              El rendimiento no depende de un solo dato. Si aumentan las instrucciones o el CPI, el tiempo sube.
+              Si aumenta la frecuencia, el tiempo baja.
             </p>
-            
-            <h3 style={{ fontSize: 22, fontWeight: 600, marginBottom: 14, color: "#f8fafc" }}>Objetivos del Simulador</h3>
-            <ul style={{ color: "#94a3b8", paddingLeft: 20, lineHeight: 2, fontSize: 15 }}>
-              <li>Visualizar el ciclo de vida de los procesos</li>
-              <li>Comprender los algoritmos de planificacion (FCFS, Round Robin)</li>
-              <li>Analizar metricas de rendimiento en tiempo real</li>
-              <li>Experimentar con diferentes configuraciones de quantum</li>
+            <ul className="list">
+              <li>Mas instrucciones implican mas trabajo total.</li>
+              <li>Un CPI alto significa que cada instruccion cuesta mas ciclos.</li>
+              <li>Una frecuencia mayor reduce la duracion de cada ciclo.</li>
             </ul>
           </div>
-          
-          <div style={{ background: "#0f172a", borderRadius: 12, padding: 20, border: "1px solid #1e293b" }}>
-            <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16, color: "#f8fafc" }}>Componentes Principales</h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {[
-                { name: "Cola de Listos (Ready Queue)", desc: "Procesos esperando tiempo de CPU", color: "#3b82f6" },
-                { name: "CPU (Procesador)", desc: "Ejecuta las instrucciones del proceso activo", color: "#22c55e" },
-                { name: "Scheduler (Planificador)", desc: "Decide que proceso ejecutar", color: "#f59e0b" },
-                { name: "Dispatcher", desc: "Realiza el cambio de contexto", color: "#a855f7" },
-              ].map((item) => (
-                <div key={item.name} style={{ display: "flex", gap: 12, padding: 12, background: "#1e293b", borderRadius: 8 }}>
-                  <div style={{ width: 4, background: item.color, borderRadius: 2 }} />
-                  <div>
-                    <div style={{ fontWeight: 600, color: "#f8fafc", fontSize: 14 }}>{item.name}</div>
-                    <div style={{ color: "#94a3b8", fontSize: 13 }}>{item.desc}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-        
-        <div className="presenter-name">Algenis De los Santos</div>
-        <div className="slide-number">2 / 13</div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════════════
-          SLIDE 3: TEMA 1 - Estados de un Proceso (Algenis) - Parte 2
-      ═══════════════════════════════════════════════════════════════ */}
-      <div className="print-slide">
-        <div className="slide-header">
-          <div className="topic-label">Tema 01</div>
-          <h2>Estados de un Proceso</h2>
-          <div className="divider" />
-        </div>
-        
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: 28, flex: 1 }}>
-          <div>
-            <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 14, color: "#f8fafc" }}>Los 5 Estados Fundamentales</h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {[
-                { state: "Nuevo", color: "#6b7280", desc: "Proceso recien creado, aun no admitido al sistema" },
-                { state: "Ready (Listo)", color: "#eab308", desc: "En memoria, esperando ser asignado a la CPU" },
-                { state: "Ejecutando", color: "#22c55e", desc: "Actualmente usando el procesador" },
-                { state: "Esperando (Bloqueado)", color: "#f97316", desc: "Esperando I/O o algun evento externo" },
-                { state: "Terminado", color: "#64748b", desc: "Ejecucion completada, liberando recursos" },
-              ].map((item) => (
-                <div key={item.state} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: 10, background: "#0f172a", borderRadius: 8 }}>
-                  <div style={{ width: 14, height: 14, borderRadius: "50%", background: item.color, marginTop: 3, flexShrink: 0 }} />
-                  <div>
-                    <span style={{ fontWeight: 600, color: "#f8fafc", fontSize: 14 }}>{item.state}</span>
-                    <p style={{ color: "#94a3b8", fontSize: 13, margin: 0, marginTop: 2 }}>{item.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          <div style={{ background: "#0f172a", borderRadius: 12, padding: 24, border: "1px solid #1e293b" }}>
-            <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 20, color: "#f8fafc", textAlign: "center" }}>Diagrama de Transicion de Estados</h3>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-              <div style={{ padding: "10px 28px", background: "#374151", borderRadius: 8, color: "#f8fafc", fontWeight: 500 }}>Nuevo</div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <ArrowRight size={16} color="#22d3ee" style={{ transform: "rotate(90deg)" }} />
-                <span style={{ color: "#64748b", fontSize: 12 }}>admitir</span>
-              </div>
-              <div style={{ padding: "10px 28px", background: "#ca8a04", borderRadius: 8, color: "#f8fafc", fontWeight: 500 }}>Ready (Cola)</div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <ArrowRight size={16} color="#22d3ee" style={{ transform: "rotate(90deg)" }} />
-                <span style={{ color: "#64748b", fontSize: 12 }}>dispatch</span>
-              </div>
-              <div style={{ padding: "10px 28px", background: "#16a34a", borderRadius: 8, color: "#f8fafc", fontWeight: 500 }}>Ejecutando (CPU)</div>
-              <div style={{ display: "flex", gap: 60, marginTop: 12 }}>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-                  <span style={{ color: "#f97316", fontSize: 12 }}>I/O request</span>
-                  <ArrowRight size={16} color="#f97316" style={{ transform: "rotate(90deg)" }} />
-                  <div style={{ padding: "8px 20px", background: "#c2410c", borderRadius: 8, color: "#f8fafc", fontWeight: 500, fontSize: 14 }}>Esperando</div>
-                  <span style={{ color: "#64748b", fontSize: 11 }}>I/O complete {'->'} Ready</span>
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-                  <span style={{ color: "#64748b", fontSize: 12 }}>exit</span>
-                  <ArrowRight size={16} color="#64748b" style={{ transform: "rotate(90deg)" }} />
-                  <div style={{ padding: "8px 20px", background: "#475569", borderRadius: 8, color: "#f8fafc", fontWeight: 500, fontSize: 14 }}>Terminado</div>
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-                  <span style={{ color: "#22d3ee", fontSize: 12 }}>timeout (quantum)</span>
-                  <ArrowRight size={16} color="#22d3ee" style={{ transform: "rotate(90deg)" }} />
-                  <span style={{ color: "#ca8a04", fontSize: 12 }}>{'->'} Ready</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div className="presenter-name">Algenis De los Santos</div>
-        <div className="slide-number">3 / 13</div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════════════
-          SLIDE 4: TEMA 2 - CPU-bound vs I/O-bound (Oliver) - Parte 1
-      ═══════════════════════════════════════════════════════════════ */}
-      <div className="print-slide">
-        <div className="slide-header">
-          <div className="topic-label">Tema 02</div>
-          <h2>Procesos CPU-bound vs I/O-bound</h2>
-          <div className="divider" />
-        </div>
-        
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, flex: 1 }}>
-          {/* CPU-bound */}
-          <div style={{ background: "#0f172a", borderRadius: 12, padding: 20, border: "2px solid #dc2626" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
-              <div style={{ padding: 10, background: "rgba(220,38,38,0.15)", borderRadius: 8 }}>
-                <Cpu size={28} color="#dc2626" />
-              </div>
-              <h3 style={{ fontSize: 22, fontWeight: 600, color: "#dc2626", margin: 0 }}>CPU-bound</h3>
-            </div>
-            <p style={{ color: "#94a3b8", marginBottom: 14, lineHeight: 1.6, fontSize: 14 }}>
-              Procesos que pasan la mayor parte del tiempo realizando calculos intensivos en el procesador.
-              Necesitan mucho tiempo de CPU y realizan pocas operaciones de entrada/salida.
-            </p>
-            <h4 style={{ color: "#f8fafc", fontWeight: 600, marginBottom: 8, fontSize: 15 }}>Caracteristicas:</h4>
-            <ul style={{ color: "#94a3b8", paddingLeft: 18, lineHeight: 1.9, fontSize: 14, marginBottom: 14 }}>
-              <li>Alto uso de CPU (85-95%)</li>
-              <li>Minimas operaciones de I/O</li>
-              <li>Rafagas de CPU largas y continuas</li>
-              <li>Pocos cambios de contexto</li>
+          <div className="card">
+            <h3 style={{ color: "#c084fc", fontSize: 22 }}>Lectura del simulador</h3>
+            <ul className="list">
+              <li>El simulador permite variar instrucciones, CPI y frecuencia.</li>
+              <li>Los cambios se reflejan en tiempo, ciclos totales y eficiencia.</li>
+              <li>Sirve como base para comparar luego monociclo contra pipeline.</li>
             </ul>
-            <h4 style={{ color: "#f8fafc", fontWeight: 600, marginBottom: 8, fontSize: 15 }}>Ejemplos:</h4>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-              {["Renderizado de video", "Calculos cientificos", "Compresion", "Machine Learning", "Criptografia"].map((ex) => (
-                <span key={ex} style={{ fontSize: 12, padding: "4px 10px", background: "rgba(220,38,38,0.15)", color: "#fca5a5", borderRadius: 4 }}>{ex}</span>
-              ))}
-            </div>
-          </div>
-          
-          {/* I/O-bound */}
-          <div style={{ background: "#0f172a", borderRadius: 12, padding: 20, border: "2px solid #22c55e" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
-              <div style={{ padding: 10, background: "rgba(34,197,94,0.15)", borderRadius: 8 }}>
-                <HardDrive size={28} color="#22c55e" />
-              </div>
-              <h3 style={{ fontSize: 22, fontWeight: 600, color: "#22c55e", margin: 0 }}>I/O-bound</h3>
-            </div>
-            <p style={{ color: "#94a3b8", marginBottom: 14, lineHeight: 1.6, fontSize: 14 }}>
-              Procesos que pasan la mayor parte del tiempo esperando operaciones de entrada/salida.
-              Usan poco la CPU y frecuentemente se bloquean esperando datos externos.
+            <p className="footer-note" style={{ marginTop: 18 }}>
+              Ejemplo: si el mismo trabajo se completa con menos CPI o con ciclos mas cortos, el tiempo final mejora.
             </p>
-            <h4 style={{ color: "#f8fafc", fontWeight: 600, marginBottom: 8, fontSize: 15 }}>Caracteristicas:</h4>
-            <ul style={{ color: "#94a3b8", paddingLeft: 18, lineHeight: 1.9, fontSize: 14, marginBottom: 14 }}>
-              <li>Bajo uso de CPU (10-35%)</li>
-              <li>Frecuentes operaciones de I/O</li>
-              <li>Rafagas de CPU cortas</li>
-              <li>Muchos cambios de contexto</li>
+          </div>
+        </div>
+      </Slide>
+
+      <Slide number="3 / 8" eyebrow="Seccion 02" title="Procesador monociclo" presenter="Christopher Enrique Marrero Liriano">
+        <div className="comparison-grid">
+          <div className="card">
+            <h3 style={{ color: "#fb923c", fontSize: 22 }}>Como funciona</h3>
+            <ul className="list">
+              <li>Toda instruccion debe terminar dentro de un unico ciclo.</li>
+              <li>Ese ciclo se define por la instruccion mas lenta del conjunto.</li>
+              <li>Las instrucciones cortas terminan antes, pero no pueden salir antes.</li>
             </ul>
-            <h4 style={{ color: "#f8fafc", fontWeight: 600, marginBottom: 8, fontSize: 15 }}>Ejemplos:</h4>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-              {["Editores de texto", "Navegadores web", "Servidores de archivos", "Bases de datos", "Shells"].map((ex) => (
-                <span key={ex} style={{ fontSize: 12, padding: "4px 10px", background: "rgba(34,197,94,0.15)", color: "#86efac", borderRadius: 4 }}>{ex}</span>
+            <p className="footer-note" style={{ marginTop: 16 }}>
+              En el ejemplo de la presentacion real, `LOAD` fija el ciclo en 800 ns y arrastra a todas las demas.
+            </p>
+          </div>
+          <div className="card">
+            <h3 style={{ color: "#22c55e", fontSize: 22 }}>Linea de tiempo estatica</h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 14 }}>
+              {monocycleRows.map((row) => (
+                <div key={row.instruction} className="timeline-table">
+                  <div style={{ color: "#f8fafc", fontFamily: "Consolas, monospace", fontWeight: 700 }}>{row.instruction}</div>
+                  <div className="bar">
+                    <div className="bar-useful" style={{ width: `${(row.useful / 800) * 100}%` }} />
+                    <div className="bar-wasted" style={{ width: `${(row.wasted / 800) * 100}%` }} />
+                  </div>
+                  <div style={{ color: "#cbd5e1", fontSize: 13 }}>{row.useful} ns util</div>
+                </div>
               ))}
             </div>
           </div>
         </div>
-        
-        <div className="presenter-name">Oliver Abreu</div>
-        <div className="slide-number">4 / 13</div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════════════
-          SLIDE 5: TEMA 2 - Rafagas y Comparacion (Oliver) - Parte 2
-      ═══════════════════════════════════════════════════════════════ */}
-      <div className="print-slide">
-        <div className="slide-header">
-          <div className="topic-label">Tema 02</div>
-          <h2>Patron de Rafagas y Comparacion</h2>
-          <div className="divider" />
-        </div>
-        
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, flex: 1 }}>
-          <div>
-            <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 16, color: "#f8fafc" }}>Patron de Rafagas (Burst Pattern)</h3>
-            
-            <div style={{ background: "#0f172a", borderRadius: 12, padding: 20, border: "1px solid #1e293b", marginBottom: 16 }}>
-              <h4 style={{ color: "#dc2626", fontSize: 15, marginBottom: 10 }}>CPU-bound: Rafagas largas</h4>
-              <div style={{ display: "flex", gap: 3, marginBottom: 6 }}>
-                {[1,2,3,4,5,6,7,8].map(i => (
-                  <div key={i} style={{ flex: 1, height: 28, background: "#dc2626", borderRadius: 3 }} />
-                ))}
-                <div style={{ width: 24, height: 28, background: "#22c55e", borderRadius: 3 }} />
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#64748b" }}>
-                <span>CPU</span>
-                <span>I/O</span>
-              </div>
-              <p style={{ color: "#94a3b8", fontSize: 13, marginTop: 10 }}>
-                El proceso usa la CPU por largos periodos antes de necesitar I/O.
-              </p>
-            </div>
-            
-            <div style={{ background: "#0f172a", borderRadius: 12, padding: 20, border: "1px solid #1e293b" }}>
-              <h4 style={{ color: "#22c55e", fontSize: 15, marginBottom: 10 }}>I/O-bound: Rafagas cortas</h4>
-              <div style={{ display: "flex", gap: 3, marginBottom: 6 }}>
-                {[1,2,3,4,5,6,7,8,9,10].map(i => (
-                  <div key={i} style={{ flex: i % 2 === 0 ? 2 : 1, height: 28, background: i % 2 === 0 ? "#22c55e" : "#dc2626", borderRadius: 3 }} />
-                ))}
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#64748b" }}>
-                <span>CPU</span>
-                <span style={{ color: "#22c55e" }}>I/O frecuente</span>
-              </div>
-              <p style={{ color: "#94a3b8", fontSize: 13, marginTop: 10 }}>
-                El proceso alterna rapidamente entre CPU e I/O.
-              </p>
-            </div>
-          </div>
-          
-          <div>
-            <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 16, color: "#f8fafc" }}>Tabla Comparativa</h3>
-            <div style={{ background: "#0f172a", borderRadius: 12, padding: 20, border: "1px solid #1e293b" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
-                <thead>
-                  <tr style={{ borderBottom: "2px solid #334155" }}>
-                    <th style={{ textAlign: "left", padding: "10px 8px", color: "#94a3b8" }}>Caracteristica</th>
-                    <th style={{ textAlign: "center", padding: "10px 8px", color: "#dc2626" }}>CPU-bound</th>
-                    <th style={{ textAlign: "center", padding: "10px 8px", color: "#22c55e" }}>I/O-bound</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[
-                    { metric: "Uso de CPU", cpu: "Alto (85-95%)", io: "Bajo (10-35%)" },
-                    { metric: "Rafaga tipica", cpu: "50-500ms", io: "1-10ms" },
-                    { metric: "Operaciones I/O", cpu: "Pocas", io: "Muchas" },
-                    { metric: "Context switches", cpu: "Pocos", io: "Frecuentes" },
-                    { metric: "Tiempo en Ready", cpu: "Corto", io: "Variable" },
-                    { metric: "Tiempo en Wait", cpu: "Minimo", io: "Alto" },
-                  ].map((row, i) => (
-                    <tr key={row.metric} style={{ borderBottom: i < 5 ? "1px solid #1e293b" : "none" }}>
-                      <td style={{ padding: "10px 8px", color: "#f8fafc" }}>{row.metric}</td>
-                      <td style={{ textAlign: "center", padding: "10px 8px", color: "#fca5a5" }}>{row.cpu}</td>
-                      <td style={{ textAlign: "center", padding: "10px 8px", color: "#86efac" }}>{row.io}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            
-            <div style={{ marginTop: 16, padding: 14, background: "#1e293b", borderRadius: 8, border: "1px solid #334155" }}>
-              <h4 style={{ color: "#22d3ee", fontWeight: 600, marginBottom: 6, fontSize: 14 }}>Importancia para el Planificador:</h4>
-              <p style={{ color: "#94a3b8", fontSize: 13, lineHeight: 1.5 }}>
-                El scheduler debe balancear procesos CPU-bound e I/O-bound para maximizar 
-                la utilizacion de recursos. Los I/O-bound deberian tener prioridad para 
-                mantener los dispositivos ocupados.
-              </p>
-            </div>
-          </div>
-        </div>
-        
-        <div className="presenter-name">Oliver Abreu</div>
-        <div className="slide-number">5 / 13</div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════════════
-          SLIDE 6: TEMA 3 - FCFS Concepto (Enmanuel) - Parte 1
-      ═══════════════════════════════════════════════════════════════ */}
-      <div className="print-slide">
-        <div className="slide-header">
-          <div className="topic-label">Tema 03</div>
-          <h2>Algoritmo FCFS (First Come, First Served)</h2>
-          <div className="divider" />
-        </div>
-        
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, flex: 1 }}>
-          <div>
-            <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 14, color: "#f8fafc" }}>Concepto</h3>
-            <p style={{ color: "#94a3b8", lineHeight: 1.7, marginBottom: 16, fontSize: 15 }}>
-              FCFS (First Come, First Served) es el algoritmo de planificacion mas simple. 
-              Los procesos se ejecutan en el orden exacto en que llegan a la cola de listos, 
-              sin interrupciones hasta que terminan o se bloquean.
+        <div className="card-grid">
+          <div className="card">
+            <h4 style={{ color: "#f8fafc", fontSize: 18 }}>Ventaja</h4>
+            <p style={{ color: "#cbd5e1", lineHeight: 1.7, fontSize: 14 }}>
+              La logica es simple y facil de entender: una instruccion entra, se completa y sale.
             </p>
-            
-            <div style={{ background: "#0f172a", borderRadius: 10, padding: 16, border: "1px solid #3b82f6", marginBottom: 16 }}>
-              <h4 style={{ color: "#3b82f6", fontWeight: 600, marginBottom: 10, fontSize: 15 }}>Caracteristicas Clave</h4>
-              <ul style={{ color: "#94a3b8", paddingLeft: 18, lineHeight: 1.9, fontSize: 14 }}>
-                <li><strong style={{ color: "#f8fafc" }}>No preventivo:</strong> Un proceso usa la CPU hasta terminar</li>
-                <li><strong style={{ color: "#f8fafc" }}>Simple:</strong> Implementacion con cola FIFO</li>
-                <li><strong style={{ color: "#f8fafc" }}>Justo:</strong> Respeta estrictamente el orden de llegada</li>
-                <li><strong style={{ color: "#f8fafc" }}>Predecible:</strong> Sin interrupciones inesperadas</li>
-              </ul>
-            </div>
-            
-            <div style={{ background: "#0f172a", borderRadius: 10, padding: 16, border: "1px solid #f97316" }}>
-              <h4 style={{ color: "#f97316", fontWeight: 600, marginBottom: 10, fontSize: 15 }}>Desventajas</h4>
-              <ul style={{ color: "#94a3b8", paddingLeft: 18, lineHeight: 1.9, fontSize: 14 }}>
-                <li>Efecto Convoy: procesos cortos esperan a largos</li>
-                <li>Tiempo de espera promedio alto</li>
-                <li>No optimo para sistemas interactivos</li>
-                <li>Sin consideracion de prioridades</li>
-              </ul>
-            </div>
           </div>
-          
-          <div style={{ background: "#0f172a", borderRadius: 12, padding: 20, border: "1px solid #1e293b" }}>
-            <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16, color: "#f8fafc" }}>Visualizacion de Cola FIFO</h3>
-            
-            <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 24 }}>
-              <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 12, color: "#64748b", marginBottom: 6 }}>Llegada</div>
-                <ArrowRight size={20} color="#22d3ee" />
-              </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                {[
-                  { id: "P1", time: "0ms", color: "#3b82f6" },
-                  { id: "P2", time: "1ms", color: "#22c55e" },
-                  { id: "P3", time: "2ms", color: "#f97316" },
-                  { id: "P4", time: "3ms", color: "#a855f7" },
-                ].map((p) => (
-                  <div key={p.id} style={{ textAlign: "center" }}>
-                    <div style={{ width: 50, height: 50, background: p.color, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 600, color: "#fff", fontSize: 16 }}>
-                      {p.id}
-                    </div>
-                    <span style={{ fontSize: 11, color: "#64748b" }}>{p.time}</span>
-                  </div>
-                ))}
-              </div>
-              <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 12, color: "#64748b", marginBottom: 6 }}>CPU</div>
-                <ArrowRight size={20} color="#22d3ee" />
-              </div>
-            </div>
-            
-            <div style={{ padding: 16, background: "#1e293b", borderRadius: 8, marginBottom: 16 }}>
-              <h4 style={{ color: "#f8fafc", fontWeight: 600, marginBottom: 8, fontSize: 14 }}>Proceso de Ejecucion:</h4>
-              <ol style={{ color: "#94a3b8", paddingLeft: 18, lineHeight: 1.8, fontSize: 14 }}>
-                <li>P1 llega primero {'->'} se ejecuta inmediatamente</li>
-                <li>P2, P3, P4 llegan y esperan en cola</li>
-                <li>P1 termina {'->'} P2 toma la CPU</li>
-                <li>Se repite hasta que todos terminen</li>
-              </ol>
-            </div>
-            
-            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: 12, background: "rgba(251,191,36,0.1)", borderRadius: 8, border: "1px solid #f59e0b" }}>
-              <AlertTriangle size={18} color="#f59e0b" />
-              <span style={{ color: "#fcd34d", fontSize: 13 }}>Si P1 tarda 100ms, P2/P3/P4 esperan todo ese tiempo</span>
-            </div>
-          </div>
-        </div>
-        
-        <div className="presenter-name">Enmanuel Santos</div>
-        <div className="slide-number">6 / 13</div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════════════
-          SLIDE 7: TEMA 3 - FCFS Ejemplo Practico (Enmanuel) - Parte 2
-      ═══════════════════════════════════════════════════════════════ */}
-      <div className="print-slide">
-        <div className="slide-header">
-          <div className="topic-label">Tema 03</div>
-          <h2>FCFS: Ejemplo Practico y Metricas</h2>
-          <div className="divider" />
-        </div>
-        
-        <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: 24, flex: 1 }}>
-          <div>
-            <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 14, color: "#f8fafc" }}>Ejemplo de Ejecucion</h3>
-            
-            <div style={{ background: "#0f172a", borderRadius: 10, padding: 16, border: "1px solid #1e293b", marginBottom: 16 }}>
-              <h4 style={{ color: "#94a3b8", fontSize: 13, marginBottom: 10 }}>Procesos (orden de llegada en t=0):</h4>
-              <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-                {[
-                  { id: "P1", burst: 8, color: "#3b82f6" },
-                  { id: "P2", burst: 4, color: "#22c55e" },
-                  { id: "P3", burst: 2, color: "#f97316" },
-                  { id: "P4", burst: 3, color: "#a855f7" },
-                ].map((p) => (
-                  <div key={p.id} style={{ textAlign: "center" }}>
-                    <div style={{ width: 52, height: 52, background: p.color, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 600, fontSize: 16 }}>
-                      {p.id}
-                    </div>
-                    <span style={{ fontSize: 12, color: "#94a3b8" }}>Burst: {p.burst}ms</span>
-                  </div>
-                ))}
-              </div>
-              
-              <h4 style={{ color: "#94a3b8", fontSize: 13, marginBottom: 8 }}>Diagrama de Gantt:</h4>
-              <div style={{ display: "flex", height: 44, marginBottom: 6, borderRadius: 6, overflow: "hidden" }}>
-                <div style={{ width: "47%", background: "#3b82f6", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 600 }}>P1 (8ms)</div>
-                <div style={{ width: "24%", background: "#22c55e", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 600 }}>P2 (4ms)</div>
-                <div style={{ width: "12%", background: "#f97316", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 600 }}>P3</div>
-                <div style={{ width: "17%", background: "#a855f7", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 600 }}>P4</div>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#64748b", paddingLeft: 4, paddingRight: 4 }}>
-                <span>0</span><span>8</span><span>12</span><span>14</span><span>17</span>
-              </div>
-            </div>
-            
-            <div style={{ background: "#0f172a", borderRadius: 10, padding: 16, border: "1px solid #dc2626" }}>
-              <h4 style={{ color: "#dc2626", fontWeight: 600, marginBottom: 10, fontSize: 15 }}>Efecto Convoy (Convoy Effect)</h4>
-              <p style={{ color: "#94a3b8", fontSize: 13, lineHeight: 1.6 }}>
-                P3 (2ms) y P4 (3ms) son procesos cortos pero deben esperar 8ms+4ms = 12ms 
-                antes de ejecutarse. Este es el "convoy effect" donde procesos cortos 
-                quedan atrapados detras de procesos largos.
-              </p>
-            </div>
-          </div>
-          
-          <div>
-            <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 14, color: "#f8fafc" }}>Calculo de Metricas</h3>
-            
-            <div style={{ background: "#0f172a", borderRadius: 10, padding: 16, border: "1px solid #1e293b" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-                <thead>
-                  <tr style={{ borderBottom: "2px solid #334155" }}>
-                    <th style={{ textAlign: "left", padding: "8px 6px", color: "#94a3b8" }}>Proceso</th>
-                    <th style={{ textAlign: "center", padding: "8px 6px", color: "#94a3b8" }}>Burst</th>
-                    <th style={{ textAlign: "center", padding: "8px 6px", color: "#94a3b8" }}>T. Espera</th>
-                    <th style={{ textAlign: "center", padding: "8px 6px", color: "#94a3b8" }}>T. Retorno</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[
-                    { id: "P1", burst: "8ms", wait: "0ms", turnaround: "8ms", color: "#3b82f6" },
-                    { id: "P2", burst: "4ms", wait: "8ms", turnaround: "12ms", color: "#22c55e" },
-                    { id: "P3", burst: "2ms", wait: "12ms", turnaround: "14ms", color: "#f97316" },
-                    { id: "P4", burst: "3ms", wait: "14ms", turnaround: "17ms", color: "#a855f7" },
-                  ].map((row, i) => (
-                    <tr key={row.id} style={{ borderBottom: i < 3 ? "1px solid #1e293b" : "none" }}>
-                      <td style={{ padding: "10px 6px", color: row.color, fontWeight: 600 }}>{row.id}</td>
-                      <td style={{ textAlign: "center", padding: "10px 6px", color: "#f8fafc" }}>{row.burst}</td>
-                      <td style={{ textAlign: "center", padding: "10px 6px", color: "#fca5a5" }}>{row.wait}</td>
-                      <td style={{ textAlign: "center", padding: "10px 6px", color: "#86efac" }}>{row.turnaround}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              
-              <div style={{ marginTop: 16, padding: 12, background: "#1e293b", borderRadius: 8 }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                  <div>
-                    <span style={{ color: "#94a3b8", fontSize: 12 }}>T. Espera Promedio:</span>
-                    <div style={{ color: "#22d3ee", fontWeight: 700, fontSize: 20 }}>8.5ms</div>
-                    <span style={{ color: "#64748b", fontSize: 11 }}>(0+8+12+14)/4</span>
-                  </div>
-                  <div>
-                    <span style={{ color: "#94a3b8", fontSize: 12 }}>T. Retorno Promedio:</span>
-                    <div style={{ color: "#22d3ee", fontWeight: 700, fontSize: 20 }}>12.75ms</div>
-                    <span style={{ color: "#64748b", fontSize: 11 }}>(8+12+14+17)/4</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div className="presenter-name">Enmanuel Santos</div>
-        <div className="slide-number">7 / 13</div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════════════
-          SLIDE 8: TEMA 4 - Round Robin Concepto (Frainer) - Parte 1
-      ═══════════════════════════════════════════════════════════════ */}
-      <div className="print-slide">
-        <div className="slide-header">
-          <div className="topic-label">Tema 04</div>
-          <h2>Algoritmo Round Robin</h2>
-          <div className="divider" />
-        </div>
-        
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, flex: 1 }}>
-          <div>
-            <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 14, color: "#f8fafc" }}>Concepto</h3>
-            <p style={{ color: "#94a3b8", lineHeight: 1.7, marginBottom: 16, fontSize: 15 }}>
-              Round Robin (RR) es un algoritmo de planificacion preventivo disenado para sistemas 
-              de tiempo compartido. Asigna a cada proceso un quantum (tiempo maximo) de CPU, 
-              y cuando este expira, el proceso vuelve al final de la cola.
+          <div className="card">
+            <h4 style={{ color: "#f8fafc", fontSize: 18 }}>Desventaja</h4>
+            <p style={{ color: "#cbd5e1", lineHeight: 1.7, fontSize: 14 }}>
+              Mucho tiempo del ciclo queda vacio para instrucciones rapidas, por lo que el hardware no se aprovecha bien.
             </p>
-            
-            <div style={{ background: "#0f172a", borderRadius: 10, padding: 16, border: "2px solid #22d3ee", marginBottom: 16 }}>
-              <h4 style={{ color: "#22d3ee", fontWeight: 600, marginBottom: 10, fontSize: 16 }}>Quantum (Time Slice)</h4>
-              <p style={{ color: "#94a3b8", fontSize: 14, lineHeight: 1.6, marginBottom: 12 }}>
-                Es el tiempo maximo que un proceso puede usar la CPU antes de ser interrumpido.
-                La eleccion del quantum es critica para el rendimiento del sistema.
-              </p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: 10, background: "#1e293b", borderRadius: 6 }}>
-                  <span style={{ color: "#f8fafc", fontSize: 13 }}>Quantum pequeno (1-5ms)</span>
-                  <span style={{ color: "#f97316", fontSize: 12 }}>Mas cambios de contexto, mejor respuesta</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: 10, background: "#1e293b", borderRadius: 6 }}>
-                  <span style={{ color: "#f8fafc", fontSize: 13 }}>Quantum grande (50-100ms)</span>
-                  <span style={{ color: "#22c55e", fontSize: 12 }}>Menos overhead, comporta como FCFS</span>
-                </div>
-              </div>
-            </div>
-            
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-              <div style={{ background: "#0f172a", borderRadius: 8, padding: 12, border: "1px solid #22c55e" }}>
-                <h5 style={{ color: "#22c55e", fontWeight: 600, marginBottom: 6, fontSize: 13 }}>Ventajas</h5>
-                <ul style={{ color: "#94a3b8", fontSize: 12, paddingLeft: 14, lineHeight: 1.7 }}>
-                  <li>Equitativo para todos</li>
-                  <li>Buen tiempo de respuesta</li>
-                  <li>Sin inanicion</li>
-                  <li>Predecible</li>
-                </ul>
-              </div>
-              <div style={{ background: "#0f172a", borderRadius: 8, padding: 12, border: "1px solid #dc2626" }}>
-                <h5 style={{ color: "#dc2626", fontWeight: 600, marginBottom: 6, fontSize: 13 }}>Desventajas</h5>
-                <ul style={{ color: "#94a3b8", fontSize: 12, paddingLeft: 14, lineHeight: 1.7 }}>
-                  <li>Overhead por cambios</li>
-                  <li>Quantum critico</li>
-                  <li>Mayor turnaround</li>
-                  <li>Contexto costoso</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          
-          <div style={{ background: "#0f172a", borderRadius: 12, padding: 20, border: "1px solid #1e293b" }}>
-            <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16, color: "#f8fafc" }}>Funcionamiento Visual</h3>
-            
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, marginBottom: 20 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ color: "#64748b", fontSize: 12 }}>Ready Queue:</span>
-                <div style={{ display: "flex", gap: 6 }}>
-                  {["P1", "P2", "P3", "P4"].map((p, i) => (
-                    <div key={p} style={{ width: 36, height: 36, background: ["#3b82f6", "#22c55e", "#f97316", "#a855f7"][i], borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 600, fontSize: 13 }}>
-                      {p}
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <ArrowRight size={16} color="#22d3ee" style={{ transform: "rotate(90deg)" }} />
-                <span style={{ color: "#64748b", fontSize: 11 }}>dispatch</span>
-              </div>
-              
-              <div style={{ padding: "16px 32px", background: "#16a34a", borderRadius: 10, border: "2px solid #22c55e" }}>
-                <div style={{ textAlign: "center" }}>
-                  <span style={{ color: "#bbf7d0", fontSize: 11 }}>CPU</span>
-                  <div style={{ fontWeight: 700, fontSize: 20, color: "#fff" }}>P1</div>
-                  <span style={{ color: "#bbf7d0", fontSize: 11 }}>Q=4ms</span>
-                </div>
-              </div>
-              
-              <div style={{ display: "flex", gap: 40, marginTop: 8 }}>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                  <span style={{ color: "#f97316", fontSize: 11 }}>Quantum expira</span>
-                  <ArrowRight size={14} color="#f97316" style={{ transform: "rotate(90deg)" }} />
-                  <span style={{ color: "#64748b", fontSize: 10 }}>Vuelve a cola</span>
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                  <span style={{ color: "#22c55e", fontSize: 11 }}>Termina antes</span>
-                  <ArrowRight size={14} color="#22c55e" style={{ transform: "rotate(90deg)" }} />
-                  <span style={{ color: "#64748b", fontSize: 10 }}>Sale del sistema</span>
-                </div>
-              </div>
-            </div>
-            
-            <div style={{ padding: 12, background: "#1e293b", borderRadius: 8 }}>
-              <p style={{ color: "#94a3b8", fontSize: 12, lineHeight: 1.6, textAlign: "center" }}>
-                El proceso recibe exactamente Q milisegundos. Si no termina, 
-                vuelve al final de la cola y el siguiente proceso toma la CPU.
-              </p>
-            </div>
           </div>
         </div>
-        
-        <div className="presenter-name">Frainer Encarnacion</div>
-        <div className="slide-number">8 / 13</div>
-      </div>
+      </Slide>
 
-      {/* ═══════════════════════════════════════════════════════════════
-          SLIDE 9: TEMA 4 - Round Robin Context Switching (Frainer) - Parte 2
-      ═══════════════════════════════════════════════════════════════ */}
-      <div className="print-slide">
-        <div className="slide-header">
-          <div className="topic-label">Tema 04</div>
-          <h2>Context Switching y Ejemplo Practico</h2>
-          <div className="divider" />
+      <Slide number="4 / 8" eyebrow="Seccion 03" title="Pipeline de 5 etapas" presenter="Enmanuel Santos Diaz">
+        <div className="stage-row">
+          {pipelineStages.map((stage, index) => (
+            <div key={stage.id} className="stage-card" style={{ background: stageColors[index] }}>
+              <div>
+                <div className="stage-id">{stage.id}</div>
+                <div className="stage-name">{stage.name}</div>
+              </div>
+              <div className="stage-text">{stage.text}</div>
+            </div>
+          ))}
         </div>
-        
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, flex: 1 }}>
-          <div>
-            <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 14, color: "#f8fafc" }}>Context Switching (Cambio de Contexto)</h3>
-            <p style={{ color: "#94a3b8", fontSize: 14, lineHeight: 1.6, marginBottom: 16 }}>
-              Cuando el quantum expira, el sistema operativo debe guardar el estado del 
-              proceso actual y cargar el estado del siguiente. Este proceso tiene un costo.
+        <div className="card-grid">
+          <div className="card">
+            <h3 style={{ color: "#c084fc", fontSize: 22 }}>Analogia de cocina</h3>
+            <ul className="list">
+              <li>`IF`: recepcion del pedido.</li>
+              <li>`ID`: preparacion de ingredientes.</li>
+              <li>`EX`: coccion o trabajo principal.</li>
+              <li>`MEM`: acceso a recursos extra.</li>
+              <li>`WB`: entrega del plato terminado.</li>
+            </ul>
+          </div>
+          <div className="card">
+            <h3 style={{ color: "#5eead4", fontSize: 22 }}>Por que mejora</h3>
+            <ul className="list">
+              <li>Mientras una instruccion esta en `EX`, otra puede estar en `ID` y otra en `IF`.</li>
+              <li>El pipeline no reduce siempre la latencia individual, pero si aumenta el trabajo completado por ciclo.</li>
+              <li>Despues del llenado inicial, puede salir una instruccion por ciclo.</li>
+            </ul>
+          </div>
+        </div>
+      </Slide>
+
+      <Slide number="5 / 8" eyebrow="Seccion 04" title="Comparacion directa y speedup" presenter="Frainer Encarnacion">
+        <div className="comparison-grid">
+          <div className="comparison-card" style={{ background: "linear-gradient(180deg, rgba(249,115,22,0.18), rgba(15,23,42,0.85))", border: "1px solid rgba(251,146,60,0.3)" }}>
+            <h3 style={{ color: "#fdba74" }}>Monociclo</h3>
+            <ul className="list">
+              <li>1 instruccion ocupa 1 ciclo completo.</li>
+              <li>Si una instruccion lenta domina, todas heredan ese tiempo.</li>
+              <li>Buen modelo para introducir el concepto de ciclo de instruccion.</li>
+            </ul>
+            <div className="formula-box" style={{ marginTop: 18, fontSize: 22, padding: 16 }}>100 x 800 ns = 80,000 ns</div>
+          </div>
+          <div className="comparison-card" style={{ background: "linear-gradient(180deg, rgba(124,58,237,0.18), rgba(15,23,42,0.85))", border: "1px solid rgba(192,132,252,0.3)" }}>
+            <h3 style={{ color: "#d8b4fe" }}>Pipeline</h3>
+            <ul className="list">
+              <li>Se divide la tarea en 5 etapas mas cortas.</li>
+              <li>El costo inicial es llenar el pipeline.</li>
+              <li>Luego el throughput mejora porque varias instrucciones avanzan a la vez.</li>
+            </ul>
+            <div className="formula-box" style={{ marginTop: 18, fontSize: 22, padding: 16 }}>(100 + 4) x 200 ns = 20,800 ns</div>
+          </div>
+        </div>
+        <div className="metric-grid">
+          <div className="metric">
+            <div className="metric-label">Speedup</div>
+            <div className="metric-value">3.85x</div>
+          </div>
+          <div className="metric">
+            <div className="metric-label">Throughput</div>
+            <div className="metric-value">1 instr/ciclo</div>
+          </div>
+          <div className="metric">
+            <div className="metric-label">Idea</div>
+            <div className="metric-value">Mas trabajo paralelo</div>
+          </div>
+          <div className="metric">
+            <div className="metric-label">Mundo real</div>
+            <div className="metric-value">Imagen, video, DB</div>
+          </div>
+        </div>
+      </Slide>
+
+      <Slide number="6 / 8" eyebrow="Seccion 05" title="Limitaciones reales del pipeline" presenter="Oliver Abreu Mateo">
+        <div className="card-grid" style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}>
+          <div className="card">
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+              <AlertTriangle size={20} color="#f59e0b" />
+              <h3 style={{ color: "#f59e0b", fontSize: 20, margin: 0 }}>Riesgo de datos</h3>
+            </div>
+            <p style={{ color: "#cbd5e1", lineHeight: 1.7, fontSize: 14 }}>
+              Una instruccion necesita un resultado que todavia no ha sido escrito por la anterior.
             </p>
-            
-            <div style={{ background: "#0f172a", borderRadius: 10, padding: 16, border: "1px solid #1e293b", marginBottom: 16 }}>
-              <h4 style={{ color: "#f8fafc", fontWeight: 600, marginBottom: 12, fontSize: 14 }}>Pasos del Context Switch:</h4>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {[
-                  { step: "1", text: "Guardar registros de CPU (PC, SP, flags)", color: "#f97316" },
-                  { step: "2", text: "Guardar estado del proceso en PCB", color: "#f97316" },
-                  { step: "3", text: "Seleccionar siguiente proceso (scheduler)", color: "#22d3ee" },
-                  { step: "4", text: "Cargar PCB del nuevo proceso", color: "#22c55e" },
-                  { step: "5", text: "Restaurar registros de CPU", color: "#22c55e" },
-                  { step: "6", text: "Continuar ejecucion del nuevo proceso", color: "#22c55e" },
-                ].map((item) => (
-                  <div key={item.step} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ width: 24, height: 24, background: item.color, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 600, fontSize: 12 }}>
-                      {item.step}
-                    </div>
-                    <span style={{ color: "#94a3b8", fontSize: 13 }}>{item.text}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <div style={{ padding: 14, background: "rgba(251,191,36,0.1)", borderRadius: 8, border: "1px solid #f59e0b" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                <AlertTriangle size={16} color="#f59e0b" />
-                <span style={{ color: "#fcd34d", fontWeight: 600, fontSize: 14 }}>Costo del Context Switch</span>
-              </div>
-              <p style={{ color: "#fcd34d", fontSize: 12, lineHeight: 1.5 }}>
-                Tipicamente 1-10 microsegundos. Con quantum muy pequeno, 
-                el overhead puede consumir mas tiempo que el trabajo util.
-              </p>
-            </div>
+            <ul className="list">
+              <li>Provoca stalls o burbujas.</li>
+              <li>Ejemplo: `LOAD` seguido de `SUB` usando el mismo registro.</li>
+            </ul>
           </div>
-          
-          <div style={{ background: "#0f172a", borderRadius: 12, padding: 16, border: "1px solid #1e293b" }}>
-            <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12, color: "#f8fafc" }}>Ejemplo: Quantum = 4ms</h3>
-            
-            <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-              {[
-                { id: "P1", burst: 8, color: "#3b82f6" },
-                { id: "P2", burst: 4, color: "#22c55e" },
-                { id: "P3", burst: 6, color: "#f97316" },
-              ].map((p) => (
-                <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <div style={{ width: 28, height: 28, background: p.color, borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600 }}>
-                    {p.id}
-                  </div>
-                  <span style={{ fontSize: 11, color: "#94a3b8" }}>{p.burst}ms</span>
-                </div>
-              ))}
+          <div className="card">
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+              <AlertTriangle size={20} color="#ef4444" />
+              <h3 style={{ color: "#ef4444", fontSize: 20, margin: 0 }}>Riesgo de control</h3>
             </div>
-            
-            <h5 style={{ color: "#94a3b8", fontSize: 12, marginBottom: 6 }}>Diagrama de Gantt:</h5>
-            <div style={{ display: "flex", height: 36, marginBottom: 6, borderRadius: 4, overflow: "hidden", fontSize: 12 }}>
-              <div style={{ flex: 4, background: "#3b82f6", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 600 }}>P1</div>
-              <div style={{ flex: 4, background: "#22c55e", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 600 }}>P2</div>
-              <div style={{ flex: 4, background: "#f97316", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 600 }}>P3</div>
-              <div style={{ flex: 4, background: "#3b82f6", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 600 }}>P1</div>
-              <div style={{ flex: 2, background: "#f97316", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 600 }}>P3</div>
+            <p style={{ color: "#cbd5e1", lineHeight: 1.7, fontSize: 14 }}>
+              Los saltos cambian el flujo y pueden invalidar instrucciones que ya entraron al pipeline.
+            </p>
+            <ul className="list">
+              <li>Provoca flush.</li>
+              <li>Reduce el rendimiento efectivo.</li>
+            </ul>
+          </div>
+          <div className="card">
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+              <AlertTriangle size={20} color="#8b5cf6" />
+              <h3 style={{ color: "#a78bfa", fontSize: 20, margin: 0 }}>Riesgo estructural</h3>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#64748b", marginBottom: 16 }}>
-              <span>0</span><span>4</span><span>8</span><span>12</span><span>16</span><span>18</span>
-            </div>
-            
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
-              <thead>
-                <tr style={{ borderBottom: "1px solid #334155" }}>
-                  <th style={{ textAlign: "left", padding: "6px 4px", color: "#94a3b8" }}>Proceso</th>
-                  <th style={{ textAlign: "center", padding: "6px 4px", color: "#94a3b8" }}>T. Espera</th>
-                  <th style={{ textAlign: "center", padding: "6px 4px", color: "#94a3b8" }}>T. Retorno</th>
-                  <th style={{ textAlign: "center", padding: "6px 4px", color: "#94a3b8" }}>T. Respuesta</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr style={{ borderBottom: "1px solid #1e293b" }}>
-                  <td style={{ padding: "8px 4px", color: "#3b82f6", fontWeight: 600 }}>P1</td>
-                  <td style={{ textAlign: "center", padding: "8px 4px", color: "#f8fafc" }}>8ms</td>
-                  <td style={{ textAlign: "center", padding: "8px 4px", color: "#f8fafc" }}>16ms</td>
-                  <td style={{ textAlign: "center", padding: "8px 4px", color: "#22d3ee" }}>0ms</td>
-                </tr>
-                <tr style={{ borderBottom: "1px solid #1e293b" }}>
-                  <td style={{ padding: "8px 4px", color: "#22c55e", fontWeight: 600 }}>P2</td>
-                  <td style={{ textAlign: "center", padding: "8px 4px", color: "#f8fafc" }}>4ms</td>
-                  <td style={{ textAlign: "center", padding: "8px 4px", color: "#f8fafc" }}>8ms</td>
-                  <td style={{ textAlign: "center", padding: "8px 4px", color: "#22d3ee" }}>4ms</td>
-                </tr>
-                <tr>
-                  <td style={{ padding: "8px 4px", color: "#f97316", fontWeight: 600 }}>P3</td>
-                  <td style={{ textAlign: "center", padding: "8px 4px", color: "#f8fafc" }}>10ms</td>
-                  <td style={{ textAlign: "center", padding: "8px 4px", color: "#f8fafc" }}>18ms</td>
-                  <td style={{ textAlign: "center", padding: "8px 4px", color: "#22d3ee" }}>8ms</td>
-                </tr>
-              </tbody>
-            </table>
-            
-            <div style={{ marginTop: 12, padding: 10, background: "#1e293b", borderRadius: 6, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, textAlign: "center", fontSize: 11 }}>
-              <div>
-                <div style={{ color: "#94a3b8" }}>Espera Prom.</div>
-                <div style={{ color: "#22d3ee", fontWeight: 700, fontSize: 14 }}>7.3ms</div>
-              </div>
-              <div>
-                <div style={{ color: "#94a3b8" }}>Retorno Prom.</div>
-                <div style={{ color: "#22d3ee", fontWeight: 700, fontSize: 14 }}>14ms</div>
-              </div>
-              <div>
-                <div style={{ color: "#94a3b8" }}>Respuesta Prom.</div>
-                <div style={{ color: "#22d3ee", fontWeight: 700, fontSize: 14 }}>4ms</div>
-              </div>
-            </div>
+            <p style={{ color: "#cbd5e1", lineHeight: 1.7, fontSize: 14 }}>
+              Dos etapas compiten por el mismo recurso al mismo tiempo.
+            </p>
+            <ul className="list">
+              <li>Ejemplo: memoria o unidad funcional compartida.</li>
+              <li>Se evita duplicando recursos o reordenando el flujo.</li>
+            </ul>
           </div>
         </div>
-        
-        <div className="presenter-name">Frainer Encarnacion</div>
-        <div className="slide-number">9 / 13</div>
-      </div>
+        <div className="card-grid">
+          <div className="card">
+            <h3 style={{ color: "#22c55e", fontSize: 22 }}>Tecnicas de mitigacion</h3>
+            <ul className="list">
+              <li>Forwarding para reenviar resultados sin esperar el write back completo.</li>
+              <li>Stall controlado cuando no hay otra salida segura.</li>
+              <li>Prediccion de saltos para reducir flush por ramas.</li>
+            </ul>
+          </div>
+          <div className="card">
+            <h3 style={{ color: "#5eead4", fontSize: 22 }}>Conclusion tecnica</h3>
+            <p style={{ color: "#cbd5e1", lineHeight: 1.7, fontSize: 14 }}>
+              El pipeline mejora mucho el rendimiento, pero no es gratis: necesita logica adicional para manejar conflictos y mantener el flujo estable.
+            </p>
+          </div>
+        </div>
+      </Slide>
 
-      {/* ═══════════════════════════════════════════════════════════════
-          SLIDE 10: TEMA 4 - Fairness y Simulaciones (Frainer) - Parte 3
-      ═══════════════════════════════════════════════════════════════ */}
-      <div className="print-slide">
-        <div className="slide-header">
-          <div className="topic-label">Tema 04</div>
-          <h2>Fairness: FCFS vs Round Robin</h2>
-          <div className="divider" />
-        </div>
-        
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, flex: 1 }}>
-          <div>
-            <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 14, color: "#f8fafc" }}>Comparacion de Equidad (Fairness)</h3>
-            
-            <div style={{ background: "#0f172a", borderRadius: 10, padding: 16, border: "1px solid #dc2626", marginBottom: 16 }}>
-              <h4 style={{ color: "#dc2626", fontWeight: 600, marginBottom: 10, fontSize: 15 }}>FCFS - Problema de Equidad</h4>
-              <div style={{ marginBottom: 12 }}>
-                <div style={{ display: "flex", height: 32, borderRadius: 4, overflow: "hidden", marginBottom: 4 }}>
-                  <div style={{ width: "80%", background: "#3b82f6", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 600, fontSize: 12 }}>P1 (80ms)</div>
-                  <div style={{ width: "5%", background: "#22c55e", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 600, fontSize: 10 }}>P2</div>
-                  <div style={{ width: "5%", background: "#f97316", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 600, fontSize: 10 }}>P3</div>
-                  <div style={{ width: "10%", background: "#a855f7", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 600, fontSize: 12 }}>P4</div>
-                </div>
-              </div>
-              <p style={{ color: "#94a3b8", fontSize: 13, lineHeight: 1.5 }}>
-                P2 y P3 (procesos cortos) esperan 80ms por P1. 
-                Tiempo de respuesta terrible para procesos interactivos.
-              </p>
+      <Slide number="7 / 8" eyebrow="Cierre" title="Conclusiones y participantes">
+        <div className="card-grid">
+          <div className="card">
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+              <CheckCircle2 size={22} color="#22c55e" />
+              <h3 style={{ color: "#22c55e", fontSize: 22, margin: 0 }}>Ideas clave</h3>
             </div>
-            
-            <div style={{ background: "#0f172a", borderRadius: 10, padding: 16, border: "1px solid #22c55e" }}>
-              <h4 style={{ color: "#22c55e", fontWeight: 600, marginBottom: 10, fontSize: 15 }}>Round Robin - Distribucion Equitativa</h4>
-              <div style={{ marginBottom: 12 }}>
-                <div style={{ display: "flex", height: 32, borderRadius: 4, overflow: "hidden", marginBottom: 4, fontSize: 10 }}>
-                  {["P1", "P2", "P3", "P4", "P1", "P2", "P3", "P4", "P1", "P1"].map((p, i) => (
-                    <div key={i} style={{ flex: 1, background: p === "P1" ? "#3b82f6" : p === "P2" ? "#22c55e" : p === "P3" ? "#f97316" : "#a855f7", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 600, borderRight: i < 9 ? "1px solid #0f172a" : "none" }}>
-                      {p}
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <p style={{ color: "#94a3b8", fontSize: 13, lineHeight: 1.5 }}>
-                Todos los procesos reciben tiempo de CPU regularmente.
-                P2/P3 responden en los primeros 20ms en lugar de 80ms.
-              </p>
-            </div>
+            <ul className="list">
+              <li>El monociclo es simple, pero desperdicia tiempo por depender de la instruccion mas lenta.</li>
+              <li>El pipeline divide el trabajo y mejora el throughput despues del llenado.</li>
+              <li>El speedup existe mientras los riesgos se mantengan controlados.</li>
+              <li>La ganancia real depende de la carga, la frecuencia y los hazards.</li>
+            </ul>
           </div>
-          
-          <div>
-            <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 14, color: "#f8fafc" }}>Aplicaciones del Mundo Real</h3>
-            
+          <div className="card">
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+              <Zap size={22} color="#5eead4" />
+              <h3 style={{ color: "#5eead4", fontSize: 22, margin: 0 }}>Participacion del equipo</h3>
+            </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <div style={{ background: "#0f172a", borderRadius: 10, padding: 14, border: "1px solid #1e293b" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                  <Monitor size={20} color="#3b82f6" />
-                  <h4 style={{ color: "#f8fafc", fontWeight: 600, fontSize: 14, margin: 0 }}>Apps en una PC</h4>
-                </div>
-                <p style={{ color: "#94a3b8", fontSize: 12, lineHeight: 1.5 }}>
-                  Chrome, VS Code, Spotify, un juego... Round Robin permite que todas 
-                  respondan aunque una este haciendo calculos pesados.
-                </p>
-              </div>
-              
-              <div style={{ background: "#0f172a", borderRadius: 10, padding: 14, border: "1px solid #1e293b" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                  <Server size={20} color="#22c55e" />
-                  <h4 style={{ color: "#f8fafc", fontWeight: 600, fontSize: 14, margin: 0 }}>Servidor Web</h4>
-                </div>
-                <p style={{ color: "#94a3b8", fontSize: 12, lineHeight: 1.5 }}>
-                  Multiples usuarios haciendo requests. Round Robin garantiza que 
-                  ningun usuario monopolice el servidor.
-                </p>
-              </div>
-              
-              <div style={{ background: "#0f172a", borderRadius: 10, padding: 14, border: "1px solid #1e293b" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                  <Code size={20} color="#f97316" />
-                  <h4 style={{ color: "#f8fafc", fontWeight: 600, fontSize: 14, margin: 0 }}>JavaScript Event Loop</h4>
-                </div>
-                <p style={{ color: "#94a3b8", fontSize: 12, lineHeight: 1.5 }}>
-                  El Event Loop de JS es similar: Task Queue = Ready Queue, 
-                  Call Stack = CPU, el loop procesa tareas en orden FIFO.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div className="presenter-name">Frainer Encarnacion</div>
-        <div className="slide-number">10 / 13</div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════════════
-          SLIDE 11: TEMA 5 - Metricas de Rendimiento (Christopher) - Parte 1
-      ═══════════════════════════════════════════════════════════════ */}
-      <div className="print-slide">
-        <div className="slide-header">
-          <div className="topic-label">Tema 05</div>
-          <h2>Analisis de Rendimiento: Metricas Clave</h2>
-          <div className="divider" />
-        </div>
-        
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, flex: 1 }}>
-          <div>
-            <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16, color: "#f8fafc" }}>Metricas de Evaluacion</h3>
-            
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {[
-                { 
-                  name: "Tiempo de Espera (Waiting Time)", 
-                  desc: "Tiempo total que un proceso pasa en la cola de listos esperando CPU",
-                  formula: "T_espera = T_retorno - T_burst",
-                  icon: Clock,
-                  color: "#f97316"
-                },
-                { 
-                  name: "Tiempo de Retorno (Turnaround Time)", 
-                  desc: "Tiempo desde que el proceso llega hasta que termina completamente",
-                  formula: "T_retorno = T_fin - T_llegada",
-                  icon: RotateCcw,
-                  color: "#22c55e"
-                },
-                { 
-                  name: "Tiempo de Respuesta (Response Time)", 
-                  desc: "Tiempo desde llegada hasta la primera ejecucion en CPU",
-                  formula: "T_respuesta = T_primera_ejecucion - T_llegada",
-                  icon: Zap,
-                  color: "#22d3ee"
-                },
-                { 
-                  name: "Throughput (Rendimiento)", 
-                  desc: "Numero de procesos completados por unidad de tiempo",
-                  formula: "Throughput = N_procesos / T_total",
-                  icon: BarChart3,
-                  color: "#a855f7"
-                },
-              ].map((metric) => (
-                <div key={metric.name} style={{ display: "flex", gap: 12, padding: 12, background: "#0f172a", borderRadius: 8, border: `1px solid ${metric.color}30` }}>
-                  <div style={{ padding: 8, background: `${metric.color}20`, borderRadius: 6, height: "fit-content" }}>
-                    <metric.icon size={18} color={metric.color} />
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <h4 style={{ color: "#f8fafc", fontWeight: 600, fontSize: 13, marginBottom: 4 }}>{metric.name}</h4>
-                    <p style={{ color: "#94a3b8", fontSize: 11, lineHeight: 1.4, marginBottom: 4 }}>{metric.desc}</p>
-                    <code style={{ color: metric.color, fontSize: 10, background: "#1e293b", padding: "2px 6px", borderRadius: 3 }}>{metric.formula}</code>
-                  </div>
+              {participantWork.map((person) => (
+                <div key={person.name} style={{ borderBottom: "1px solid rgba(148,163,184,0.14)", paddingBottom: 10 }}>
+                  <div style={{ color: "#f8fafc", fontWeight: 700, marginBottom: 4 }}>{person.name}</div>
+                  <div style={{ color: "#c084fc", fontSize: 13, fontWeight: 700, marginBottom: 4 }}>{person.topic}</div>
+                  <div style={{ color: "#cbd5e1", fontSize: 13, lineHeight: 1.6 }}>{person.detail}</div>
                 </div>
               ))}
             </div>
           </div>
-          
-          <div>
-            <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16, color: "#f8fafc" }}>Criterios de Optimizacion</h3>
-            
-            <div style={{ background: "#0f172a", borderRadius: 10, padding: 16, border: "1px solid #1e293b", marginBottom: 16 }}>
-              <h4 style={{ color: "#f8fafc", fontWeight: 600, marginBottom: 12, fontSize: 14 }}>Objetivos del Planificador:</h4>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {[
-                  { goal: "Maximizar utilizacion de CPU", good: "95%+", bad: "<70%" },
-                  { goal: "Maximizar throughput", good: "Alto", bad: "Bajo" },
-                  { goal: "Minimizar tiempo de espera", good: "<10ms", bad: ">100ms" },
-                  { goal: "Minimizar tiempo de respuesta", good: "<5ms", bad: ">50ms" },
-                  { goal: "Garantizar fairness", good: "Equitativo", bad: "Starvation" },
-                ].map((item) => (
-                  <div key={item.goal} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: 8, background: "#1e293b", borderRadius: 6 }}>
-                    <span style={{ color: "#f8fafc", fontSize: 12 }}>{item.goal}</span>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <span style={{ color: "#22c55e", fontSize: 11 }}>{item.good}</span>
-                      <span style={{ color: "#64748b", fontSize: 11 }}>/</span>
-                      <span style={{ color: "#dc2626", fontSize: 11 }}>{item.bad}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <div style={{ padding: 14, background: "rgba(34,211,238,0.1)", borderRadius: 8, border: "1px solid #22d3ee" }}>
-              <h4 style={{ color: "#22d3ee", fontWeight: 600, marginBottom: 8, fontSize: 14 }}>Trade-offs Importantes</h4>
-              <ul style={{ color: "#94a3b8", fontSize: 12, paddingLeft: 16, lineHeight: 1.7 }}>
-                <li>Mejor respuesta = mas context switches = mas overhead</li>
-                <li>Mejor throughput = menos cambios = peor respuesta</li>
-                <li>No existe algoritmo perfecto para todos los casos</li>
-              </ul>
-            </div>
-          </div>
         </div>
-        
-        <div className="presenter-name">Christopher Marrero</div>
-        <div className="slide-number">11 / 13</div>
-      </div>
+      </Slide>
 
-      {/* ═══════════════════════════════════════════════════════════════
-          SLIDE 12: TEMA 5 - Comparacion FCFS vs RR (Christopher) - Parte 2
-      ═══════════════════════════════════════════════════════════════ */}
-      <div className="print-slide">
-        <div className="slide-header">
-          <div className="topic-label">Tema 05</div>
-          <h2>Comparacion Final: FCFS vs Round Robin</h2>
-          <div className="divider" />
-        </div>
-        
-        <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: 24, flex: 1 }}>
-          <div>
-            <div style={{ background: "#0f172a", borderRadius: 10, padding: 16, border: "1px solid #1e293b", marginBottom: 16 }}>
-              <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 14, color: "#f8fafc" }}>Tabla Comparativa de Metricas</h3>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-                <thead>
-                  <tr style={{ borderBottom: "2px solid #334155" }}>
-                    <th style={{ textAlign: "left", padding: "10px 8px", color: "#94a3b8" }}>Metrica</th>
-                    <th style={{ textAlign: "center", padding: "10px 8px", color: "#3b82f6" }}>FCFS</th>
-                    <th style={{ textAlign: "center", padding: "10px 8px", color: "#22c55e" }}>RR (Q=4ms)</th>
-                    <th style={{ textAlign: "center", padding: "10px 8px", color: "#94a3b8" }}>Ganador</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[
-                    { metric: "T. Espera Prom.", fcfs: "8.5ms", rr: "7.3ms", winner: "rr" },
-                    { metric: "T. Retorno Prom.", fcfs: "12.75ms", rr: "14ms", winner: "fcfs" },
-                    { metric: "T. Respuesta Prom.", fcfs: "8.5ms", rr: "4ms", winner: "rr" },
-                    { metric: "Context Switches", fcfs: "3", rr: "5", winner: "fcfs" },
-                    { metric: "Overhead", fcfs: "Bajo", rr: "Medio", winner: "fcfs" },
-                    { metric: "Fairness", fcfs: "Pobre", rr: "Excelente", winner: "rr" },
-                    { metric: "Complejidad", fcfs: "Simple", rr: "Media", winner: "fcfs" },
-                  ].map((row, i) => (
-                    <tr key={row.metric} style={{ borderBottom: i < 6 ? "1px solid #1e293b" : "none" }}>
-                      <td style={{ padding: "10px 8px", color: "#f8fafc" }}>{row.metric}</td>
-                      <td style={{ textAlign: "center", padding: "10px 8px", color: row.winner === "fcfs" ? "#3b82f6" : "#94a3b8" }}>{row.fcfs}</td>
-                      <td style={{ textAlign: "center", padding: "10px 8px", color: row.winner === "rr" ? "#22c55e" : "#94a3b8" }}>{row.rr}</td>
-                      <td style={{ textAlign: "center", padding: "10px 8px" }}>
-                        {row.winner === "rr" ? (
-                          <CheckCircle2 size={16} color="#22c55e" />
-                        ) : (
-                          <CheckCircle2 size={16} color="#3b82f6" />
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+      <Slide number="8 / 8" eyebrow="Apoyo" title="Presentacion real, control remoto y exportacion">
+        <div className="card-grid">
+          <div className="card">
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+              <Layers size={22} color="#c084fc" />
+              <h3 style={{ color: "#c084fc", fontSize: 22, margin: 0 }}>Rutas del proyecto</h3>
             </div>
-            
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              <div style={{ background: "#0f172a", borderRadius: 8, padding: 12, border: "1px solid #3b82f6" }}>
-                <h4 style={{ color: "#3b82f6", fontWeight: 600, marginBottom: 6, fontSize: 13 }}>Usar FCFS cuando:</h4>
-                <ul style={{ color: "#94a3b8", fontSize: 11, paddingLeft: 14, lineHeight: 1.6 }}>
-                  <li>Procesos batch sin interaccion</li>
-                  <li>Simplicidad es prioridad</li>
-                  <li>Procesos de duracion similar</li>
-                </ul>
-              </div>
-              <div style={{ background: "#0f172a", borderRadius: 8, padding: 12, border: "1px solid #22c55e" }}>
-                <h4 style={{ color: "#22c55e", fontWeight: 600, marginBottom: 6, fontSize: 13 }}>Usar RR cuando:</h4>
-                <ul style={{ color: "#94a3b8", fontSize: 11, paddingLeft: 14, lineHeight: 1.6 }}>
-                  <li>Sistemas interactivos</li>
-                  <li>Tiempo compartido</li>
-                  <li>Fairness es critico</li>
-                </ul>
-              </div>
-            </div>
+            <ul className="list">
+              <li>`/` presenta la version interactiva principal.</li>
+              <li>`/remote` permite controlar la navegacion desde el celular.</li>
+              <li>`/print` genera esta version estatica preparada para PDF.</li>
+            </ul>
+            <p className="footer-note" style={{ marginTop: 16 }}>
+              La presentacion real mantiene simulaciones interactivas; la version impresa prioriza la explicacion conceptual.
+            </p>
           </div>
-          
-          <div>
-            <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 14, color: "#f8fafc" }}>Conclusion del Analisis</h3>
-            
-            <div style={{ background: "#0f172a", borderRadius: 10, padding: 16, border: "1px solid #1e293b", marginBottom: 16 }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                <div style={{ padding: 12, background: "#1e293b", borderRadius: 8 }}>
-                  <h4 style={{ color: "#22d3ee", fontWeight: 600, marginBottom: 6, fontSize: 14 }}>FCFS</h4>
-                  <p style={{ color: "#94a3b8", fontSize: 12, lineHeight: 1.5 }}>
-                    Ideal para sistemas batch donde los procesos llegan, se ejecutan completamente, 
-                    y no requieren interaccion. Simple pero puede causar convoy effect.
-                  </p>
-                </div>
-                
-                <div style={{ padding: 12, background: "#1e293b", borderRadius: 8 }}>
-                  <h4 style={{ color: "#22d3ee", fontWeight: 600, marginBottom: 6, fontSize: 14 }}>Round Robin</h4>
-                  <p style={{ color: "#94a3b8", fontSize: 12, lineHeight: 1.5 }}>
-                    Ideal para sistemas de tiempo compartido donde multiples usuarios 
-                    necesitan respuesta rapida. La eleccion del quantum es critica.
-                  </p>
-                </div>
-              </div>
+          <div className="card">
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+              <QrCode size={22} color="#5eead4" />
+              <h3 style={{ color: "#5eead4", fontSize: 22, margin: 0 }}>Uso del control remoto</h3>
             </div>
-            
-            <div style={{ padding: 14, background: "rgba(34,211,238,0.1)", borderRadius: 8, border: "1px solid #22d3ee" }}>
-              <h4 style={{ color: "#22d3ee", fontWeight: 600, marginBottom: 8, fontSize: 14 }}>Sistemas Modernos</h4>
-              <p style={{ color: "#94a3b8", fontSize: 12, lineHeight: 1.5 }}>
-                Los sistemas operativos modernos (Linux, Windows) usan algoritmos hibridos 
-                como CFS (Completely Fair Scheduler) que combinan conceptos de Round Robin 
-                con colas multinivel y prioridades dinamicas.
-              </p>
+            <ul className="list">
+              <li>La ultima diapositiva de la presentacion real muestra el acceso remoto.</li>
+              <li>Desde el movil se puede avanzar, retroceder y controlar simulaciones.</li>
+              <li>El PDF conserva la estructura del cierre aunque no ejecuta interacciones.</li>
+            </ul>
+            <div className="formula-box" style={{ marginTop: 22, fontSize: 20, padding: 16 }}>
+              Nombre del PDF: Los_Ingenieros_PROYECT_FINAL
             </div>
           </div>
         </div>
-        
-        <div className="presenter-name">Christopher Marrero</div>
-        <div className="slide-number">12 / 13</div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════════════
-          SLIDE 13: CONCLUSION / THANK YOU
-      ═══════════════════════════════════════════════════════════════ */}
-      <div className="print-slide" style={{ justifyContent: "center", alignItems: "center", textAlign: "center" }}>
-        <div>
-          <h1 style={{ fontSize: 52, fontWeight: 700, color: "#22d3ee", marginBottom: 24 }}>
-            Muchas gracias por su atencion
-          </h1>
-          
-          <div style={{ marginBottom: 40 }}>
-            <p style={{ fontSize: 18, color: "#94a3b8", marginBottom: 4 }}>Arquitectura del Computador</p>
-            <h2 style={{ fontSize: 32, fontWeight: 600, color: "#f8fafc" }}>Grupo: Los Ingenieros</h2>
-          </div>
-          
-          <div style={{ display: "flex", justifyContent: "center", gap: 20, flexWrap: "wrap", marginBottom: 40 }}>
-            {[
-              { name: "Algenis De los Santos", icon: Users },
-              { name: "Oliver Abreu", icon: Cpu },
-              { name: "Enmanuel Santos", icon: Clock },
-              { name: "Frainer Encarnacion", icon: RotateCcw },
-              { name: "Christopher Marrero", icon: BarChart3 },
-            ].map((member) => (
-              <div key={member.name} style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 24px", background: "#0f172a", borderRadius: 10, border: "1px solid #1e293b" }}>
-                <member.icon size={22} color="#22d3ee" />
-                <span style={{ color: "#f8fafc", fontSize: 16, fontWeight: 500 }}>{member.name}</span>
-              </div>
-            ))}
-          </div>
-          
-          <div style={{ display: "flex", justifyContent: "center", gap: 16 }}>
-            <Cpu size={36} color="#22d3ee" />
-            <Clock size={36} color="#22d3ee" />
-            <BarChart3 size={36} color="#22d3ee" />
-          </div>
+        <div className="badge-row">
+          {["Portada", "Rendimiento", "Monociclo", "Pipeline", "Speedup", "Limitaciones", "Cierre", "Control remoto"].map((item) => (
+            <span key={item} className="badge">{item}</span>
+          ))}
         </div>
-        
-        <div className="slide-number">13 / 13</div>
-      </div>
+      </Slide>
     </div>
   )
 }
