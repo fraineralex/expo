@@ -1,4 +1,4 @@
-# Los Ingenieros - PROYECTO_FINAL
+# Los Ingenieros - PROYECTO FINAL
 
 Presentacion interactiva hecha en React por el grupo Los Ingenieros para la asignatura Arquitectura del Computador.
 
