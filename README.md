@@ -1,4 +1,4 @@
-# Los Ingenieros - PROYECTO_FINAL
+# Los Ingenieros - PROYECTO FINAL
 
 Presentacion interactiva de Los Ingenieros para Arquitectura del Computador.
 
