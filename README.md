@@ -1,4 +1,4 @@
-# expo
+# Los Ingenieros - PROYECTO_FINAL
 
 Presentacion interactiva de Los Ingenieros para Arquitectura del Computador.
 
