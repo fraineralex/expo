@@ -92,7 +92,7 @@ Abre `http://localhost:3000` en el navegador para ver la presentacion principal.
 - Abre `http://localhost:3000/print` si necesitas la versión estática para explicación o exportación a PDF.
 - Ejecuta `npm run build` para validar que el proyecto compila correctamente.
 
-### Slide 1: Portada
+### Slide 1: Portada (Los Ingenieros)
 
 - Muestra el título general del proyecto y el nombre del grupo `Los Ingenieros`.
 - Sirve como introducción visual al tema de monociclo vs pipeline.
@@ -101,7 +101,7 @@ Abre `http://localhost:3000` en el navegador para ver la presentacion principal.
 - No tiene configuración manual ni simulación ejecutable.
 - Solo debes usarlo como slide de apertura y contexto general del proyecto.
 
-### Slide 2: Medición de Rendimiento
+### Slide 2: Medición de Rendimiento (Algenis De los Santos Lopez)
 
 - Explica cómo se mide el rendimiento de un procesador usando la fórmula `T = (I x CPI) / f`.
 - Muestra teoría sobre tiempo de ejecución, CPI y frecuencia del reloj.
@@ -110,7 +110,7 @@ Abre `http://localhost:3000` en el navegador para ver la presentacion principal.
 - Muestra métricas en vivo como ciclo actual, tiempo de ciclo, ciclos totales y tiempo de CPU.
 - Permite ver el cálculo detallado del resultado en tiempo real.
 
-### Cómo ejecutar la simulación del Slide 2
+### Cómo ejecutar la simulación del Slide 2 (Algenis De los Santos Lopez)
 
 - Pulsa `Iniciar` para comenzar la simulación.
 - Pulsa `Pausar` para detener temporalmente la ejecución.
@@ -118,7 +118,7 @@ Abre `http://localhost:3000` en el navegador para ver la presentacion principal.
 - Pulsa `Reiniciar` para volver al estado inicial.
 - Mientras la simulación está corriendo, los controles deslizantes quedan bloqueados.
 
-### Cómo configurar el Slide 2
+### Cómo configurar el Slide 2 (Algenis De los Santos Lopez)
 
 - Ajusta `Instrucciones (I)` con el control deslizante para cambiar la carga de trabajo.
 - Ajusta `CPI` entre `1` y `5` en pasos de `0.5`.
@@ -127,7 +127,7 @@ Abre `http://localhost:3000` en el navegador para ver la presentacion principal.
 - Un CPI mayor representa instrucciones más costosas en ciclos.
 - Una frecuencia mayor reduce el tiempo de ciclo y mejora el tiempo final.
 
-### Slide 3: Procesador Monociclo
+### Slide 3: Procesador Monociclo (Christopher Enrique Marrero Liriano)
 
 - Muestra una simulación visual del comportamiento de un procesador monociclo.
 - Usa instrucciones como `ADD`, `LOAD`, `SUB`, `STORE`, `AND` y `OR`.
@@ -136,7 +136,7 @@ Abre `http://localhost:3000` en el navegador para ver la presentacion principal.
 - Incluye una línea de tiempo por instrucción y un resumen estadístico lateral.
 - Presenta el resultado final con el porcentaje total de desperdicio al completar la simulación.
 
-### Cómo ejecutar la simulación del Slide 3
+### Cómo ejecutar la simulación del Slide 3 (Christopher Enrique Marrero Liriano)
 
 - Pulsa `Simular` para iniciar la ejecución automática.
 - Pulsa `Pausar` para detener el avance.
@@ -144,7 +144,7 @@ Abre `http://localhost:3000` en el navegador para ver la presentacion principal.
 - Pulsa `Reiniciar` para volver al ciclo `0`.
 - Observa cómo se ilumina la instrucción activa y cómo se acumulan tiempo útil y desperdicio.
 
-### Cómo interpretar el Slide 3
+### Cómo interpretar el Slide 3 (Christopher Enrique Marrero Liriano)
 
 - La barra verde representa tiempo útil.
 - La barra roja representa tiempo desperdiciado.
@@ -153,7 +153,7 @@ Abre `http://localhost:3000` en el navegador para ver la presentacion principal.
 - El panel lateral muestra el tiempo ejecutado, útil y desperdiciado.
 - El resultado final resume la ineficiencia acumulada del modelo monociclo.
 
-### Slide 4: Pipeline de 5 Etapas
+### Slide 4: Pipeline de 5 Etapas (Enmanuel Santos Diaz)
 
 - Presenta una analogía de cocina industrial para explicar el pipeline.
 - Relaciona cada estación de la cocina con `IF`, `ID`, `EX`, `MEM` y `WB`.
@@ -162,7 +162,7 @@ Abre `http://localhost:3000` en el navegador para ver la presentacion principal.
 - Muestra métricas como pedidos completados, eficiencia, throughput y ciclo actual.
 - Señala automáticamente un `data hazard` en ciertos ciclos del ejemplo.
 
-### Cómo ejecutar la simulación del Slide 4
+### Cómo ejecutar la simulación del Slide 4 (Enmanuel Santos Diaz)
 
 - Pulsa `Play` para iniciar el movimiento del pipeline.
 - Pulsa `Pausa` para detener la simulación.
@@ -171,7 +171,7 @@ Abre `http://localhost:3000` en el navegador para ver la presentacion principal.
 - Pulsa el botón de reinicio para volver al ciclo inicial.
 - Puedes pasar el cursor sobre cada estación para ver su explicación.
 
-### Cómo configurar el Slide 4
+### Cómo configurar el Slide 4 (Enmanuel Santos Diaz)
 
 - Ajusta `Velocidad` entre `300 ms` y `1500 ms` por ciclo.
 - Una velocidad menor hace que la simulación avance más rápido.
@@ -180,7 +180,7 @@ Abre `http://localhost:3000` en el navegador para ver la presentacion principal.
 - Observa la alerta de `Hazard` para identificar conflictos entre instrucciones.
 - Usa el diagrama de Gantt para explicar cómo se superponen las etapas.
 
-### Slide 5: Comparación Directa y Speedup
+### Slide 5: Comparación Directa y Speedup (Frainer Encarnacion)
 
 - Compara monociclo y pipeline en escenarios prácticos.
 - Tiene cuatro pestañas: `Mundo Real`, `Carreras`, `Throughput` y `Calculadora`.
@@ -189,7 +189,7 @@ Abre `http://localhost:3000` en el navegador para ver la presentacion principal.
 - Incluye simulaciones abstractas para explicar paralelismo y throughput.
 - También incorpora una calculadora de speedup y una sección basada en la Ley de Amdahl.
 
-### Cómo usar la pestaña Mundo Real
+### Cómo usar la pestaña Mundo Real (Frainer Encarnacion)
 
 - Selecciona una tarea en el panel izquierdo.
 - Pulsa `Ejecutar` para correr la comparación entre monociclo y pipeline.
@@ -198,7 +198,7 @@ Abre `http://localhost:3000` en el navegador para ver la presentacion principal.
 - Observa el progreso de ambos modelos en paralelo.
 - Al finalizar, revisa el tiempo de monociclo, el tiempo de pipeline, el ahorro y el `Speedup Real`.
 
-### Cómo usar la pestaña Carreras
+### Cómo usar la pestaña Carreras (Frainer Encarnacion)
 
 - Cambia la `Velocidad` con el control deslizante.
 - Cambia el número de `Etapas` entre `3` y `7`.
@@ -207,7 +207,7 @@ Abre `http://localhost:3000` en el navegador para ver la presentacion principal.
 - Pulsa el botón de reinicio para restablecer posiciones y contadores.
 - Usa esta pestaña para explicar visualmente por qué más etapas permiten más trabajo simultáneo.
 
-### Cómo usar la pestaña Throughput
+### Cómo usar la pestaña Throughput (Frainer Encarnacion)
 
 - Pulsa `Simular` para iniciar la carga de aplicaciones.
 - Pulsa `Pausar` para detener el avance.
@@ -216,7 +216,7 @@ Abre `http://localhost:3000` en el navegador para ver la presentacion principal.
 - Observa cómo el pipeline procesa varias apps en diferentes etapas al mismo tiempo.
 - Al finalizar, compara ciclos totales, throughput y speedup final.
 
-### Cómo usar la pestaña Calculadora
+### Cómo usar la pestaña Calculadora (Frainer Encarnacion)
 
 - Ajusta `Número de Instrucciones` para comparar tiempos entre monociclo y pipeline.
 - Observa cómo cambia el speedup calculado automáticamente.
@@ -225,7 +225,7 @@ Abre `http://localhost:3000` en el navegador para ver la presentacion principal.
 - Interpreta el límite superior del speedup cuando la porción serial no puede paralelizarse.
 - Usa esta pestaña para respaldar la explicación matemática del rendimiento.
 
-### Slide 6: Limitaciones Reales del Pipeline
+### Slide 6: Limitaciones Reales del Pipeline (Oliver Abreu Mateo)
 
 - Explica tres escenarios: `Normal`, `Riesgo de Datos` y `Riesgo de Control`.
 - Muestra cómo cambian las instrucciones y las etapas según el escenario.
@@ -234,7 +234,7 @@ Abre `http://localhost:3000` en el navegador para ver la presentacion principal.
 - Resume el impacto en rendimiento según el tipo de conflicto.
 - Sirve para demostrar que el pipeline mejora el rendimiento, pero también introduce problemas reales.
 
-### Cómo ejecutar la simulación del Slide 6
+### Cómo ejecutar la simulación del Slide 6 (Oliver Abreu Mateo)
 
 - Selecciona uno de los escenarios disponibles.
 - Pulsa `Simular` para iniciar el avance por ciclos.
@@ -243,7 +243,7 @@ Abre `http://localhost:3000` en el navegador para ver la presentacion principal.
 - Cambiar de escenario también reinicia automáticamente la simulación.
 - Observa las celdas activas, las burbujas y los `flush` en la tabla principal.
 
-### Cómo interpretar el Slide 6
+### Cómo interpretar el Slide 6 (Oliver Abreu Mateo)
 
 - En `Normal`, el pipeline avanza sin conflictos y maximiza el throughput.
 - En `Riesgo de Datos`, aparecen `stall` y `burbuja` por dependencias entre instrucciones.
@@ -252,7 +252,7 @@ Abre `http://localhost:3000` en el navegador para ver la presentacion principal.
 - La leyenda ayuda a distinguir etapa activa, stall y flush.
 - El bloque final de impacto resume cómo cada riesgo afecta el rendimiento real.
 
-### Slide 7: Gracias
+### Slide 7: Gracias (Los Ingenieros)
 
 - Muestra el cierre de la presentación.
 - Presenta nuevamente a los integrantes del equipo.
@@ -261,7 +261,7 @@ Abre `http://localhost:3000` en el navegador para ver la presentacion principal.
 - Funciona como cierre formal de la exposición.
 - Debe usarse como slide final de agradecimiento antes del control remoto.
 
-### Slide 8: Control Remoto
+### Slide 8: Control Remoto (Los Ingenieros)
 
 - Muestra un código QR para controlar la presentación desde el celular.
 - Genera dinámicamente la URL del control remoto.
