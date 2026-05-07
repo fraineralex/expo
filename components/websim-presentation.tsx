@@ -5,14 +5,13 @@ import Reveal from "reveal.js"
 import "reveal.js/dist/reveal.css"
 
 import {
-  WebSimTitleSlide,
-  WebSimIntroSlide,
-  CPUBoundSlide,
-  FCFSSlide,
-  RoundRobinSlide,
-  PerformanceAnalysisSlide,
-  WebSimConclusionSlide,
-} from "./websim/slides"
+  CoverSlide,
+  BisectionVsBinarySlide,
+  InstagramSearchSlide,
+  AmazonFilterSlide,
+  WhatsAppSlide,
+  ConclusionSlide,
+} from "./bisection/slides"
 
 export default function WebSimPresentation() {
   const deckRef = useRef<HTMLDivElement>(null)
@@ -111,39 +110,34 @@ export default function WebSimPresentation() {
     <div style={{ position: isPrintMode ? "relative" : "fixed", inset: isPrintMode ? undefined : 0, overflow: isPrintMode ? "visible" : "hidden" }}>
       <div className="reveal" ref={deckRef} style={{ width: "100%", height: isPrintMode ? "auto" : "100%" }}>
         <div className="slides">
-          {/* SLIDE 1: Title */}
+          {/* SLIDE 1: Portada */}
           <section data-transition="zoom-in fade-out">
-            <WebSimTitleSlide isPrintMode={isPrintMode} />
+            <CoverSlide isPrintMode={isPrintMode} />
           </section>
 
-          {/* SLIDE 2: Introducción al simulador - Algenis De los Santos */}
+          {/* SLIDE 2: Biseccion vs Binary Search */}
           <section data-transition="slide">
-            <WebSimIntroSlide isPrintMode={isPrintMode} />
+            <BisectionVsBinarySlide isPrintMode={isPrintMode} />
           </section>
 
-          {/* SLIDE 3: CPU-bound vs I/O-bound - Oliver Abreu */}
+          {/* SLIDE 3: Frainer - Instagram Search */}
           <section data-transition="slide">
-            <CPUBoundSlide isPrintMode={isPrintMode} />
+            <InstagramSearchSlide isPrintMode={isPrintMode} />
           </section>
 
-          {/* SLIDE 4: FCFS Scheduling - Enmanuel Santos */}
+          {/* SLIDE 4: Enmanuel - Amazon Filter */}
           <section data-transition="slide">
-            <FCFSSlide isPrintMode={isPrintMode} />
+            <AmazonFilterSlide isPrintMode={isPrintMode} />
           </section>
 
-          {/* SLIDE 5: Round Robin - Frainer Encarnación */}
+          {/* SLIDE 5: Christopher - WhatsApp + Applications */}
           <section data-transition="slide">
-            <RoundRobinSlide isPrintMode={isPrintMode} />
+            <WhatsAppSlide isPrintMode={isPrintMode} />
           </section>
 
-          {/* SLIDE 6: Performance Analysis - Christopher Marrero */}
-          <section data-transition="slide">
-            <PerformanceAnalysisSlide isPrintMode={isPrintMode} />
-          </section>
-
-          {/* SLIDE 7: Conclusion */}
+          {/* SLIDE 6: Conclusion */}
           <section data-transition="zoom">
-            <WebSimConclusionSlide isPrintMode={isPrintMode} />
+            <ConclusionSlide isPrintMode={isPrintMode} />
           </section>
         </div>
       </div>
@@ -158,12 +152,12 @@ export default function WebSimPresentation() {
         }
 
         .reveal {
-          --r-background-color: #0a0a1a;
+          --r-background-color: #f8fafc;
           --r-main-font: inherit;
           --r-main-font-size: 18px;
-          --r-main-color: #f8fafc;
-          --r-heading-color: #f8fafc;
-          --r-link-color: #22d3ee;
+          --r-main-color: #1e293b;
+          --r-heading-color: #0f172a;
+          --r-link-color: #3b82f6;
         }
 
         .reveal .slides {
@@ -200,22 +194,22 @@ export default function WebSimPresentation() {
         }
 
         .reveal .progress {
-          background: rgba(34, 211, 238, 0.15);
+          background: rgba(59, 130, 246, 0.15);
           height: 3px;
           z-index: 100;
         }
 
         .reveal .progress span {
-          background: #22d3ee;
+          background: #3b82f6;
         }
 
         .reveal .controls {
-          color: #22d3ee;
+          color: #3b82f6;
           z-index: 100;
         }
 
         .reveal .controls button {
-          color: #22d3ee;
+          color: #3b82f6;
         }
 
         .reveal .controls .navigate-up,
@@ -225,12 +219,13 @@ export default function WebSimPresentation() {
 
         /* Slide number */
         .reveal .slide-number {
-          background: rgba(10, 10, 26, 0.8);
+          background: rgba(255, 255, 255, 0.9);
           color: #64748b;
           font-family: monospace;
           font-size: 11px;
           padding: 4px 8px;
           border-radius: 4px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
         /* ============================================
@@ -243,7 +238,7 @@ export default function WebSimPresentation() {
             width: 100% !important;
             height: 100% !important;
             overflow: visible !important;
-            background: #0a0a1a !important;
+            background: #f8fafc !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
             color-adjust: exact !important;
@@ -279,7 +274,7 @@ export default function WebSimPresentation() {
             margin: 0 !important;
             padding: 0 !important;
             box-sizing: border-box !important;
-            background: #0a0a1a !important;
+            background: #f8fafc !important;
           }
 
           .reveal .slides > section > div {
