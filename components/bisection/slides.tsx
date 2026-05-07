@@ -596,7 +596,7 @@ export function InstagramSearchSlide({ isPrintMode = false }: { isPrintMode?: bo
   const [iterations, setIterations] = useState(0)
   const [message, setMessage] = useState("Presiona 'Buscar' para encontrar @fraineralex_user")
   const [currentLetter, setCurrentLetter] = useState("")
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map())
 
   const startSearch = useCallback(() => {
     setIsSearching(true)
@@ -624,14 +624,11 @@ export function InstagramSearchSlide({ isPrintMode = false }: { isPrintMode?: bo
     setCurrentLetter("")
   }, [])
 
-  // Auto-scroll to center the mid element
+  // Auto-scroll to center the mid element using scrollIntoView
   useEffect(() => {
-    if (scrollContainerRef.current) {
-      const container = scrollContainerRef.current
-      const itemHeight = 56 // Approximate height of each item
-      const containerHeight = container.clientHeight
-      const scrollTo = midIndex * itemHeight - containerHeight / 2 + itemHeight / 2
-      container.scrollTo({ top: Math.max(0, scrollTo), behavior: 'smooth' })
+    const midElement = itemRefs.current.get(midIndex)
+    if (midElement) {
+      midElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
   }, [midIndex])
 
@@ -734,10 +731,7 @@ export function InstagramSearchSlide({ isPrintMode = false }: { isPrintMode?: bo
         </div>
 
         {/* User list with auto-scroll */}
-        <div 
-          ref={scrollContainerRef}
-          className="flex-1 bg-white rounded-2xl shadow-lg border border-slate-200 overflow-y-auto"
-        >
+        <div className="flex-1 bg-white rounded-2xl shadow-lg border border-slate-200 overflow-y-auto">
           <div className="p-2">
             {instagramUsers.map((user, i) => {
               const isInRange = i >= currentRange[0] && i <= currentRange[1]
@@ -747,6 +741,9 @@ export function InstagramSearchSlide({ isPrintMode = false }: { isPrintMode?: bo
               return (
                 <div
                   key={user}
+                  ref={(el) => {
+                    if (el) itemRefs.current.set(i, el)
+                  }}
                   className={`flex items-center gap-3 p-2.5 rounded-xl mb-1 transition-all duration-500 ${
                     isFound
                       ? "bg-green-100 border-2 border-green-500 scale-[1.02]"
@@ -1190,7 +1187,7 @@ export function WhatsAppSlide({ isPrintMode = false }: { isPrintMode?: boolean }
   const [isPaused, setIsPaused] = useState(false)
   const [iterations, setIterations] = useState(0)
   const [statusMessage, setStatusMessage] = useState(`Presiona 'Buscar' para encontrar mensaje del ${targetDate}`)
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map())
 
   const startSearch = useCallback(() => {
     setIsSearching(true)
@@ -1218,14 +1215,11 @@ export function WhatsAppSlide({ isPrintMode = false }: { isPrintMode?: boolean }
     setStatusMessage(`Presiona 'Buscar' para encontrar mensaje del ${targetDate}`)
   }, [])
 
-  // Auto-scroll to center the mid element
+  // Auto-scroll to center the mid element using scrollIntoView
   useEffect(() => {
-    if (scrollContainerRef.current) {
-      const container = scrollContainerRef.current
-      const itemHeight = 70
-      const containerHeight = container.clientHeight
-      const scrollTo = midIndex * itemHeight - containerHeight / 2 + itemHeight / 2
-      container.scrollTo({ top: Math.max(0, scrollTo), behavior: 'smooth' })
+    const midElement = itemRefs.current.get(midIndex)
+    if (midElement) {
+      midElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
   }, [midIndex])
 
@@ -1309,10 +1303,7 @@ export function WhatsAppSlide({ isPrintMode = false }: { isPrintMode?: boolean }
         </div>
 
         {/* Messages with auto-scroll */}
-        <div 
-          ref={scrollContainerRef}
-          className="flex-1 bg-[#e5ddd5] rounded-2xl shadow-lg overflow-y-auto"
-        >
+        <div className="flex-1 bg-[#e5ddd5] rounded-2xl shadow-lg overflow-y-auto">
           <div className="p-3 space-y-2">
             {messages.map((msg, i) => {
               const isInRange = i >= searchLow && i <= searchHigh
@@ -1322,6 +1313,9 @@ export function WhatsAppSlide({ isPrintMode = false }: { isPrintMode?: boolean }
               return (
                 <div
                   key={msg.id}
+                  ref={(el) => {
+                    if (el) itemRefs.current.set(i, el)
+                  }}
                   className={`flex ${msg.sender === "me" ? "justify-end" : "justify-start"}`}
                 >
                   <div
