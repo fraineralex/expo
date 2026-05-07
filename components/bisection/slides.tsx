@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState, useCallback } from "react"
-import { Search, Database, Brain, Globe, Gamepad2, Server, Cpu, Zap, MessageCircle, ShoppingCart, User, ChevronRight, Play, RotateCcw, Check } from "lucide-react"
+import { Search, Database, Brain, Globe, Gamepad2, Server, Cpu, Zap, MessageCircle, ShoppingCart, User, ChevronRight, Play, RotateCcw, Check, Pause, ArrowRight } from "lucide-react"
 
 /* ─────────────────────────────────────────────
    SLIDE 1 — PORTADA
@@ -142,279 +142,359 @@ export function CoverSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
 }
 
 /* ─────────────────────────────────────────────
-   SLIDE 2 — BISECCION VS BINARY SEARCH
+   SLIDE 2 — BISECCION VS BINARY SEARCH (MEJORADO)
 ───────────────────────────────────────────── */
 export function BisectionVsBinarySlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
+  // Binary search config - 32 elements to have more iterations
+  const sortedArray = Array.from({ length: 32 }, (_, i) => i * 3 + 1) // [1, 4, 7, 10, 13, ..., 94]
+  const target = 64 // Target value to find
+  const targetIndex = sortedArray.indexOf(target) // Should be index 21
+  
+  // Bisection config - finding sqrt(2) ≈ 1.41421356
+  const targetRoot = 1.41421356 // Precision goal: 0.0001
+  const f = (x: number) => x * x - 2 // f(x) = x² - 2, root = √2
+  
   const [step, setStep] = useState(0)
   const [isRunning, setIsRunning] = useState(false)
+  const [message, setMessage] = useState("Presiona 'Iniciar' para comenzar la simulacion")
   
   // Bisection state
-  const [bisectionInterval, setBisectionInterval] = useState<[number, number]>([1, 5])
-  const [bisectionMid, setBisectionMid] = useState(3)
+  const [bisectionA, setBisectionA] = useState(1)
+  const [bisectionB, setBisectionB] = useState(2)
+  const [bisectionMid, setBisectionMid] = useState(1.5)
+  const [bisectionHistory, setBisectionHistory] = useState<{a: number, b: number, mid: number, fMid: number}[]>([])
+  const [bisectionFound, setBisectionFound] = useState(false)
   
   // Binary search state
-  const sortedArray = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91]
-  const target = 23
-  const [searchRange, setSearchRange] = useState<[number, number]>([0, 9])
-  const [searchMid, setSearchMid] = useState(4)
-  const [found, setFound] = useState(false)
-
-  const f = (x: number) => x * x - 6 // f(x) = x² - 6, root ≈ 2.449
+  const [searchLow, setSearchLow] = useState(0)
+  const [searchHigh, setSearchHigh] = useState(31)
+  const [searchMid, setSearchMid] = useState(15)
+  const [binaryHistory, setBinaryHistory] = useState<{low: number, high: number, mid: number, value: number, comparison: string}[]>([])
+  const [binaryFound, setBinaryFound] = useState(false)
 
   const startSimulation = useCallback(() => {
     setIsRunning(true)
     setStep(0)
-    setBisectionInterval([1, 5])
-    setBisectionMid(3)
-    setSearchRange([0, 9])
-    setSearchMid(4)
-    setFound(false)
+    setBisectionA(1)
+    setBisectionB(2)
+    setBisectionMid(1.5)
+    setBisectionHistory([])
+    setBisectionFound(false)
+    setSearchLow(0)
+    setSearchHigh(31)
+    setSearchMid(15)
+    setBinaryHistory([])
+    setBinaryFound(false)
+    setMessage("Iniciando busqueda simultanea...")
   }, [])
 
   const resetSimulation = useCallback(() => {
     setIsRunning(false)
     setStep(0)
-    setBisectionInterval([1, 5])
-    setBisectionMid(3)
-    setSearchRange([0, 9])
-    setSearchMid(4)
-    setFound(false)
+    setBisectionA(1)
+    setBisectionB(2)
+    setBisectionMid(1.5)
+    setBisectionHistory([])
+    setBisectionFound(false)
+    setSearchLow(0)
+    setSearchHigh(31)
+    setSearchMid(15)
+    setBinaryHistory([])
+    setBinaryFound(false)
+    setMessage("Presiona 'Iniciar' para comenzar la simulacion")
   }, [])
 
   useEffect(() => {
     if (!isRunning || isPrintMode) return
+    if (bisectionFound && binaryFound) {
+      setIsRunning(false)
+      setMessage("Ambas busquedas completadas! El mismo principio: dividir a la mitad.")
+      return
+    }
 
     const interval = setInterval(() => {
       setStep((s) => {
         const newStep = s + 1
         
         // Bisection logic
-        setBisectionInterval(([a, b]) => {
-          const mid = (a + b) / 2
-          setBisectionMid(mid)
-          if (f(mid) < 0) return [mid, b]
-          return [a, mid]
-        })
+        if (!bisectionFound) {
+          setBisectionA((prevA) => {
+            setBisectionB((prevB) => {
+              const mid = (prevA + prevB) / 2
+              const fMid = f(mid)
+              setBisectionMid(mid)
+              
+              setBisectionHistory((h) => [...h, { a: prevA, b: prevB, mid, fMid }])
+              
+              // Check precision
+              if (Math.abs(mid - targetRoot) < 0.0001) {
+                setBisectionFound(true)
+                setMessage(`Biseccion: Raiz encontrada! √2 ≈ ${mid.toFixed(6)}`)
+              }
+              
+              if (fMid < 0) {
+                return prevB // keep b
+              }
+              return mid // new b = mid
+            })
+            
+            const mid = (prevA + bisectionB) / 2
+            if (f(mid) < 0) {
+              return mid // new a = mid
+            }
+            return prevA // keep a
+          })
+        }
 
         // Binary search logic
-        setSearchRange(([low, high]) => {
-          const mid = Math.floor((low + high) / 2)
-          setSearchMid(mid)
-          if (sortedArray[mid] === target) {
-            setFound(true)
-            setIsRunning(false)
-            return [mid, mid]
-          }
-          if (sortedArray[mid] < target) return [mid + 1, high]
-          return [low, mid - 1]
-        })
-
-        if (newStep >= 4) {
-          setIsRunning(false)
-          setFound(true)
+        if (!binaryFound) {
+          setSearchLow((prevLow) => {
+            setSearchHigh((prevHigh) => {
+              const mid = Math.floor((prevLow + prevHigh) / 2)
+              const value = sortedArray[mid]
+              setSearchMid(mid)
+              
+              let comparison = ""
+              if (value === target) {
+                comparison = `${value} = ${target} ENCONTRADO!`
+                setBinaryFound(true)
+                setMessage(`Binary Search: Elemento ${target} encontrado en indice ${mid}!`)
+              } else if (value < target) {
+                comparison = `${value} < ${target}, buscar derecha`
+              } else {
+                comparison = `${value} > ${target}, buscar izquierda`
+              }
+              
+              setBinaryHistory((h) => [...h, { low: prevLow, high: prevHigh, mid, value, comparison }])
+              
+              if (value === target) {
+                return mid
+              }
+              if (value < target) {
+                return prevHigh // keep high
+              }
+              return mid - 1 // new high
+            })
+            
+            const mid = Math.floor((prevLow + searchHigh) / 2)
+            const value = sortedArray[mid]
+            if (value === target) return mid
+            if (value < target) return mid + 1
+            return prevLow
+          })
         }
 
         return newStep
       })
-    }, 1500)
+    }, 2000) // 2 seconds between iterations for clarity
 
     return () => clearInterval(interval)
-  }, [isRunning, isPrintMode])
+  }, [isRunning, isPrintMode, bisectionFound, binaryFound, bisectionB, searchHigh, sortedArray])
 
   return (
-    <div className="w-full h-full flex flex-col bg-gradient-to-br from-slate-50 via-white to-blue-50 relative overflow-hidden p-12">
+    <div className="w-full h-full flex flex-col bg-gradient-to-br from-slate-50 via-white to-blue-50 relative overflow-hidden p-6">
       {/* Header */}
-      <div className="text-center mb-8">
-        <h2 className="text-4xl font-bold text-slate-900 mb-3">
+      <div className="text-center mb-4">
+        <h2 className="text-3xl font-bold text-slate-900 mb-2">
           Biseccion <span className="text-blue-500">=</span> Binary Search
         </h2>
-        <p className="text-lg text-slate-600">
-          El Metodo de Biseccion es la version matematica continua de Binary Search
+        <p className="text-slate-600">
+          Ambos dividen el espacio de busqueda a la mitad en cada iteracion
         </p>
       </div>
 
+      {/* Message bar */}
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-4 text-center">
+        <span className={`font-medium ${bisectionFound && binaryFound ? "text-green-600" : "text-blue-700"}`}>
+          {message}
+        </span>
+        <span className="ml-4 text-slate-500">Iteracion: {step}</span>
+      </div>
+
       {/* Main content - two sides */}
-      <div className="flex-1 flex gap-8">
+      <div className="flex-1 flex gap-4 overflow-hidden">
         {/* Left side - Bisection */}
-        <div className="flex-1 bg-white rounded-2xl shadow-lg border border-slate-200 p-6 flex flex-col">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-lg">f</span>
+        <div className="flex-1 bg-white rounded-2xl shadow-lg border border-slate-200 p-4 flex flex-col overflow-hidden">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">f</span>
             </div>
             <div>
-              <h3 className="font-semibold text-slate-900">Metodo de Biseccion</h3>
-              <p className="text-xs text-slate-500">Funciones continuas</p>
+              <h3 className="font-semibold text-slate-900 text-sm">Metodo de Biseccion</h3>
+              <p className="text-xs text-slate-500">Buscando √2 (precision 0.0001)</p>
+            </div>
+            {bisectionFound && <Check className="w-5 h-5 text-green-500 ml-auto" />}
+          </div>
+
+          {/* Current state */}
+          <div className="bg-purple-50 rounded-lg p-3 mb-3">
+            <div className="text-xs text-purple-600 font-medium mb-2">Estado Actual:</div>
+            <div className="grid grid-cols-3 gap-2 text-center text-sm">
+              <div>
+                <div className="text-slate-500">a</div>
+                <div className="font-mono font-bold text-purple-700">{bisectionA.toFixed(6)}</div>
+              </div>
+              <div>
+                <div className="text-slate-500">mid</div>
+                <div className={`font-mono font-bold ${bisectionFound ? "text-green-600" : "text-purple-700"}`}>
+                  {bisectionMid.toFixed(6)}
+                </div>
+              </div>
+              <div>
+                <div className="text-slate-500">b</div>
+                <div className="font-mono font-bold text-purple-700">{bisectionB.toFixed(6)}</div>
+              </div>
+            </div>
+            <div className="mt-2 text-center text-xs text-slate-600">
+              f(mid) = {f(bisectionMid).toFixed(6)} | Meta: √2 ≈ 1.414214
             </div>
           </div>
 
-          {/* Function visualization */}
-          <div className="flex-1 relative bg-slate-50 rounded-xl p-4">
-            <div className="text-xs text-slate-500 mb-2">f(x) = x² - 6 | Buscando raiz</div>
-            
-            {/* Simple interval visualization */}
-            <div className="relative h-32 flex items-end">
-              <svg className="w-full h-full" viewBox="0 0 400 120">
-                {/* Axis */}
-                <line x1="40" y1="100" x2="360" y2="100" stroke="#cbd5e1" strokeWidth="2" />
-                <line x1="40" y1="10" x2="40" y2="100" stroke="#cbd5e1" strokeWidth="2" />
-                
-                {/* Curve approximation */}
-                <path
-                  d="M 40 80 Q 120 120 200 100 Q 280 80 360 20"
-                  fill="none"
-                  stroke="#8b5cf6"
-                  strokeWidth="3"
-                />
-                
-                {/* Interval markers */}
-                <line
-                  x1={40 + (bisectionInterval[0] - 1) * 80}
-                  y1="10"
-                  x2={40 + (bisectionInterval[0] - 1) * 80}
-                  y2="100"
-                  stroke="#3b82f6"
-                  strokeWidth="2"
-                  strokeDasharray="4"
-                />
-                <line
-                  x1={40 + (bisectionInterval[1] - 1) * 80}
-                  y1="10"
-                  x2={40 + (bisectionInterval[1] - 1) * 80}
-                  y2="100"
-                  stroke="#3b82f6"
-                  strokeWidth="2"
-                  strokeDasharray="4"
-                />
-                
-                {/* Midpoint */}
-                <circle
-                  cx={40 + (bisectionMid - 1) * 80}
-                  cy="100"
-                  r="8"
-                  fill="#3b82f6"
-                  className="transition-all duration-500"
-                />
-                
-                {/* Root indicator */}
-                <circle cx="156" cy="100" r="4" fill="#22c55e" />
-              </svg>
-            </div>
-
-            {/* Interval info */}
-            <div className="mt-4 flex justify-between text-sm">
-              <span className="text-slate-600">a = {bisectionInterval[0].toFixed(2)}</span>
-              <span className="font-semibold text-blue-600">m = {bisectionMid.toFixed(3)}</span>
-              <span className="text-slate-600">b = {bisectionInterval[1].toFixed(2)}</span>
+          {/* Interval visualization */}
+          <div className="relative h-8 bg-slate-100 rounded-lg mb-3 overflow-hidden">
+            <div 
+              className="absolute top-0 bottom-0 bg-purple-200 transition-all duration-500"
+              style={{
+                left: `${((bisectionA - 1) / 1) * 100}%`,
+                right: `${((2 - bisectionB) / 1) * 100}%`,
+              }}
+            />
+            <div 
+              className={`absolute top-0 bottom-0 w-1 transition-all duration-500 ${bisectionFound ? "bg-green-500" : "bg-purple-600"}`}
+              style={{ left: `${((bisectionMid - 1) / 1) * 100}%` }}
+            />
+            <div className="absolute inset-x-0 bottom-0 flex justify-between px-2 text-xs text-slate-500">
+              <span>1.0</span>
+              <span>1.5</span>
+              <span>2.0</span>
             </div>
           </div>
 
-          {/* Properties */}
-          <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
-            <div className="bg-purple-50 rounded-lg p-2 text-center">
-              <div className="text-purple-600 font-medium">Divide</div>
-              <div className="text-slate-600">Intervalos</div>
-            </div>
-            <div className="bg-purple-50 rounded-lg p-2 text-center">
-              <div className="text-purple-600 font-medium">Busca</div>
-              <div className="text-slate-600">Raices</div>
-            </div>
-            <div className="bg-purple-50 rounded-lg p-2 text-center">
-              <div className="text-purple-600 font-medium">Usa</div>
-              <div className="text-slate-600">Funciones</div>
+          {/* History */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="text-xs text-slate-500 mb-2">Historial de iteraciones:</div>
+            <div className="space-y-1">
+              {bisectionHistory.map((h, i) => (
+                <div key={i} className="bg-slate-50 rounded p-2 text-xs font-mono">
+                  <span className="text-purple-600">#{i + 1}</span>
+                  {" ["}
+                  <span className="text-blue-600">{h.a.toFixed(4)}</span>
+                  {", "}
+                  <span className="text-blue-600">{h.b.toFixed(4)}</span>
+                  {"] → mid="}
+                  <span className="font-bold">{h.mid.toFixed(4)}</span>
+                  {" f(mid)="}
+                  <span className={h.fMid < 0 ? "text-red-500" : "text-green-500"}>
+                    {h.fMid.toFixed(4)}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
         {/* Center connector */}
-        <div className="flex flex-col items-center justify-center gap-2">
-          <div className="w-px h-16 bg-gradient-to-b from-transparent via-blue-300 to-transparent" />
-          <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center shadow-lg">
+        <div className="flex flex-col items-center justify-center gap-2 py-8">
+          <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center shadow-lg">
             <span className="text-white font-bold">=</span>
           </div>
-          <div className="w-px h-16 bg-gradient-to-b from-transparent via-blue-300 to-transparent" />
-          <div className="text-xs text-slate-500 text-center max-w-20">
+          <div className="text-xs text-slate-500 text-center max-w-16">
             Misma logica
           </div>
         </div>
 
         {/* Right side - Binary Search */}
-        <div className="flex-1 bg-white rounded-2xl shadow-lg border border-slate-200 p-6 flex flex-col">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center">
-              <Search className="w-5 h-5 text-white" />
+        <div className="flex-1 bg-white rounded-2xl shadow-lg border border-slate-200 p-4 flex flex-col overflow-hidden">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg flex items-center justify-center">
+              <Search className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h3 className="font-semibold text-slate-900">Binary Search</h3>
-              <p className="text-xs text-slate-500">Datos ordenados</p>
+              <h3 className="font-semibold text-slate-900 text-sm">Binary Search</h3>
+              <p className="text-xs text-slate-500">Buscando valor {target} en 32 elementos</p>
+            </div>
+            {binaryFound && <Check className="w-5 h-5 text-green-500 ml-auto" />}
+          </div>
+
+          {/* Current state */}
+          <div className="bg-blue-50 rounded-lg p-3 mb-3">
+            <div className="text-xs text-blue-600 font-medium mb-2">Estado Actual:</div>
+            <div className="grid grid-cols-3 gap-2 text-center text-sm">
+              <div>
+                <div className="text-slate-500">low</div>
+                <div className="font-mono font-bold text-blue-700">{searchLow}</div>
+              </div>
+              <div>
+                <div className="text-slate-500">mid</div>
+                <div className={`font-mono font-bold ${binaryFound ? "text-green-600" : "text-blue-700"}`}>
+                  {searchMid}
+                </div>
+              </div>
+              <div>
+                <div className="text-slate-500">high</div>
+                <div className="font-mono font-bold text-blue-700">{searchHigh}</div>
+              </div>
+            </div>
+            <div className="mt-2 text-center text-xs text-slate-600">
+              arr[mid] = {sortedArray[searchMid]} | Buscando: {target}
             </div>
           </div>
 
           {/* Array visualization */}
-          <div className="flex-1 bg-slate-50 rounded-xl p-4">
-            <div className="text-xs text-slate-500 mb-2">Array ordenado | Buscando: {target}</div>
-            
-            <div className="flex gap-1 justify-center mt-8">
+          <div className="mb-3">
+            <div className="flex gap-0.5 justify-center flex-wrap">
               {sortedArray.map((val, i) => {
-                const isInRange = i >= searchRange[0] && i <= searchRange[1]
+                const isInRange = i >= searchLow && i <= searchHigh
                 const isMid = i === searchMid
-                const isTarget = found && val === target
+                const isTarget = binaryFound && i === searchMid
                 
                 return (
                   <div
                     key={i}
-                    className={`w-9 h-12 rounded-lg flex items-center justify-center text-sm font-medium transition-all duration-500 ${
+                    className={`w-6 h-7 rounded text-xs flex items-center justify-center font-medium transition-all duration-500 ${
                       isTarget
-                        ? "bg-green-500 text-white scale-110 shadow-lg"
+                        ? "bg-green-500 text-white scale-110"
                         : isMid
-                        ? "bg-blue-500 text-white scale-105 shadow-md"
+                        ? "bg-blue-500 text-white scale-105"
                         : isInRange
                         ? "bg-blue-100 text-blue-700"
-                        : "bg-slate-200 text-slate-400 opacity-50"
+                        : "bg-slate-100 text-slate-300"
                     }`}
+                    title={`Index: ${i}, Value: ${val}`}
                   >
                     {val}
                   </div>
                 )
               })}
             </div>
-
-            {/* Index markers */}
-            <div className="flex gap-1 justify-center mt-2">
-              {sortedArray.map((_, i) => (
-                <div key={i} className="w-9 text-center text-xs text-slate-400">
-                  {i}
-                </div>
-              ))}
-            </div>
-
-            {/* Range info */}
-            <div className="mt-6 flex justify-between text-sm">
-              <span className="text-slate-600">low = {searchRange[0]}</span>
-              <span className="font-semibold text-blue-600">mid = {searchMid}</span>
-              <span className="text-slate-600">high = {searchRange[1]}</span>
-            </div>
           </div>
 
-          {/* Properties */}
-          <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
-            <div className="bg-blue-50 rounded-lg p-2 text-center">
-              <div className="text-blue-600 font-medium">Divide</div>
-              <div className="text-slate-600">Listas</div>
-            </div>
-            <div className="bg-blue-50 rounded-lg p-2 text-center">
-              <div className="text-blue-600 font-medium">Busca</div>
-              <div className="text-slate-600">Elementos</div>
-            </div>
-            <div className="bg-blue-50 rounded-lg p-2 text-center">
-              <div className="text-blue-600 font-medium">Usa</div>
-              <div className="text-slate-600">Datos ordenados</div>
+          {/* History */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="text-xs text-slate-500 mb-2">Historial de iteraciones:</div>
+            <div className="space-y-1">
+              {binaryHistory.map((h, i) => (
+                <div key={i} className="bg-slate-50 rounded p-2 text-xs font-mono">
+                  <span className="text-blue-600">#{i + 1}</span>
+                  {" ["}
+                  <span className="text-blue-600">{h.low}</span>
+                  {"-"}
+                  <span className="text-blue-600">{h.high}</span>
+                  {"] mid="}
+                  <span className="font-bold">{h.mid}</span>
+                  {" → "}
+                  <span className={h.comparison.includes("ENCONTRADO") ? "text-green-600 font-bold" : "text-slate-600"}>
+                    {h.comparison}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </div>
 
       {/* Controls */}
-      <div className="flex justify-center gap-4 mt-6">
+      <div className="flex justify-center gap-4 mt-4">
         <button
           onClick={startSimulation}
           disabled={isRunning}
@@ -431,33 +511,44 @@ export function BisectionVsBinarySlide({ isPrintMode = false }: { isPrintMode?: 
           Reiniciar
         </button>
       </div>
-
-      {/* Step indicator */}
-      <div className="absolute bottom-4 right-6 text-sm text-slate-500">
-        Iteracion: {step}
-      </div>
     </div>
   )
 }
 
 /* ─────────────────────────────────────────────
-   SLIDE 3 — FRAINER: INSTAGRAM SEARCH
+   SLIDE 3 — FRAINER: INSTAGRAM SEARCH (MEJORADO)
+   Busqueda de "fraineralex" letra por letra
 ───────────────────────────────────────────── */
-const instagramUsers = [
-  "alex_photo", "anna_travels", "bob_dev", "carlos_music", "diana_fit",
-  "emma_cook", "felix_art", "frainer_dev", "gina_style", "henry_code",
-  "iris_nature", "jake_sports", "karen_books", "leo_gaming", "maya_dance",
-  "nick_tech"
-].sort()
+// Generate 200 users alphabetically sorted for more iterations
+const generateUsers = () => {
+  const prefixes = [
+    "aa", "ab", "ac", "ad", "ae", "af", "ag", "ba", "bb", "bc", "ca", "cb", "cc", 
+    "da", "db", "dc", "ea", "eb", "ec", "fa", "fb", "fc", "fd", "fe", "ff", "fg", "fh", "fi", "fj", "fk", "fl", "fm", "fn", "fo", "fp", "fq", "fr",
+    "fra", "fraa", "frab", "frac", "frad", "frae", "frai", "fraib", "fraic", "fraid", "fraie", "fraif", "fraig", "fraih", "fraii", "fraij", "fraik", "frail", "fraim", "frain", "fraine", "frainer", "frainera", "fraineralex",
+    "frainerb", "frainerc", "frainerd", "frainere", "frainerf", "frainerg",
+    "fras", "frat", "frau", "frav", "fraw", "frax", "fray", "fraz",
+    "frb", "frc", "frd", "fre", "frf", "frg", "frh", "fri", "frj", "frk", "frl", "frm", "frn", "fro", "frp", "frq", "frr", "frs", "frt", "fru", "frv", "frw", "frx", "fry", "frz",
+    "fs", "ft", "fu", "fv", "fw", "fx", "fy", "fz",
+    "ga", "gb", "gc", "gd", "ge", "ha", "hb", "hc", "ia", "ib", "ic",
+    "ja", "jb", "ka", "kb", "la", "lb", "ma", "mb", "na", "nb", "oa", "ob",
+    "pa", "pb", "qa", "qb", "ra", "rb", "sa", "sb", "ta", "tb", "ua", "ub",
+    "va", "vb", "wa", "wb", "xa", "xb", "ya", "yb", "za", "zb"
+  ]
+  return prefixes.map(p => `${p}_user`).sort()
+}
+
+const instagramUsers = generateUsers()
+const targetUser = "fraineralex_user"
 
 export function InstagramSearchSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
-  const [searchQuery] = useState("frainer_dev")
   const [currentRange, setCurrentRange] = useState<[number, number]>([0, instagramUsers.length - 1])
   const [midIndex, setMidIndex] = useState(Math.floor(instagramUsers.length / 2))
   const [found, setFound] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
   const [iterations, setIterations] = useState(0)
-  const [discarded, setDiscarded] = useState(0)
+  const [message, setMessage] = useState("Presiona 'Buscar' para encontrar @fraineralex_user")
+  const [searchHistory, setSearchHistory] = useState<{low: number, high: number, mid: number, user: string, comparison: string}[]>([])
+  const [currentLetter, setCurrentLetter] = useState("")
 
   const startSearch = useCallback(() => {
     setIsSearching(true)
@@ -465,7 +556,9 @@ export function InstagramSearchSlide({ isPrintMode = false }: { isPrintMode?: bo
     setMidIndex(Math.floor(instagramUsers.length / 2))
     setFound(false)
     setIterations(0)
-    setDiscarded(0)
+    setMessage("Iniciando busqueda binaria...")
+    setSearchHistory([])
+    setCurrentLetter("")
   }, [])
 
   const resetSearch = useCallback(() => {
@@ -474,7 +567,9 @@ export function InstagramSearchSlide({ isPrintMode = false }: { isPrintMode?: bo
     setMidIndex(Math.floor(instagramUsers.length / 2))
     setFound(false)
     setIterations(0)
-    setDiscarded(0)
+    setMessage("Presiona 'Buscar' para encontrar @fraineralex_user")
+    setSearchHistory([])
+    setCurrentLetter("")
   }, [])
 
   useEffect(() => {
@@ -488,83 +583,139 @@ export function InstagramSearchSlide({ isPrintMode = false }: { isPrintMode?: bo
 
         const currentUser = instagramUsers[mid]
         
-        if (currentUser === searchQuery) {
+        // Find the differing character position for educational display
+        let diffPos = 0
+        for (let i = 0; i < Math.min(currentUser.length, targetUser.length); i++) {
+          if (currentUser[i] !== targetUser[i]) {
+            diffPos = i
+            break
+          }
+          diffPos = i + 1
+        }
+        setCurrentLetter(targetUser.substring(0, diffPos + 1))
+        
+        let comparison = ""
+        if (currentUser === targetUser) {
+          comparison = "ENCONTRADO!"
           setFound(true)
           setIsSearching(false)
+          setMessage(`Usuario @fraineralex encontrado en ${iterations + 1} iteraciones!`)
+          setSearchHistory((h) => [...h, { low, high, mid, user: currentUser, comparison }])
           return [mid, mid]
         }
 
-        if (currentUser < searchQuery) {
-          setDiscarded((d) => d + (mid - low + 1))
+        if (currentUser < targetUser) {
+          comparison = `"${currentUser}" < "${targetUser}" → buscar DERECHA`
+          setMessage(`Comparando: "${currentUser}" es menor, descartamos izquierda`)
+          setSearchHistory((h) => [...h, { low, high, mid, user: currentUser, comparison }])
           return [mid + 1, high]
         } else {
-          setDiscarded((d) => d + (high - mid + 1))
+          comparison = `"${currentUser}" > "${targetUser}" → buscar IZQUIERDA`
+          setMessage(`Comparando: "${currentUser}" es mayor, descartamos derecha`)
+          setSearchHistory((h) => [...h, { low, high, mid, user: currentUser, comparison }])
           return [low, mid - 1]
         }
       })
-    }, 1200)
+    }, 1800)
 
     return () => clearTimeout(timeout)
-  }, [isSearching, found, currentRange, isPrintMode, searchQuery])
+  }, [isSearching, found, currentRange, isPrintMode, iterations])
+
+  // Get visible subset of users around current mid
+  const visibleStart = Math.max(0, midIndex - 8)
+  const visibleEnd = Math.min(instagramUsers.length, midIndex + 8)
+  const visibleUsers = instagramUsers.slice(visibleStart, visibleEnd)
 
   return (
     <div className="w-full h-full flex bg-gradient-to-br from-slate-50 via-white to-pink-50 relative overflow-hidden">
       {/* Left panel - Instagram-style interface */}
-      <div className="flex-1 p-8 flex flex-col">
-        <div className="flex items-center gap-3 mb-6">
+      <div className="flex-1 p-6 flex flex-col">
+        <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 rounded-xl flex items-center justify-center">
             <User className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h3 className="text-2xl font-bold text-slate-900">Busqueda de Usuario</h3>
+            <h3 className="text-xl font-bold text-slate-900">Busqueda de Usuario: Binary Search</h3>
             <p className="text-sm text-slate-500">Frainer &middot; Instagram</p>
           </div>
         </div>
 
-        {/* Search bar */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 mb-6">
+        {/* Message bar */}
+        <div className={`rounded-xl p-3 mb-4 text-sm ${found ? "bg-green-50 border border-green-200 text-green-700" : "bg-pink-50 border border-pink-200 text-pink-700"}`}>
+          {message}
+        </div>
+
+        {/* Search target */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 mb-4">
           <div className="flex items-center gap-3">
             <Search className="w-5 h-5 text-slate-400" />
-            <span className="text-slate-700 font-medium">{searchQuery}</span>
+            <div>
+              <span className="text-slate-500">Buscando: </span>
+              <span className="font-mono font-bold text-pink-600">@fraineralex_user</span>
+            </div>
+          </div>
+          {currentLetter && (
+            <div className="mt-2 text-xs text-slate-500">
+              Prefijo coincidente hasta ahora: <span className="font-mono font-bold text-green-600">{currentLetter}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Current range visualization */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-4">
+          <div className="flex justify-between text-xs text-slate-500 mb-2">
+            <span>Rango actual: [{currentRange[0]} - {currentRange[1]}]</span>
+            <span>{currentRange[1] - currentRange[0] + 1} usuarios restantes de {instagramUsers.length}</span>
+          </div>
+          <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-gradient-to-r from-pink-400 to-purple-500 rounded-full transition-all duration-500"
+              style={{
+                marginLeft: `${(currentRange[0] / instagramUsers.length) * 100}%`,
+                width: `${((currentRange[1] - currentRange[0] + 1) / instagramUsers.length) * 100}%`
+              }}
+            />
           </div>
         </div>
 
-        {/* User list */}
-        <div className="flex-1 bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
-          <div className="p-4 border-b border-slate-100">
-            <span className="text-sm text-slate-500">{instagramUsers.length} usuarios ordenados alfabeticamente</span>
+        {/* User list visualization */}
+        <div className="flex-1 bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden flex flex-col">
+          <div className="p-3 border-b border-slate-100 flex justify-between items-center">
+            <span className="text-sm text-slate-500">Usuarios (mostrando alrededor del punto medio)</span>
+            <span className="text-xs bg-slate-100 px-2 py-1 rounded">Total: {instagramUsers.length}</span>
           </div>
-          <div className="p-2 space-y-1 max-h-[400px] overflow-y-auto">
-            {instagramUsers.map((user, i) => {
-              const isInRange = i >= currentRange[0] && i <= currentRange[1]
-              const isMid = i === midIndex && isSearching
-              const isFound = found && user === searchQuery
+          <div className="flex-1 p-2 space-y-1 overflow-y-auto">
+            {visibleUsers.map((user, i) => {
+              const actualIndex = visibleStart + i
+              const isInRange = actualIndex >= currentRange[0] && actualIndex <= currentRange[1]
+              const isMid = actualIndex === midIndex && isSearching
+              const isFound = found && user === targetUser
 
               return (
                 <div
                   key={user}
-                  className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-500 ${
+                  className={`flex items-center gap-3 p-2.5 rounded-xl transition-all duration-500 ${
                     isFound
-                      ? "bg-green-100 border-2 border-green-500"
+                      ? "bg-green-100 border-2 border-green-500 scale-[1.02]"
                       : isMid
                       ? "bg-pink-100 border-2 border-pink-500 scale-[1.02]"
                       : isInRange
                       ? "bg-slate-50"
-                      : "opacity-30"
+                      : "opacity-30 bg-slate-100"
                   }`}
                 >
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-medium ${
+                  <div className="text-xs text-slate-400 w-8">[{actualIndex}]</div>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${
                     isFound ? "bg-green-500" : isMid ? "bg-pink-500" : "bg-gradient-to-br from-purple-400 to-pink-400"
                   }`}>
                     {user[0].toUpperCase()}
                   </div>
                   <div className="flex-1">
-                    <div className="font-medium text-slate-900">@{user}</div>
-                    <div className="text-xs text-slate-500">Usuario verificado</div>
+                    <div className="font-mono text-sm text-slate-900">@{user}</div>
                   </div>
                   {isFound && <Check className="w-5 h-5 text-green-500" />}
                   {isMid && !isFound && (
-                    <span className="text-xs bg-pink-500 text-white px-2 py-1 rounded-full">
+                    <span className="text-xs bg-pink-500 text-white px-2 py-1 rounded-full animate-pulse">
                       Comparando
                     </span>
                   )}
@@ -575,38 +726,62 @@ export function InstagramSearchSlide({ isPrintMode = false }: { isPrintMode?: bo
         </div>
       </div>
 
-      {/* Right panel - Metrics */}
-      <div className="w-80 bg-white border-l border-slate-200 p-6 flex flex-col">
-        <h4 className="text-lg font-semibold text-slate-900 mb-6">Metricas de Busqueda</h4>
+      {/* Right panel - Metrics and History */}
+      <div className="w-96 bg-white border-l border-slate-200 p-4 flex flex-col">
+        <h4 className="text-lg font-semibold text-slate-900 mb-4">Proceso de Busqueda</h4>
 
-        <div className="space-y-4 flex-1">
-          <div className="bg-slate-50 rounded-xl p-4">
-            <div className="text-sm text-slate-500">Iteraciones</div>
-            <div className="text-3xl font-bold text-slate-900">{iterations}</div>
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="bg-slate-50 rounded-xl p-3">
+            <div className="text-xs text-slate-500">Iteraciones</div>
+            <div className="text-2xl font-bold text-slate-900">{iterations}</div>
           </div>
-          <div className="bg-slate-50 rounded-xl p-4">
-            <div className="text-sm text-slate-500">Usuarios descartados</div>
-            <div className="text-3xl font-bold text-pink-500">{discarded}</div>
-          </div>
-          <div className="bg-slate-50 rounded-xl p-4">
-            <div className="text-sm text-slate-500">Rango actual</div>
-            <div className="text-xl font-bold text-slate-900">
-              [{currentRange[0]} - {currentRange[1]}]
+          <div className="bg-slate-50 rounded-xl p-3">
+            <div className="text-xs text-slate-500">Descartados</div>
+            <div className="text-2xl font-bold text-pink-500">
+              {instagramUsers.length - (currentRange[1] - currentRange[0] + 1)}
             </div>
           </div>
-          <div className="bg-slate-50 rounded-xl p-4">
-            <div className="text-sm text-slate-500">Eficiencia</div>
-            <div className="text-xl font-bold text-green-500">
-              O(log n) = {Math.ceil(Math.log2(instagramUsers.length))} max
+          <div className="bg-slate-50 rounded-xl p-3">
+            <div className="text-xs text-slate-500">Restantes</div>
+            <div className="text-2xl font-bold text-blue-500">
+              {currentRange[1] - currentRange[0] + 1}
+            </div>
+          </div>
+          <div className="bg-slate-50 rounded-xl p-3">
+            <div className="text-xs text-slate-500">Max iteraciones</div>
+            <div className="text-2xl font-bold text-green-500">
+              {Math.ceil(Math.log2(instagramUsers.length))}
             </div>
           </div>
         </div>
 
-        <p className="text-xs text-slate-500 mb-4 leading-relaxed">
-          Las plataformas sociales usan estructuras de busqueda optimizadas inspiradas en algoritmos de division sucesiva.
-        </p>
+        {/* History log */}
+        <div className="flex-1 bg-slate-50 rounded-xl p-3 overflow-hidden flex flex-col">
+          <div className="text-xs text-slate-500 mb-2 font-medium">Historial de comparaciones:</div>
+          <div className="flex-1 overflow-y-auto space-y-1.5">
+            {searchHistory.map((h, i) => (
+              <div key={i} className={`text-xs p-2 rounded-lg ${h.comparison.includes("ENCONTRADO") ? "bg-green-100" : "bg-white"}`}>
+                <div className="flex items-center gap-2">
+                  <span className="text-pink-600 font-bold">#{i + 1}</span>
+                  <span className="text-slate-500">Rango [{h.low}-{h.high}]</span>
+                </div>
+                <div className="font-mono text-slate-700 mt-1">
+                  mid[{h.mid}] = "{h.user}"
+                </div>
+                <div className={`mt-1 ${h.comparison.includes("ENCONTRADO") ? "text-green-600 font-bold" : "text-slate-600"}`}>
+                  {h.comparison}
+                </div>
+              </div>
+            ))}
+            {searchHistory.length === 0 && (
+              <div className="text-slate-400 text-center py-4">
+                El historial aparecera aqui
+              </div>
+            )}
+          </div>
+        </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 mt-4">
           <button
             onClick={startSearch}
             disabled={isSearching}
@@ -628,146 +803,215 @@ export function InstagramSearchSlide({ isPrintMode = false }: { isPrintMode?: bo
 }
 
 /* ─────────────────────────────────────────────
-   SLIDE 4 — ENMANUEL: AMAZON PRODUCT FILTER
+   SLIDE 4 — ENMANUEL: AMAZON PRODUCT FILTER (MEJORADO)
+   Mas productos y iteraciones visibles
 ───────────────────────────────────────────── */
-const products = [
-  { id: 1, name: "Audifonos Basicos", price: 25, img: "🎧" },
-  { id: 2, name: "Mouse Inalambrico", price: 45, img: "🖱️" },
-  { id: 3, name: "Teclado Mecanico", price: 75, img: "⌨️" },
-  { id: 4, name: "Monitor 24 pulgadas", price: 89, img: "🖥️" },
-  { id: 5, name: "Webcam HD", price: 95, img: "📷" },
-  { id: 6, name: "Auriculares Gaming", price: 110, img: "🎮" },
-  { id: 7, name: "SSD 500GB", price: 125, img: "💾" },
-  { id: 8, name: "Tablet 10 pulgadas", price: 140, img: "📱" },
-  { id: 9, name: "Smartwatch", price: 155, img: "⌚" },
-  { id: 10, name: "Camara Digital", price: 180, img: "📸" },
-  { id: 11, name: "Drone Mini", price: 220, img: "🚁" },
-  { id: 12, name: "Laptop Gaming", price: 350, img: "💻" },
-].sort((a, b) => a.price - b.price)
+// Generate 50 products with prices from $10 to $500
+const generateProducts = () => {
+  const names = [
+    "Cable USB", "Funda Celular", "Cargador", "Auriculares", "Mouse Pad",
+    "Hub USB", "Webcam Basica", "Soporte Laptop", "Lampara LED", "Teclado",
+    "Mouse", "Monitor Stand", "Microfono", "Audifonos", "SSD 256GB",
+    "Memoria RAM", "Cooler", "Fuente Poder", "Ventilador", "Cable HDMI",
+    "Router WiFi", "Disco Duro", "Tarjeta SD", "Pendrive", "Adaptador",
+    "Tablet Stand", "Ring Light", "Tripode", "Gimbal", "Estabilizador",
+    "Webcam HD", "Monitor 22", "Teclado Gaming", "Mouse Gaming", "Headset",
+    "SSD 512GB", "GPU Basica", "Procesador", "Motherboard", "Gabinete",
+    "Monitor 27", "Laptop Basic", "Laptop Pro", "iMac Mini", "Gaming PC",
+    "Workstation", "Server Mini", "NAS Storage", "Impresora", "Escaner"
+  ]
+  return names.map((name, i) => ({
+    id: i + 1,
+    name,
+    price: Math.round(10 + (i * 10) + Math.random() * 5)
+  })).sort((a, b) => a.price - b.price)
+}
+
+const products = generateProducts()
 
 export function AmazonFilterSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
-  const targetRange = { min: 100, max: 150 }
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 400])
+  const targetPrice = 175 // We want to find products around $175
+  const [searchLow, setSearchLow] = useState(0)
+  const [searchHigh, setSearchHigh] = useState(products.length - 1)
+  const [midIndex, setMidIndex] = useState(Math.floor(products.length / 2))
   const [isFiltering, setIsFiltering] = useState(false)
   const [iterations, setIterations] = useState(0)
-  const [step, setStep] = useState(0)
+  const [found, setFound] = useState(false)
+  const [message, setMessage] = useState(`Presiona 'Buscar' para encontrar productos cerca de $${targetPrice}`)
+  const [searchHistory, setSearchHistory] = useState<{low: number, high: number, mid: number, price: number, comparison: string}[]>([])
 
   const startFilter = useCallback(() => {
     setIsFiltering(true)
-    setPriceRange([0, 400])
+    setSearchLow(0)
+    setSearchHigh(products.length - 1)
+    setMidIndex(Math.floor(products.length / 2))
     setIterations(0)
-    setStep(0)
+    setFound(false)
+    setMessage("Iniciando busqueda binaria por precio...")
+    setSearchHistory([])
   }, [])
 
   const resetFilter = useCallback(() => {
     setIsFiltering(false)
-    setPriceRange([0, 400])
+    setSearchLow(0)
+    setSearchHigh(products.length - 1)
+    setMidIndex(Math.floor(products.length / 2))
     setIterations(0)
-    setStep(0)
+    setFound(false)
+    setMessage(`Presiona 'Buscar' para encontrar productos cerca de $${targetPrice}`)
+    setSearchHistory([])
   }, [])
 
   useEffect(() => {
-    if (!isFiltering || isPrintMode) return
+    if (!isFiltering || found || isPrintMode) return
 
     const timeout = setTimeout(() => {
-      setStep((s) => {
-        const newStep = s + 1
-        setIterations(newStep)
+      setSearchLow((prevLow) => {
+        setSearchHigh((prevHigh) => {
+          const mid = Math.floor((prevLow + prevHigh) / 2)
+          setMidIndex(mid)
+          setIterations((i) => i + 1)
 
-        // Simulate bisection narrowing down to target range
-        setPriceRange(([min, max]) => {
-          const mid = (min + max) / 2
+          const currentPrice = products[mid].price
+          let comparison = ""
           
-          if (newStep >= 4) {
+          // Check if we're close enough (within $10)
+          if (Math.abs(currentPrice - targetPrice) <= 10) {
+            comparison = `$${currentPrice} ≈ $${targetPrice} ENCONTRADO!`
+            setFound(true)
             setIsFiltering(false)
-            return [targetRange.min, targetRange.max]
+            setMessage(`Producto encontrado! "${products[mid].name}" a $${currentPrice}`)
+            setSearchHistory((h) => [...h, { low: prevLow, high: prevHigh, mid, price: currentPrice, comparison }])
+            return mid
           }
 
-          if (mid < targetRange.min) {
-            return [mid, max]
-          } else if (mid > targetRange.max) {
-            return [min, mid]
+          if (currentPrice < targetPrice) {
+            comparison = `$${currentPrice} < $${targetPrice} → buscar precios MAYORES`
+            setMessage(`$${currentPrice} es menor que $${targetPrice}, descartamos precios bajos`)
+            setSearchHistory((h) => [...h, { low: prevLow, high: prevHigh, mid, price: currentPrice, comparison }])
+            return prevHigh
+          } else {
+            comparison = `$${currentPrice} > $${targetPrice} → buscar precios MENORES`
+            setMessage(`$${currentPrice} es mayor que $${targetPrice}, descartamos precios altos`)
+            setSearchHistory((h) => [...h, { low: prevLow, high: prevHigh, mid, price: currentPrice, comparison }])
+            return mid - 1
           }
-          return [targetRange.min, targetRange.max]
         })
-
-        return newStep
+        
+        const mid = Math.floor((prevLow + searchHigh) / 2)
+        const currentPrice = products[mid].price
+        if (Math.abs(currentPrice - targetPrice) <= 10) return mid
+        if (currentPrice < targetPrice) return mid + 1
+        return prevLow
       })
-    }, 1000)
+    }, 1800)
 
     return () => clearTimeout(timeout)
-  }, [isFiltering, step, isPrintMode])
+  }, [isFiltering, found, searchLow, searchHigh, isPrintMode])
 
-  const visibleProducts = products.filter(
-    (p) => p.price >= priceRange[0] && p.price <= priceRange[1]
-  )
-
-  const matchingProducts = products.filter(
-    (p) => p.price >= targetRange.min && p.price <= targetRange.max
-  )
+  // Visible products around mid
+  const visibleStart = Math.max(0, midIndex - 6)
+  const visibleEnd = Math.min(products.length, midIndex + 6)
+  const visibleProducts = products.slice(visibleStart, visibleEnd)
 
   return (
     <div className="w-full h-full flex bg-gradient-to-br from-slate-50 via-white to-orange-50 relative overflow-hidden">
       {/* Left panel - E-commerce interface */}
-      <div className="flex-1 p-8 flex flex-col">
-        <div className="flex items-center gap-3 mb-6">
+      <div className="flex-1 p-6 flex flex-col">
+        <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-yellow-500 rounded-xl flex items-center justify-center">
             <ShoppingCart className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h3 className="text-2xl font-bold text-slate-900">Filtro de Productos</h3>
+            <h3 className="text-xl font-bold text-slate-900">Busqueda de Producto por Precio</h3>
             <p className="text-sm text-slate-500">Enmanuel &middot; Amazon</p>
           </div>
         </div>
 
-        {/* Filter bar */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-6">
+        {/* Message bar */}
+        <div className={`rounded-xl p-3 mb-4 text-sm ${found ? "bg-green-50 border border-green-200 text-green-700" : "bg-orange-50 border border-orange-200 text-orange-700"}`}>
+          {message}
+        </div>
+
+        {/* Search target */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 mb-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-slate-500">Rango de precio objetivo:</span>
-            <span className="font-semibold text-orange-600">
-              ${targetRange.min} - ${targetRange.max}
-            </span>
+            <span className="text-slate-500">Buscando precio cercano a:</span>
+            <span className="font-bold text-2xl text-orange-600">${targetPrice}</span>
           </div>
-          <div className="mt-3 h-2 bg-slate-100 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-orange-400 to-yellow-500 rounded-full transition-all duration-500"
+        </div>
+
+        {/* Price range visualization */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-4">
+          <div className="flex justify-between text-xs text-slate-500 mb-2">
+            <span>Rango: [{searchLow} - {searchHigh}]</span>
+            <span>{searchHigh - searchLow + 1} productos restantes de {products.length}</span>
+          </div>
+          <div className="relative h-6 bg-slate-100 rounded-full overflow-hidden">
+            {/* Full range */}
+            <div 
+              className="absolute top-0 bottom-0 bg-orange-200 transition-all duration-500"
               style={{
-                width: `${((priceRange[1] - priceRange[0]) / 400) * 100}%`,
-                marginLeft: `${(priceRange[0] / 400) * 100}%`,
+                left: `${(searchLow / products.length) * 100}%`,
+                width: `${((searchHigh - searchLow + 1) / products.length) * 100}%`
               }}
+            />
+            {/* Mid pointer */}
+            <div 
+              className={`absolute top-0 bottom-0 w-1.5 transition-all duration-500 ${found ? "bg-green-500" : "bg-orange-500"}`}
+              style={{ left: `${(midIndex / products.length) * 100}%` }}
+            />
+            {/* Target position (approximate) */}
+            <div 
+              className="absolute top-0 bottom-0 w-0.5 bg-red-400"
+              style={{ left: `${(products.findIndex(p => p.price >= targetPrice) / products.length) * 100}%` }}
             />
           </div>
           <div className="flex justify-between mt-1 text-xs text-slate-400">
-            <span>${priceRange[0].toFixed(0)}</span>
-            <span>${priceRange[1].toFixed(0)}</span>
+            <span>${products[0]?.price}</span>
+            <span className="text-red-500">Meta: ${targetPrice}</span>
+            <span>${products[products.length - 1]?.price}</span>
           </div>
         </div>
 
         {/* Products grid */}
         <div className="flex-1 bg-white rounded-2xl shadow-lg border border-slate-200 p-4 overflow-hidden">
-          <div className="grid grid-cols-3 gap-3 max-h-[380px] overflow-y-auto">
-            {products.map((product) => {
-              const isVisible = product.price >= priceRange[0] && product.price <= priceRange[1]
-              const isMatch = product.price >= targetRange.min && product.price <= targetRange.max
+          <div className="text-xs text-slate-500 mb-3">Productos alrededor del punto medio:</div>
+          <div className="grid grid-cols-3 gap-2 overflow-y-auto max-h-[300px]">
+            {visibleProducts.map((product, i) => {
+              const actualIndex = visibleStart + i
+              const isInRange = actualIndex >= searchLow && actualIndex <= searchHigh
+              const isMid = actualIndex === midIndex
+              const isMatch = found && actualIndex === midIndex
 
               return (
                 <div
                   key={product.id}
-                  className={`p-4 rounded-xl border-2 transition-all duration-500 ${
-                    !isVisible
-                      ? "opacity-20 scale-95 border-transparent"
-                      : isMatch && !isFiltering
+                  className={`p-3 rounded-xl border-2 transition-all duration-500 ${
+                    !isInRange
+                      ? "opacity-25 border-transparent bg-slate-50"
+                      : isMatch
                       ? "border-green-500 bg-green-50 scale-[1.02]"
+                      : isMid
+                      ? "border-orange-500 bg-orange-50 scale-[1.02]"
                       : "border-slate-200 bg-white"
                   }`}
                 >
-                  <div className="text-3xl mb-2">{product.img}</div>
+                  <div className="text-xs text-slate-400 mb-1">[{actualIndex}]</div>
                   <div className="text-sm font-medium text-slate-900 truncate">
                     {product.name}
                   </div>
-                  <div className={`text-lg font-bold ${isMatch ? "text-green-600" : "text-orange-500"}`}>
+                  <div className={`text-lg font-bold ${isMatch ? "text-green-600" : isMid ? "text-orange-600" : "text-slate-700"}`}>
                     ${product.price}
                   </div>
+                  {isMid && !found && (
+                    <div className="text-xs text-orange-600 mt-1 animate-pulse">Comparando...</div>
+                  )}
+                  {isMatch && (
+                    <div className="flex items-center gap-1 text-xs text-green-600 mt-1">
+                      <Check className="w-3 h-3" /> Encontrado
+                    </div>
+                  )}
                 </div>
               )
             })}
@@ -775,43 +1019,69 @@ export function AmazonFilterSlide({ isPrintMode = false }: { isPrintMode?: boole
         </div>
       </div>
 
-      {/* Right panel - Metrics */}
-      <div className="w-80 bg-white border-l border-slate-200 p-6 flex flex-col">
-        <h4 className="text-lg font-semibold text-slate-900 mb-6">Metricas de Filtrado</h4>
+      {/* Right panel - Metrics and History */}
+      <div className="w-96 bg-white border-l border-slate-200 p-4 flex flex-col">
+        <h4 className="text-lg font-semibold text-slate-900 mb-4">Proceso de Busqueda</h4>
 
-        <div className="space-y-4 flex-1">
-          <div className="bg-slate-50 rounded-xl p-4">
-            <div className="text-sm text-slate-500">Iteraciones</div>
-            <div className="text-3xl font-bold text-slate-900">{iterations}</div>
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="bg-slate-50 rounded-xl p-3">
+            <div className="text-xs text-slate-500">Iteraciones</div>
+            <div className="text-2xl font-bold text-slate-900">{iterations}</div>
           </div>
-          <div className="bg-slate-50 rounded-xl p-4">
-            <div className="text-sm text-slate-500">Productos visibles</div>
-            <div className="text-3xl font-bold text-orange-500">{visibleProducts.length}</div>
-          </div>
-          <div className="bg-slate-50 rounded-xl p-4">
-            <div className="text-sm text-slate-500">Productos descartados</div>
-            <div className="text-3xl font-bold text-slate-400">
-              {products.length - visibleProducts.length}
+          <div className="bg-slate-50 rounded-xl p-3">
+            <div className="text-xs text-slate-500">Descartados</div>
+            <div className="text-2xl font-bold text-orange-500">
+              {products.length - (searchHigh - searchLow + 1)}
             </div>
           </div>
-          <div className="bg-slate-50 rounded-xl p-4">
-            <div className="text-sm text-slate-500">Coincidencias</div>
-            <div className="text-3xl font-bold text-green-500">{matchingProducts.length}</div>
+          <div className="bg-slate-50 rounded-xl p-3">
+            <div className="text-xs text-slate-500">Precio actual</div>
+            <div className="text-xl font-bold text-blue-500">
+              ${products[midIndex]?.price}
+            </div>
+          </div>
+          <div className="bg-slate-50 rounded-xl p-3">
+            <div className="text-xs text-slate-500">Max iteraciones</div>
+            <div className="text-2xl font-bold text-green-500">
+              {Math.ceil(Math.log2(products.length))}
+            </div>
           </div>
         </div>
 
-        <p className="text-xs text-slate-500 mb-4 leading-relaxed">
-          Los sistemas de ecommerce reducen drasticamente el numero de elementos analizados usando divisiones sucesivas.
-        </p>
+        {/* History log */}
+        <div className="flex-1 bg-slate-50 rounded-xl p-3 overflow-hidden flex flex-col">
+          <div className="text-xs text-slate-500 mb-2 font-medium">Historial de comparaciones:</div>
+          <div className="flex-1 overflow-y-auto space-y-1.5">
+            {searchHistory.map((h, i) => (
+              <div key={i} className={`text-xs p-2 rounded-lg ${h.comparison.includes("ENCONTRADO") ? "bg-green-100" : "bg-white"}`}>
+                <div className="flex items-center gap-2">
+                  <span className="text-orange-600 font-bold">#{i + 1}</span>
+                  <span className="text-slate-500">Rango [{h.low}-{h.high}]</span>
+                </div>
+                <div className="font-mono text-slate-700 mt-1">
+                  mid[{h.mid}] = ${h.price}
+                </div>
+                <div className={`mt-1 ${h.comparison.includes("ENCONTRADO") ? "text-green-600 font-bold" : "text-slate-600"}`}>
+                  {h.comparison}
+                </div>
+              </div>
+            ))}
+            {searchHistory.length === 0 && (
+              <div className="text-slate-400 text-center py-4">
+                El historial aparecera aqui
+              </div>
+            )}
+          </div>
+        </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 mt-4">
           <button
             onClick={startFilter}
             disabled={isFiltering}
             className="flex-1 py-2.5 bg-gradient-to-r from-orange-400 to-yellow-500 text-white rounded-xl font-medium flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50"
           >
             <Play className="w-4 h-4" />
-            Filtrar
+            Buscar
           </button>
           <button
             onClick={resetFilter}
@@ -826,18 +1096,38 @@ export function AmazonFilterSlide({ isPrintMode = false }: { isPrintMode?: boole
 }
 
 /* ─────────────────────────────────────────────
-   SLIDE 5 — CHRISTOPHER: WHATSAPP + APPLICATIONS
+   SLIDE 5 — CHRISTOPHER: WHATSAPP + APPLICATIONS (MEJORADO)
+   Mas mensajes y iteraciones visibles
 ───────────────────────────────────────────── */
-const messages = [
-  { id: 1, date: "2024-01-05", text: "Feliz ano nuevo!", sender: "other" },
-  { id: 2, date: "2024-01-15", text: "Como va el proyecto?", sender: "me" },
-  { id: 3, date: "2024-02-10", text: "Reunion manana a las 10", sender: "other" },
-  { id: 4, date: "2024-02-28", text: "Entregamos el codigo", sender: "me" },
-  { id: 5, date: "2024-03-15", text: "Excelente presentacion!", sender: "other" },
-  { id: 6, date: "2024-04-01", text: "Nuevo semestre comienza", sender: "me" },
-  { id: 7, date: "2024-04-20", text: "Proyecto de biseccion", sender: "other" },
-  { id: 8, date: "2024-05-05", text: "Practicando el metodo", sender: "me" },
-]
+// Generate 30 messages across a year for more iterations
+const generateMessages = () => {
+  const texts = [
+    "Feliz ano nuevo!", "Como estas?", "Reunion manana", "OK perfecto",
+    "Gracias por la info", "Te llamo luego", "Proyecto aprobado!", "Necesito ayuda",
+    "Excelente trabajo", "Confirmo asistencia", "Enviame el archivo", "Recibido",
+    "Nos vemos el lunes", "Entregue el informe", "Tengo una duda", "Listo!",
+    "Importante: revisar", "Actualice los datos", "Nueva version disponible", "Corregido",
+    "Presentacion lista", "Feedback positivo", "Tarea completada", "Recordatorio",
+    "Metodo de biseccion", "Practica manana", "Nota del examen", "Aprobamos!",
+    "Ultimo dia", "Felices vacaciones"
+  ]
+  
+  const messages = texts.map((text, i) => {
+    const month = Math.floor(i / 3) + 1
+    const day = (i % 28) + 1
+    return {
+      id: i + 1,
+      date: `2024-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
+      text,
+      sender: i % 2 === 0 ? "other" : "me"
+    }
+  }).sort((a, b) => a.date.localeCompare(b.date))
+  
+  return messages
+}
+
+const messages = generateMessages()
+const targetDate = "2024-05-10" // Specific date to find
 
 const applications = [
   { icon: Database, name: "Bases de Datos", desc: "Indices B-Tree" },
@@ -849,86 +1139,145 @@ const applications = [
 ]
 
 export function WhatsAppSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
-  const targetDate = "2024-03-15"
-  const [currentRange, setCurrentRange] = useState<[number, number]>([0, messages.length - 1])
+  const [searchLow, setSearchLow] = useState(0)
+  const [searchHigh, setSearchHigh] = useState(messages.length - 1)
   const [midIndex, setMidIndex] = useState(Math.floor(messages.length / 2))
   const [found, setFound] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
   const [iterations, setIterations] = useState(0)
+  const [message, setMessage] = useState(`Presiona 'Buscar' para encontrar mensaje del ${targetDate}`)
+  const [searchHistory, setSearchHistory] = useState<{low: number, high: number, mid: number, date: string, comparison: string}[]>([])
 
   const startSearch = useCallback(() => {
     setIsSearching(true)
-    setCurrentRange([0, messages.length - 1])
+    setSearchLow(0)
+    setSearchHigh(messages.length - 1)
     setMidIndex(Math.floor(messages.length / 2))
     setFound(false)
     setIterations(0)
+    setMessage("Iniciando busqueda binaria por fecha...")
+    setSearchHistory([])
   }, [])
 
   const resetSearch = useCallback(() => {
     setIsSearching(false)
-    setCurrentRange([0, messages.length - 1])
+    setSearchLow(0)
+    setSearchHigh(messages.length - 1)
     setMidIndex(Math.floor(messages.length / 2))
     setFound(false)
     setIterations(0)
+    setMessage(`Presiona 'Buscar' para encontrar mensaje del ${targetDate}`)
+    setSearchHistory([])
   }, [])
 
   useEffect(() => {
     if (!isSearching || found || isPrintMode) return
 
     const timeout = setTimeout(() => {
-      setCurrentRange(([low, high]) => {
-        const mid = Math.floor((low + high) / 2)
-        setMidIndex(mid)
-        setIterations((i) => i + 1)
+      setSearchLow((prevLow) => {
+        setSearchHigh((prevHigh) => {
+          const mid = Math.floor((prevLow + prevHigh) / 2)
+          setMidIndex(mid)
+          setIterations((i) => i + 1)
 
-        const currentMsg = messages[mid]
+          const currentMsg = messages[mid]
+          let comparison = ""
+          
+          if (currentMsg.date === targetDate) {
+            comparison = `${currentMsg.date} = ${targetDate} ENCONTRADO!`
+            setFound(true)
+            setIsSearching(false)
+            setMessage(`Mensaje encontrado: "${currentMsg.text}"`)
+            setSearchHistory((h) => [...h, { low: prevLow, high: prevHigh, mid, date: currentMsg.date, comparison }])
+            return mid
+          }
+
+          if (currentMsg.date < targetDate) {
+            comparison = `${currentMsg.date} < ${targetDate} → buscar fechas POSTERIORES`
+            setMessage(`${currentMsg.date} es anterior, descartamos mensajes viejos`)
+            setSearchHistory((h) => [...h, { low: prevLow, high: prevHigh, mid, date: currentMsg.date, comparison }])
+            return prevHigh
+          } else {
+            comparison = `${currentMsg.date} > ${targetDate} → buscar fechas ANTERIORES`
+            setMessage(`${currentMsg.date} es posterior, descartamos mensajes nuevos`)
+            setSearchHistory((h) => [...h, { low: prevLow, high: prevHigh, mid, date: currentMsg.date, comparison }])
+            return mid - 1
+          }
+        })
         
-        if (currentMsg.date === targetDate) {
-          setFound(true)
-          setIsSearching(false)
-          return [mid, mid]
-        }
-
-        if (currentMsg.date < targetDate) {
-          return [mid + 1, high]
-        } else {
-          return [low, mid - 1]
-        }
+        const mid = Math.floor((prevLow + searchHigh) / 2)
+        const currentMsg = messages[mid]
+        if (currentMsg.date === targetDate) return mid
+        if (currentMsg.date < targetDate) return mid + 1
+        return prevLow
       })
-    }, 1200)
+    }, 1800)
 
     return () => clearTimeout(timeout)
-  }, [isSearching, found, currentRange, isPrintMode])
+  }, [isSearching, found, searchLow, searchHigh, isPrintMode])
+
+  // Visible messages around mid
+  const visibleStart = Math.max(0, midIndex - 5)
+  const visibleEnd = Math.min(messages.length, midIndex + 5)
+  const visibleMessages = messages.slice(visibleStart, visibleEnd)
 
   return (
-    <div className="w-full h-full flex flex-col bg-gradient-to-br from-slate-50 via-white to-green-50 relative overflow-hidden p-8">
-      <div className="flex items-center gap-3 mb-6">
+    <div className="w-full h-full flex flex-col bg-gradient-to-br from-slate-50 via-white to-green-50 relative overflow-hidden p-6">
+      <div className="flex items-center gap-3 mb-4">
         <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center">
           <MessageCircle className="w-5 h-5 text-white" />
         </div>
         <div>
-          <h3 className="text-2xl font-bold text-slate-900">Busqueda de Mensajes + Aplicaciones</h3>
+          <h3 className="text-xl font-bold text-slate-900">Busqueda de Mensajes + Aplicaciones</h3>
           <p className="text-sm text-slate-500">Christopher &middot; WhatsApp</p>
         </div>
       </div>
 
-      <div className="flex-1 flex gap-6">
+      <div className="flex-1 flex gap-4 overflow-hidden">
         {/* Left - WhatsApp simulation */}
         <div className="flex-1 bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden flex flex-col">
-          <div className="bg-green-600 text-white p-4 flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-              <User className="w-5 h-5" />
+          {/* Header */}
+          <div className="bg-green-600 text-white p-3 flex items-center gap-3">
+            <div className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center">
+              <User className="w-4 h-4" />
             </div>
-            <div>
-              <div className="font-medium">Grupo Proyecto</div>
+            <div className="flex-1">
+              <div className="font-medium text-sm">Grupo Proyecto</div>
               <div className="text-xs text-white/70">Buscando: {targetDate}</div>
+            </div>
+            <div className="text-xs bg-white/20 px-2 py-1 rounded">
+              {messages.length} msgs
             </div>
           </div>
 
-          <div className="flex-1 p-4 space-y-2 bg-[#e5ddd5] overflow-y-auto">
-            {messages.map((msg, i) => {
-              const isInRange = i >= currentRange[0] && i <= currentRange[1]
-              const isMid = i === midIndex && isSearching
+          {/* Message bar */}
+          <div className={`p-2 text-xs ${found ? "bg-green-50 text-green-700" : "bg-yellow-50 text-yellow-700"}`}>
+            {message}
+          </div>
+
+          {/* Range indicator */}
+          <div className="px-3 py-2 bg-slate-50 border-b border-slate-200">
+            <div className="flex justify-between text-xs text-slate-500 mb-1">
+              <span>Rango [{searchLow} - {searchHigh}]</span>
+              <span>{searchHigh - searchLow + 1} restantes</span>
+            </div>
+            <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-green-400 rounded-full transition-all duration-500"
+                style={{
+                  marginLeft: `${(searchLow / messages.length) * 100}%`,
+                  width: `${((searchHigh - searchLow + 1) / messages.length) * 100}%`
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Messages */}
+          <div className="flex-1 p-3 space-y-2 bg-[#e5ddd5] overflow-y-auto">
+            {visibleMessages.map((msg, i) => {
+              const actualIndex = visibleStart + i
+              const isInRange = actualIndex >= searchLow && actualIndex <= searchHigh
+              const isMid = actualIndex === midIndex && isSearching
               const isFound = found && msg.date === targetDate
 
               return (
@@ -937,7 +1286,7 @@ export function WhatsAppSlide({ isPrintMode = false }: { isPrintMode?: boolean }
                   className={`flex ${msg.sender === "me" ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={`max-w-[70%] p-3 rounded-xl transition-all duration-500 ${
+                    className={`max-w-[80%] p-2.5 rounded-xl transition-all duration-500 ${
                       msg.sender === "me"
                         ? "bg-green-100 rounded-br-none"
                         : "bg-white rounded-bl-none"
@@ -951,15 +1300,21 @@ export function WhatsAppSlide({ isPrintMode = false }: { isPrintMode?: boolean }
                         : ""
                     }`}
                   >
+                    <div className="text-xs text-slate-400 mb-0.5">[{actualIndex}]</div>
                     <div className="text-sm text-slate-800">{msg.text}</div>
-                    <div className="text-xs text-slate-500 mt-1">{msg.date}</div>
+                    <div className="text-xs text-slate-500 mt-1 flex items-center gap-2">
+                      {msg.date}
+                      {isMid && !found && <span className="text-blue-600 animate-pulse">Comparando</span>}
+                      {isFound && <Check className="w-3 h-3 text-green-500" />}
+                    </div>
                   </div>
                 </div>
               )
             })}
           </div>
 
-          <div className="p-3 bg-white border-t border-slate-200 flex gap-2">
+          {/* Controls */}
+          <div className="p-2 bg-white border-t border-slate-200 flex gap-2">
             <button
               onClick={startSearch}
               disabled={isSearching}
@@ -977,48 +1332,59 @@ export function WhatsAppSlide({ isPrintMode = false }: { isPrintMode?: boolean }
           </div>
         </div>
 
+        {/* Middle - History */}
+        <div className="w-72 flex flex-col">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 mb-3">
+            <div className="grid grid-cols-2 gap-2 text-center">
+              <div>
+                <div className="text-xl font-bold text-green-500">{iterations}</div>
+                <div className="text-xs text-slate-500">Iteraciones</div>
+              </div>
+              <div>
+                <div className="text-xl font-bold text-slate-900">{messages.length - (searchHigh - searchLow + 1)}</div>
+                <div className="text-xs text-slate-500">Descartados</div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 p-3 overflow-hidden flex flex-col">
+            <div className="text-xs text-slate-500 mb-2 font-medium">Historial:</div>
+            <div className="flex-1 overflow-y-auto space-y-1">
+              {searchHistory.map((h, i) => (
+                <div key={i} className={`text-xs p-2 rounded ${h.comparison.includes("ENCONTRADO") ? "bg-green-100" : "bg-slate-50"}`}>
+                  <span className="text-green-600 font-bold">#{i + 1}</span>
+                  {" mid["}
+                  <span className="font-mono">{h.mid}</span>
+                  {"] = "}
+                  <span className="font-mono">{h.date}</span>
+                  <div className={`text-xs mt-1 ${h.comparison.includes("ENCONTRADO") ? "text-green-600" : "text-slate-500"}`}>
+                    {h.comparison.split("→")[1] || h.comparison}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* Right - Applications */}
         <div className="flex-1 flex flex-col">
-          <h4 className="text-lg font-semibold text-slate-900 mb-4">Aplicaciones Reales</h4>
-          <div className="grid grid-cols-2 gap-3 flex-1">
-            {applications.map((app, i) => (
+          <h4 className="text-sm font-semibold text-slate-900 mb-3">Aplicaciones del Binary Search</h4>
+          <div className="grid grid-cols-2 gap-2 flex-1">
+            {applications.map((app) => (
               <div
                 key={app.name}
-                className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 hover:shadow-lg hover:scale-[1.02] transition-all cursor-pointer group"
-                style={{ animationDelay: `${i * 100}ms` }}
+                className="bg-white rounded-xl p-3 shadow-sm border border-slate-200 hover:shadow-lg hover:scale-[1.02] transition-all cursor-pointer group"
               >
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                  <app.icon className="w-5 h-5 text-white" />
+                <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                  <app.icon className="w-4 h-4 text-white" />
                 </div>
                 <div className="font-medium text-slate-900 text-sm">{app.name}</div>
                 <div className="text-xs text-slate-500">{app.desc}</div>
               </div>
             ))}
           </div>
-
-          {/* Metrics */}
-          <div className="mt-4 bg-white rounded-xl p-4 shadow-sm border border-slate-200">
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <div className="text-2xl font-bold text-green-500">{iterations}</div>
-                <div className="text-xs text-slate-500">Iteraciones</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-slate-900">{messages.length - (currentRange[1] - currentRange[0] + 1)}</div>
-                <div className="text-xs text-slate-500">Descartados</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-blue-500">O(log n)</div>
-                <div className="text-xs text-slate-500">Complejidad</div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
-
-      <p className="text-xs text-slate-500 text-center mt-4">
-        La busqueda eficiente en grandes volumenes de datos usa estrategias similares a Binary Search
-      </p>
     </div>
   )
 }
