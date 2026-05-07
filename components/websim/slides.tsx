@@ -26,11 +26,9 @@ export function WebSimTitleSlide({ isPrintMode = false }: { isPrintMode?: boolea
   }, [isPrintMode])
 
   const members = [
-    "Algenis De los Santos",
-    "Oliver Abreu",
+    "Frainer Encarnacion",
     "Enmanuel Santos",
-    "Frainer Encarnación",
-    "Christopher Marrero",
+    "Christoper Marrero",
   ]
 
   return (
@@ -59,33 +57,49 @@ export function WebSimTitleSlide({ isPrintMode = false }: { isPrintMode?: boolea
         ))}
       </div>
 
-      <div className="max-w-5xl w-full px-16 space-y-10 z-10">
-        <div className="space-y-3">
+      <div className="max-w-5xl w-full px-16 space-y-8 z-10">
+        {/* University and Course Info */}
+        <div className="space-y-2">
           <div className="text-cyan-400 font-mono text-sm tracking-widest uppercase">
-            Arquitectura del Computador &nbsp;·&nbsp; Exposición
+            Universidad Iberoamericana (UNIBE)
           </div>
-          <h1 className="text-7xl font-bold text-white leading-tight">
-            WebSim <span className="text-cyan-400">&amp;</span>
+          <div className="text-slate-400 text-sm">
+            <span className="text-slate-300 font-medium">Asignatura:</span> Metodos Matematicos
+          </div>
+          <div className="text-slate-400 text-sm">
+            <span className="text-slate-300 font-medium">Profesor:</span> Nehomar Lezama
+          </div>
+        </div>
+
+        {/* Main Title */}
+        <div className="space-y-3">
+          <div className="text-slate-500 font-mono text-xs tracking-widest uppercase">
+            Unidad I: Metodos Numericos para Ecuaciones
+          </div>
+          <h1 className="text-6xl font-bold text-white leading-tight">
+            Metodo de la
             <br />
-            Procesos
-            <br />
-            <span className="text-cyan-400">CPU-bound</span>
+            <span className="text-cyan-400">Biseccion</span>
           </h1>
           <div className="h-1 w-24 bg-cyan-400 rounded-full" />
         </div>
 
-        <div className="flex gap-4 flex-wrap">
-          {members.map((m) => (
-            <span
-              key={m}
-              className="text-xs font-mono text-slate-300 border border-slate-700 px-3 py-1 rounded-full bg-slate-800/50"
-            >
-              {m}
-            </span>
-          ))}
+        {/* Expositores */}
+        <div className="space-y-3">
+          <div className="text-slate-500 text-xs font-mono tracking-widest uppercase">
+            Expositores
+          </div>
+          <div className="flex gap-4 flex-wrap">
+            {members.map((m) => (
+              <span
+                key={m}
+                className="text-sm font-mono text-slate-300 border border-slate-700 px-4 py-2 rounded-full bg-slate-800/50"
+              >
+                {m}
+              </span>
+            ))}
+          </div>
         </div>
-
-        <div className="text-slate-500 text-sm font-mono">Los Ingenieros</div>
       </div>
     </div>
   )
