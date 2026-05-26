@@ -14,7 +14,7 @@ import {
   ConclusionSlide,
 } from "./bisection/slides"
 
-export default function WebSimPresentation() {
+export default function BisectionPresentation() {
   const deckRef = useRef<HTMLDivElement>(null)
   const revealRef = useRef<Reveal.Api | null>(null)
   const [isReady, setIsReady] = useState(false)
@@ -30,7 +30,7 @@ export default function WebSimPresentation() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === "p") {
         e.preventDefault()
-        window.open("/print", "_blank")
+        window.open("/bisection?print-pdf", "_blank")
       }
     }
 
