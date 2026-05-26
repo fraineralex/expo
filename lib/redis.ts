@@ -1,14 +1,13 @@
 import { Redis } from "@upstash/redis"
 
-const redisUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL
-const redisToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN
+// Check if Redis credentials are configured
+const isRedisConfigured = !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN)
 
-const isRedisConfigured = !!(redisUrl && redisToken)
-
+// Redis client for presentation sync (only create if configured)
 export const redis = isRedisConfigured 
   ? new Redis({
-      url: redisUrl!,
-      token: redisToken!,
+      url: process.env.KV_REST_API_URL!,
+      token: process.env.KV_REST_API_TOKEN!,
     })
   : null
 

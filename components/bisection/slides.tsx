@@ -818,7 +818,7 @@ export function InstagramSearchSlide({ isPrintMode = false }: { isPrintMode?: bo
 }
 
 /* ─────────────────────────────────────────────
-   SLIDE 4 — ENMANUEL: AMAZON PRODUCT FILTER
+   SLIDE 4 — ELMER: AMAZON PRODUCT FILTER
 ───────────────────────────────────────────── */
 const generateProducts = () => {
   const names = [
@@ -933,7 +933,7 @@ export function AmazonFilterSlide({ isPrintMode = false }: { isPrintMode?: boole
           </div>
           <div>
             <h3 className="text-xl font-bold text-slate-900">Busqueda por Precio</h3>
-            <p className="text-sm text-slate-500">Enmanuel &middot; Amazon</p>
+            <p className="text-sm text-slate-500">Elmer &middot; Amazon</p>
           </div>
         </div>
 
@@ -1213,7 +1213,7 @@ export function WhatsAppSlide({ isPrintMode = false }: { isPrintMode?: boolean }
           </div>
           <div>
             <h3 className="text-xl font-bold text-slate-900">Busqueda de Mensajes por Fecha</h3>
-            <p className="text-sm text-slate-500">Christopher &middot; WhatsApp</p>
+            <p className="text-sm text-slate-500">Ejemplo Adicional &middot; WhatsApp</p>
           </div>
         </div>
 
@@ -1375,7 +1375,321 @@ export function WhatsAppSlide({ isPrintMode = false }: { isPrintMode?: boolean }
 }
 
 /* ─────────────────────────────────────────────
-   SLIDE 6 — DEBILIDADES DEL METODO
+   SLIDE 6 — CHRISTOPHER: VENTAJAS DEL METODO
+───────────────────────────────────────────── */
+export function AdvantagesSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
+  const [activeDemo, setActiveDemo] = useState<string | null>(null)
+  const [demoStep, setDemoStep] = useState(0)
+  const [isRunning, setIsRunning] = useState(false)
+
+  const startDemo = (demo: string) => {
+    setActiveDemo(demo)
+    setDemoStep(0)
+    setIsRunning(true)
+  }
+
+  useEffect(() => {
+    if (!isRunning || isPrintMode) return
+
+    const interval = setInterval(() => {
+      setDemoStep(s => {
+        if (s >= 12) {
+          setIsRunning(false)
+          return s
+        }
+        return s + 1
+      })
+    }, 600)
+
+    return () => clearInterval(interval)
+  }, [isRunning, isPrintMode])
+
+  const advantages = [
+    {
+      id: "simple",
+      icon: <Check className="w-6 h-6" />,
+      title: "Simple de implementar",
+      description: "Solo requiere comparar el punto medio y decidir en que mitad continuar. Pocas lineas de codigo.",
+      color: "green"
+    },
+    {
+      id: "guaranteed",
+      icon: <Zap className="w-6 h-6" />,
+      title: "Convergencia garantizada",
+      description: "Si existe una raiz en el intervalo y la funcion es continua, el metodo SIEMPRE la encontrara.",
+      color: "blue"
+    },
+    {
+      id: "logarithmic",
+      icon: <ArrowRight className="w-6 h-6" />,
+      title: "Complejidad O(log n)",
+      description: "Reduce el espacio de busqueda a la mitad en cada iteracion. 1 millon de elementos = ~20 pasos.",
+      color: "purple"
+    },
+    {
+      id: "robust",
+      icon: <Globe className="w-6 h-6" />,
+      title: "Robusto y estable",
+      description: "No necesita derivadas ni calculos complejos. Funciona con cualquier funcion continua.",
+      color: "indigo"
+    }
+  ]
+
+  return (
+    <div className="w-full h-full flex flex-col bg-gradient-to-br from-slate-50 via-white to-green-50 relative overflow-hidden p-6">
+      <div className="text-center mb-4">
+        <h2 className="text-3xl font-bold text-slate-900 mb-1">
+          Ventajas del Metodo de <span className="text-green-500">Biseccion</span>
+        </h2>
+        <p className="text-slate-600 text-sm">
+          Christopher &middot; Por que este metodo es tan util
+        </p>
+      </div>
+
+      <div className="flex-1 flex gap-4 overflow-hidden">
+        <div className="flex-1 space-y-3 overflow-auto">
+          {advantages.map((a) => (
+            <div
+              key={a.id}
+              className={`bg-white rounded-xl shadow-sm border-2 p-4 transition-all cursor-pointer hover:shadow-md ${
+                activeDemo === a.id ? "border-green-400 bg-green-50" : "border-slate-200"
+              }`}
+              onClick={() => startDemo(a.id)}
+            >
+              <div className="flex items-start gap-3">
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white ${
+                  a.color === "green" ? "bg-green-500" :
+                  a.color === "blue" ? "bg-blue-500" :
+                  a.color === "purple" ? "bg-purple-500" :
+                  "bg-indigo-500"
+                }`}>
+                  {a.icon}
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-slate-900 text-sm">{a.title}</h3>
+                  <p className="text-xs text-slate-600 mt-1">{a.description}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="w-96 bg-white rounded-2xl shadow-lg border border-slate-200 p-4 flex flex-col">
+          <h4 className="text-sm font-semibold text-slate-900 mb-3">Demostracion Interactiva</h4>
+          
+          {activeDemo === "simple" ? (
+            <div className="flex-1 flex flex-col">
+              <div className="text-xs text-slate-600 mb-3">
+                Implementacion en pseudocodigo
+              </div>
+              
+              <div className="flex-1 flex flex-col justify-center font-mono text-xs bg-slate-900 text-green-400 rounded-lg p-3 overflow-auto">
+                {demoStep >= 1 && <div className={`transition-opacity ${demoStep >= 1 ? "opacity-100" : "opacity-0"}`}>
+                  <span className="text-purple-400">function</span> biseccion(a, b, f):
+                </div>}
+                {demoStep >= 2 && <div className="ml-4">
+                  <span className="text-purple-400">while</span> (b - a) &gt; precision:
+                </div>}
+                {demoStep >= 3 && <div className="ml-8">
+                  mid = (a + b) / 2
+                </div>}
+                {demoStep >= 4 && <div className="ml-8">
+                  <span className="text-purple-400">if</span> f(mid) == 0:
+                </div>}
+                {demoStep >= 5 && <div className="ml-12">
+                  <span className="text-yellow-400">return</span> mid
+                </div>}
+                {demoStep >= 6 && <div className="ml-8">
+                  <span className="text-purple-400">if</span> f(a) * f(mid) &lt; 0:
+                </div>}
+                {demoStep >= 7 && <div className="ml-12">
+                  b = mid
+                </div>}
+                {demoStep >= 8 && <div className="ml-8">
+                  <span className="text-purple-400">else</span>:
+                </div>}
+                {demoStep >= 9 && <div className="ml-12">
+                  a = mid
+                </div>}
+                {demoStep >= 10 && <div className="ml-4">
+                  <span className="text-yellow-400">return</span> mid
+                </div>}
+                {demoStep >= 11 && <div className="mt-3 text-green-300 border-t border-slate-700 pt-2">
+                  // Solo 10 lineas de codigo!
+                </div>}
+              </div>
+            </div>
+          ) : activeDemo === "guaranteed" ? (
+            <div className="flex-1 flex flex-col">
+              <div className="text-xs text-slate-600 mb-3">
+                Teorema del Valor Intermedio: Si f es continua y f(a)*f(b) &lt; 0, existe raiz
+              </div>
+              
+              <div className="flex-1 flex flex-col justify-center">
+                <svg viewBox="0 0 200 120" className="w-full h-32 mb-3">
+                  {/* Axes */}
+                  <line x1="20" y1="60" x2="180" y2="60" stroke="#94a3b8" strokeWidth="1" />
+                  <line x1="20" y1="10" x2="20" y2="110" stroke="#94a3b8" strokeWidth="1" />
+                  <text x="185" y="63" fontSize="8" fill="#94a3b8">x</text>
+                  <text x="12" y="15" fontSize="8" fill="#94a3b8">y</text>
+                  
+                  {/* Continuous curve crossing zero */}
+                  <path 
+                    d="M 30 90 Q 60 100 100 60 Q 140 20 170 30" 
+                    stroke="#22c55e" 
+                    strokeWidth="2.5" 
+                    fill="none"
+                    className={demoStep >= 1 ? "opacity-100" : "opacity-30"}
+                  />
+                  
+                  {/* Point a */}
+                  {demoStep >= 2 && (
+                    <>
+                      <circle cx="30" cy="90" r="4" fill="#ef4444" />
+                      <text x="25" y="105" fontSize="8" fill="#ef4444">a</text>
+                      <text x="35" y="95" fontSize="7" fill="#ef4444">f(a)&lt;0</text>
+                    </>
+                  )}
+                  
+                  {/* Point b */}
+                  {demoStep >= 3 && (
+                    <>
+                      <circle cx="170" cy="30" r="4" fill="#3b82f6" />
+                      <text x="165" y="25" fontSize="8" fill="#3b82f6">b</text>
+                      <text x="145" y="28" fontSize="7" fill="#3b82f6">f(b)&gt;0</text>
+                    </>
+                  )}
+                  
+                  {/* Root point */}
+                  {demoStep >= 5 && (
+                    <>
+                      <circle cx="100" cy="60" r="5" fill="#22c55e" className="animate-pulse" />
+                      <text x="95" y="75" fontSize="8" fill="#22c55e">raiz</text>
+                    </>
+                  )}
+                  
+                  {/* Interval narrowing */}
+                  {demoStep >= 6 && (
+                    <line x1="30" y1="108" x2="170" y2="108" stroke="#f97316" strokeWidth="3" strokeDasharray="none" />
+                  )}
+                  {demoStep >= 7 && (
+                    <line x1="65" y1="108" x2="135" y2="108" stroke="#22c55e" strokeWidth="3" />
+                  )}
+                  {demoStep >= 8 && (
+                    <line x1="82" y1="108" x2="118" y2="108" stroke="#3b82f6" strokeWidth="3" />
+                  )}
+                </svg>
+                
+                <div className="text-xs space-y-1 bg-green-50 rounded p-2">
+                  {demoStep >= 1 && <div className="text-slate-600">Paso 1: Funcion continua en [a, b]</div>}
+                  {demoStep >= 2 && <div className="text-slate-600">Paso 2: f(a) = -3 (negativo, debajo del eje)</div>}
+                  {demoStep >= 3 && <div className="text-slate-600">Paso 3: f(b) = +2 (positivo, arriba del eje)</div>}
+                  {demoStep >= 4 && <div className="text-slate-600">Paso 4: f(a) * f(b) &lt; 0, hay cambio de signo</div>}
+                  {demoStep >= 5 && <div className="text-green-600 font-medium">Por TVI, DEBE existir al menos una raiz!</div>}
+                  {demoStep >= 8 && <div className="text-blue-600 font-medium">Cada iteracion reduce el intervalo a la mitad</div>}
+                </div>
+              </div>
+            </div>
+          ) : activeDemo === "logarithmic" ? (
+            <div className="flex-1 flex flex-col">
+              <div className="text-xs text-slate-600 mb-3">
+                Comparacion: Busqueda lineal O(n) vs Biseccion O(log n)
+              </div>
+              
+              <div className="flex-1 flex flex-col justify-center">
+                <div className="space-y-4">
+                  {/* Linear search */}
+                  <div>
+                    <div className="flex justify-between text-xs text-slate-500 mb-1">
+                      <span>Busqueda Lineal</span>
+                      <span className="font-mono">{Math.min(demoStep * 100, 1000)} de 1000 elementos</span>
+                    </div>
+                    <div className="h-6 bg-slate-100 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-red-500 rounded-full transition-all duration-300"
+                        style={{ width: `${Math.min(demoStep * 10, 100)}%` }}
+                      />
+                    </div>
+                    <div className="text-xs text-red-600 mt-1">
+                      {demoStep >= 10 ? "1000 pasos para encontrar el elemento" : `${Math.min(demoStep * 100, 1000)} pasos...`}
+                    </div>
+                  </div>
+                  
+                  {/* Binary search */}
+                  <div>
+                    <div className="flex justify-between text-xs text-slate-500 mb-1">
+                      <span>Biseccion / Binary Search</span>
+                      <span className="font-mono">{Math.min(demoStep, 10)} de 10 pasos</span>
+                    </div>
+                    <div className="h-6 bg-slate-100 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-green-500 rounded-full transition-all duration-300 flex items-center justify-end pr-2"
+                        style={{ width: `${Math.min(demoStep * 10, 100)}%` }}
+                      />
+                    </div>
+                    <div className="text-xs text-green-600 mt-1">
+                      {demoStep >= 10 ? "Solo 10 pasos! (log2(1000) ≈ 10)" : `${Math.min(demoStep, 10)} pasos...`}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-4 bg-blue-50 rounded p-2 text-xs space-y-1">
+                  {demoStep >= 3 && <div className="text-slate-600">1,000 elementos = 10 iteraciones</div>}
+                  {demoStep >= 5 && <div className="text-slate-600">1,000,000 elementos = 20 iteraciones</div>}
+                  {demoStep >= 7 && <div className="text-slate-600">1,000,000,000 elementos = 30 iteraciones</div>}
+                  {demoStep >= 10 && <div className="text-blue-600 font-medium">100x mas rapido que busqueda lineal!</div>}
+                </div>
+              </div>
+            </div>
+          ) : activeDemo === "robust" ? (
+            <div className="flex-1 flex flex-col">
+              <div className="text-xs text-slate-600 mb-3">
+                No requiere derivadas ni calculos complejos
+              </div>
+              
+              <div className="flex-1 flex flex-col justify-center space-y-4">
+                {/* Newton needs derivative */}
+                <div className={`bg-orange-50 rounded-lg p-3 transition-all ${demoStep >= 1 ? "opacity-100" : "opacity-30"}`}>
+                  <div className="text-xs font-semibold text-orange-800 mb-1">Newton-Raphson necesita:</div>
+                  <div className="font-mono text-xs text-orange-600">
+                    {demoStep >= 2 && <div>f(x) = funcion original</div>}
+                    {demoStep >= 3 && <div>f&apos;(x) = derivada de f</div>}
+                    {demoStep >= 4 && <div>x_n+1 = x_n - f(x_n)/f&apos;(x_n)</div>}
+                  </div>
+                  {demoStep >= 5 && <div className="text-xs text-orange-700 mt-2">Puede fallar si f&apos;(x) = 0</div>}
+                </div>
+                
+                {/* Bisection is simple */}
+                <div className={`bg-green-50 rounded-lg p-3 transition-all ${demoStep >= 6 ? "opacity-100" : "opacity-30"}`}>
+                  <div className="text-xs font-semibold text-green-800 mb-1">Biseccion solo necesita:</div>
+                  <div className="font-mono text-xs text-green-600">
+                    {demoStep >= 7 && <div>f(x) = funcion original</div>}
+                    {demoStep >= 8 && <div>Evaluar f(a), f(b), f(mid)</div>}
+                    {demoStep >= 9 && <div>Comparar signos</div>}
+                  </div>
+                  {demoStep >= 10 && <div className="text-xs text-green-700 mt-2">Siempre funciona si f es continua!</div>}
+                </div>
+                
+                {demoStep >= 11 && (
+                  <div className="bg-blue-100 rounded-lg p-2 text-xs text-blue-800 text-center font-medium">
+                    Biseccion es el metodo mas confiable para empezar
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="flex-1 flex items-center justify-center text-slate-400 text-sm">
+              Haz clic en una ventaja para ver la demostracion
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ─────────────────────────────────────────────
+   SLIDE 7 — ENMANUEL: DEBILIDADES DEL METODO
 ───────────────────────────────────────────── */
 export function WeaknessesSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
   const [activeDemo, setActiveDemo] = useState<string | null>(null)
@@ -1446,7 +1760,7 @@ export function WeaknessesSlide({ isPrintMode = false }: { isPrintMode?: boolean
           Debilidades del Metodo de <span className="text-red-500">Biseccion</span>
         </h2>
         <p className="text-slate-600 text-sm">
-          Elmer &middot; Limitaciones y alternativas mas efectivas
+          Enmanuel &middot; Limitaciones y alternativas mas efectivas
         </p>
       </div>
 

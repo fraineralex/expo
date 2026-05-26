@@ -1,99 +1,32 @@
 "use client"
 
-import { useEffect, useRef, useState, useCallback } from "react"
+import { useEffect, useRef, useState } from "react"
 import Reveal from "reveal.js"
 import "reveal.js/dist/reveal.css"
 
 import {
-  TitleSlide,
-  AlgenisSlide,
-  ChristopherSlide,
-  EnmanuelSlide,
-  FrainerSlide,
-  OliverSlide,
-  GraciasSlide,
-  QRSlide,
-} from "./pipeline/slides"
+  CoverSlide,
+  BisectionVsBinarySlide,
+  InstagramSearchSlide,
+  AmazonFilterSlide,
+  WhatsAppSlide,
+  WeaknessesSlide,
+  ConclusionSlide,
+} from "./bisection/slides"
 
-declare global {
-  interface Window {
-    Reveal?: Reveal.Api
-    triggerSimulationAction?: (action: string) => void
-  }
-}
-
-const SLIDES_WITH_SIMULATION = [2, 3] // Christopher and Enmanuel slides
-
-export default function PipelinePresentation() {
+export default function WebSimPresentation() {
   const deckRef = useRef<HTMLDivElement>(null)
   const revealRef = useRef<Reveal.Api | null>(null)
+  const [isReady, setIsReady] = useState(false)
   const [isPrintMode, setIsPrintMode] = useState(false)
-  const lastCommandTimestamp = useRef<number>(0)
-  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Broadcast current state to remote
-  const broadcastState = useCallback(async (slideIndex: number, isPlaying = false) => {
-    try {
-      await fetch("/api/presentation/state", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          currentSlide: slideIndex,
-          totalSlides: 8,
-          hasSimulation: SLIDES_WITH_SIMULATION.includes(slideIndex),
-          isPlaying,
-        }),
-      })
-    } catch {
-      // Ignore errors - remote might not be connected
-    }
-  }, [])
-
-  // Poll for commands from remote
-  const pollCommands = useCallback(async () => {
-    if (!revealRef.current) return
-    
-    try {
-      const res = await fetch(`/api/presentation/command?since=${lastCommandTimestamp.current}`)
-      if (!res.ok) return
-      
-      const data = await res.json()
-      if (!data.command) return
-      
-      lastCommandTimestamp.current = data.command.timestamp
-      
-      switch (data.command.action) {
-        case "next":
-          revealRef.current.next()
-          break
-        case "prev":
-          revealRef.current.prev()
-          break
-        case "goto":
-          if (data.command.slideIndex !== undefined) {
-            revealRef.current.slide(data.command.slideIndex, 0)
-          }
-          break
-        case "play":
-        case "pause":
-        case "step":
-        case "reset":
-          // Trigger simulation action via global function
-          if (window.triggerSimulationAction) {
-            window.triggerSimulationAction(data.command.action)
-          }
-          break
-      }
-    } catch {
-      // Ignore polling errors
-    }
-  }, [])
-
+  // Check for print-pdf mode on mount
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
     const printMode = urlParams.has("print-pdf")
     setIsPrintMode(printMode)
 
+    // Keyboard shortcut: Ctrl+P to open print-friendly version
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === "p") {
         e.preventDefault()
@@ -105,30 +38,13 @@ export default function PipelinePresentation() {
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [])
 
-  // Start polling for remote commands (with delay to let packages install)
-  useEffect(() => {
-    if (isPrintMode) return
-    
-    // Delay start by 3 seconds to let the API routes compile
-    const startDelay = setTimeout(() => {
-      pollIntervalRef.current = setInterval(pollCommands, 1000)
-    }, 3000)
-    
-    return () => {
-      clearTimeout(startDelay)
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current)
-      }
-    }
-  }, [isPrintMode, pollCommands])
-
   useEffect(() => {
     if (!deckRef.current || revealRef.current) return
 
     const deck = new Reveal(deckRef.current, {
       hash: false,
       history: false,
-      controls: false,
+      controls: !isPrintMode,
       progress: !isPrintMode,
       center: false,
       transition: isPrintMode ? "none" : "slide",
@@ -151,7 +67,7 @@ export default function PipelinePresentation() {
       autoPlayMedia: false,
       navigationMode: "linear",
       fragments: false,
-      slideNumber: false,
+      slideNumber: !isPrintMode,
       disableLayout: !isPrintMode,
       pdfMaxPagesPerSlide: 1,
       pdfSeparateFragments: false,
@@ -161,14 +77,18 @@ export default function PipelinePresentation() {
       .initialize()
       .then(() => {
         revealRef.current = deck
-        window.Reveal = deck
-        
-        // Broadcast initial state
-        broadcastState(deck.getIndices().h)
-        
-        // Broadcast state on slide change
-        deck.on("slidechanged", (event: { indexh: number }) => {
-          broadcastState(event.indexh)
+        setIsReady(true)
+
+        // Auto-show all fragments
+        deck.on("slidechanged", (event: { currentSlide: HTMLElement }) => {
+          const fragments = event.currentSlide.querySelectorAll(".fragment")
+          let delay = 0
+          fragments.forEach((fragment) => {
+            setTimeout(() => {
+              fragment.classList.add("visible")
+            }, delay)
+            delay += 400
+          })
         })
       })
       .catch((error) => {
@@ -179,11 +99,10 @@ export default function PipelinePresentation() {
       if (revealRef.current) {
         try {
           revealRef.current.destroy()
-        } catch {
+        } catch (e) {
           // Ignore destroy errors
         }
         revealRef.current = null
-        window.Reveal = undefined
       }
     }
   }, [isPrintMode])
@@ -192,44 +111,39 @@ export default function PipelinePresentation() {
     <div style={{ position: isPrintMode ? "relative" : "fixed", inset: isPrintMode ? undefined : 0, overflow: isPrintMode ? "visible" : "hidden" }}>
       <div className="reveal" ref={deckRef} style={{ width: "100%", height: isPrintMode ? "auto" : "100%" }}>
         <div className="slides">
-          {/* SLIDE 1: Title */}
+          {/* SLIDE 1: Portada */}
           <section data-transition="zoom-in fade-out">
-            <TitleSlide isPrintMode={isPrintMode} />
+            <CoverSlide isPrintMode={isPrintMode} />
           </section>
 
-          {/* SLIDE 2: Algenis - Medición de Rendimiento */}
+          {/* SLIDE 2: Biseccion vs Binary Search */}
           <section data-transition="slide">
-            <AlgenisSlide isPrintMode={isPrintMode} />
+            <BisectionVsBinarySlide isPrintMode={isPrintMode} />
           </section>
 
-          {/* SLIDE 3: Christopher - Procesador Monociclo */}
+          {/* SLIDE 3: Frainer - Instagram Search */}
           <section data-transition="slide">
-            <ChristopherSlide isPrintMode={isPrintMode} />
+            <InstagramSearchSlide isPrintMode={isPrintMode} />
           </section>
 
-          {/* SLIDE 4: Enmanuel - Pipeline de 5 etapas */}
+          {/* SLIDE 4: Enmanuel - Amazon Filter */}
           <section data-transition="slide">
-            <EnmanuelSlide isPrintMode={isPrintMode} />
+            <AmazonFilterSlide isPrintMode={isPrintMode} />
           </section>
 
-          {/* SLIDE 5: Frainer - Comparación y Speedup */}
+          {/* SLIDE 5: Christopher - WhatsApp + Applications */}
           <section data-transition="slide">
-            <FrainerSlide isPrintMode={isPrintMode} />
+            <WhatsAppSlide isPrintMode={isPrintMode} />
           </section>
 
-          {/* SLIDE 6: Oliver - Limitaciones del Pipeline */}
+          {/* SLIDE 6: Elmer - Debilidades */}
           <section data-transition="slide">
-            <OliverSlide isPrintMode={isPrintMode} />
+            <WeaknessesSlide isPrintMode={isPrintMode} />
           </section>
 
-          {/* SLIDE 7: Gracias */}
+          {/* SLIDE 7: Conclusion */}
           <section data-transition="zoom">
-            <GraciasSlide isPrintMode={isPrintMode} />
-          </section>
-
-          {/* SLIDE 8: QR Control Remoto */}
-          <section data-transition="slide">
-            <QRSlide isPrintMode={isPrintMode} />
+            <ConclusionSlide isPrintMode={isPrintMode} />
           </section>
         </div>
       </div>
@@ -249,13 +163,14 @@ export default function PipelinePresentation() {
           --r-main-font-size: 18px;
           --r-main-color: #1e293b;
           --r-heading-color: #0f172a;
-          --r-link-color: #0d9488;
+          --r-link-color: #3b82f6;
         }
 
         .reveal .slides {
           text-align: left;
         }
 
+        /* Make each section fill the full viewport */
         .reveal .slides > section {
           width: 100vw !important;
           height: 100vh !important;
@@ -275,6 +190,7 @@ export default function PipelinePresentation() {
           height: 100%;
         }
 
+        /* Override Reveal centering that creates the box */
         .reveal .slides {
           width: 100vw !important;
           height: 100vh !important;
@@ -284,42 +200,45 @@ export default function PipelinePresentation() {
         }
 
         .reveal .progress {
-          background: rgba(13, 148, 136, 0.15);
-          height: 4px;
+          background: rgba(59, 130, 246, 0.15);
+          height: 3px;
           z-index: 100;
         }
 
         .reveal .progress span {
-          background: linear-gradient(90deg, #0d9488, #7c3aed);
+          background: #3b82f6;
         }
 
         .reveal .controls {
+          color: #3b82f6;
+          z-index: 100;
+        }
+
+        .reveal .controls button {
+          color: #3b82f6;
+        }
+
+        .reveal .controls .navigate-up,
+        .reveal .controls .navigate-down {
           display: none;
         }
 
+        /* Slide number */
         .reveal .slide-number {
-          display: none;
-        }
-
-        ::-webkit-scrollbar {
-          width: 8px;
-          height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-          background: #f1f5f9;
+          background: rgba(255, 255, 255, 0.9);
+          color: #64748b;
+          font-family: monospace;
+          font-size: 11px;
+          padding: 4px 8px;
           border-radius: 4px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
-        ::-webkit-scrollbar-thumb {
-          background: #cbd5e1;
-          border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-          background: #94a3b8;
-        }
-
+        /* ============================================
+           PDF EXPORT STYLES (when ?print-pdf is in URL)
+           ============================================ */
+        
+        /* PDF mode: each slide becomes a page */
         @media print {
           html, body {
             width: 100% !important;
@@ -370,6 +289,7 @@ export default function PipelinePresentation() {
             overflow: hidden !important;
           }
 
+          /* Hide navigation elements in print */
           .reveal .controls,
           .reveal .progress,
           .reveal .slide-number,
@@ -378,11 +298,13 @@ export default function PipelinePresentation() {
             display: none !important;
           }
 
+          /* Make all content visible */
           .reveal .slides section .fragment {
             opacity: 1 !important;
             visibility: visible !important;
           }
 
+          /* Preserve colors in print */
           * {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
