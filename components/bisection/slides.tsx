@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState, useCallback } from "react"
-import { Search, Globe, MessageCircle, ShoppingCart, User, ChevronRight, Play, RotateCcw, Check, Pause, Zap } from "lucide-react"
+import { Search, Globe, MessageCircle, ShoppingCart, User, ChevronRight, Play, RotateCcw, Check, Pause, Zap, AlertTriangle, XCircle, ArrowRight } from "lucide-react"
 
 /* ─────────────────────────────────────────────
    SLIDE 1 — PORTADA
@@ -20,7 +20,6 @@ export function CoverSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
     let step = 0
     const interval = setInterval(() => {
       step++
-      const [start, end] = [0, 64]
       const range = Math.floor(64 / Math.pow(2, step))
       
       if (range <= 1) {
@@ -41,7 +40,7 @@ export function CoverSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
     return () => clearInterval(interval)
   }, [isPrintMode])
 
-  const members = ["Frainer", "Enmanuel", "Christopher"]
+  const members = ["Frainer", "Enmanuel", "Christopher", "Elmer"]
 
   return (
     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-blue-50 relative overflow-hidden">
@@ -81,7 +80,7 @@ export function CoverSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
             <div className="h-1 w-16 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full" />
           </div>
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 pt-4 flex-wrap">
             {members.map((name) => (
               <div
                 key={name}
@@ -135,11 +134,9 @@ export function CoverSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
    SLIDE 2 — BISECCION VS BINARY SEARCH
 ───────────────────────────────────────────── */
 export function BisectionVsBinarySlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
-  // Binary search config - 64 elements for more iterations
-  const sortedArray = Array.from({ length: 64 }, (_, i) => i * 2 + 1) // [1, 3, 5, ..., 127]
-  const target = 89 // Target value to find (index 44)
+  const sortedArray = Array.from({ length: 64 }, (_, i) => i * 2 + 1)
+  const target = 89
   
-  // Bisection config - finding sqrt(2) with high precision
   const targetRoot = 1.41421356
   const f = (x: number) => x * x - 2
   
@@ -148,13 +145,11 @@ export function BisectionVsBinarySlide({ isPrintMode = false }: { isPrintMode?: 
   const [isPaused, setIsPaused] = useState(false)
   const [message, setMessage] = useState("Presiona 'Iniciar' para comenzar")
   
-  // Bisection state
   const [bisectionA, setBisectionA] = useState(1)
   const [bisectionB, setBisectionB] = useState(2)
   const [bisectionMid, setBisectionMid] = useState(1.5)
   const [bisectionFound, setBisectionFound] = useState(false)
   
-  // Binary search state
   const [searchLow, setSearchLow] = useState(0)
   const [searchHigh, setSearchHigh] = useState(63)
   const [searchMid, setSearchMid] = useState(31)
@@ -205,7 +200,6 @@ export function BisectionVsBinarySlide({ isPrintMode = false }: { isPrintMode?: 
     const interval = setInterval(() => {
       setStep((s) => s + 1)
       
-      // Bisection logic
       if (!bisectionFound) {
         const mid = (bisectionA + bisectionB) / 2
         const fMid = f(mid)
@@ -213,7 +207,7 @@ export function BisectionVsBinarySlide({ isPrintMode = false }: { isPrintMode?: 
         
         if (Math.abs(mid - targetRoot) < 0.00001) {
           setBisectionFound(true)
-          setMessage(`Biseccion: Raiz encontrada! sqrt(2) = ${mid.toFixed(8)}`)
+          setMessage(`Biseccion: Raiz encontrada! √2 = ${mid.toFixed(8)}`)
         } else if (fMid < 0) {
           setBisectionA(mid)
         } else {
@@ -221,7 +215,6 @@ export function BisectionVsBinarySlide({ isPrintMode = false }: { isPrintMode?: 
         }
       }
 
-      // Binary search logic
       if (!binaryFound) {
         const mid = Math.floor((searchLow + searchHigh) / 2)
         const value = sortedArray[mid]
@@ -236,12 +229,11 @@ export function BisectionVsBinarySlide({ isPrintMode = false }: { isPrintMode?: 
           setSearchHigh(mid - 1)
         }
       }
-    }, 2500) // Slow: 2.5 seconds per iteration
+    }, 2500)
 
     return () => clearInterval(interval)
   }, [isRunning, isPaused, isPrintMode, bisectionFound, binaryFound, bisectionA, bisectionB, searchLow, searchHigh, sortedArray])
 
-  // Generate graph points for the function f(x) = x^2 - 2
   const graphPoints = []
   for (let x = 1; x <= 2; x += 0.02) {
     graphPoints.push({ x, y: f(x) })
@@ -249,7 +241,6 @@ export function BisectionVsBinarySlide({ isPrintMode = false }: { isPrintMode?: 
 
   return (
     <div className="w-full h-full flex flex-col bg-gradient-to-br from-slate-50 via-white to-blue-50 relative overflow-hidden p-6">
-      {/* Header */}
       <div className="text-center mb-3">
         <h2 className="text-3xl font-bold text-slate-900 mb-1">
           Biseccion <span className="text-blue-500">=</span> Binary Search
@@ -259,7 +250,6 @@ export function BisectionVsBinarySlide({ isPrintMode = false }: { isPrintMode?: 
         </p>
       </div>
 
-      {/* Message bar */}
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-3 text-center">
         <span className={`font-medium ${bisectionFound && binaryFound ? "text-green-600" : "text-blue-700"}`}>
           {message}
@@ -268,9 +258,7 @@ export function BisectionVsBinarySlide({ isPrintMode = false }: { isPrintMode?: 
         {isPaused && <span className="ml-4 text-orange-500 font-medium">PAUSADO</span>}
       </div>
 
-      {/* Main content - two sides */}
       <div className="flex-1 flex gap-4 overflow-hidden">
-        {/* Left side - Bisection with Graph */}
         <div className="flex-1 bg-white rounded-2xl shadow-lg border border-slate-200 p-4 flex flex-col overflow-hidden">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center">
@@ -278,19 +266,16 @@ export function BisectionVsBinarySlide({ isPrintMode = false }: { isPrintMode?: 
             </div>
             <div>
               <h3 className="font-semibold text-slate-900 text-sm">Metodo de Biseccion</h3>
-              <p className="text-xs text-slate-500">f(x) = x² - 2, buscando sqrt(2)</p>
+              <p className="text-xs text-slate-500">f(x) = x² - 2, buscando √2</p>
             </div>
             {bisectionFound && <Check className="w-5 h-5 text-green-500 ml-auto" />}
           </div>
 
-          {/* Graph visualization */}
           <div className="flex-1 relative bg-slate-50 rounded-xl overflow-hidden mb-2">
             <svg viewBox="0 0 200 140" className="w-full h-full">
-              {/* Grid */}
               <line x1="20" y1="70" x2="190" y2="70" stroke="#e2e8f0" strokeWidth="1" />
               <line x1="20" y1="20" x2="20" y2="120" stroke="#e2e8f0" strokeWidth="1" />
               
-              {/* Axis labels */}
               <text x="15" y="73" fontSize="8" fill="#94a3b8" textAnchor="end">0</text>
               <text x="15" y="25" fontSize="8" fill="#94a3b8" textAnchor="end">2</text>
               <text x="15" y="115" fontSize="8" fill="#94a3b8" textAnchor="end">-1</text>
@@ -298,7 +283,6 @@ export function BisectionVsBinarySlide({ isPrintMode = false }: { isPrintMode?: 
               <text x="105" y="130" fontSize="8" fill="#94a3b8">1.5</text>
               <text x="185" y="130" fontSize="8" fill="#94a3b8">2.0</text>
               
-              {/* Function curve f(x) = x² - 2 */}
               <path
                 d={graphPoints.map((p, i) => {
                   const px = 20 + (p.x - 1) * 170
@@ -310,7 +294,6 @@ export function BisectionVsBinarySlide({ isPrintMode = false }: { isPrintMode?: 
                 strokeWidth="2"
               />
               
-              {/* Current interval highlight */}
               <rect
                 x={20 + (bisectionA - 1) * 170}
                 y="20"
@@ -320,7 +303,6 @@ export function BisectionVsBinarySlide({ isPrintMode = false }: { isPrintMode?: 
                 className="transition-all duration-500"
               />
               
-              {/* Point a */}
               <circle
                 cx={20 + (bisectionA - 1) * 170}
                 cy={70 - f(bisectionA) * 25}
@@ -338,7 +320,6 @@ export function BisectionVsBinarySlide({ isPrintMode = false }: { isPrintMode?: 
                 a
               </text>
               
-              {/* Point b */}
               <circle
                 cx={20 + (bisectionB - 1) * 170}
                 cy={70 - f(bisectionB) * 25}
@@ -356,7 +337,6 @@ export function BisectionVsBinarySlide({ isPrintMode = false }: { isPrintMode?: 
                 b
               </text>
               
-              {/* Point mid */}
               <circle
                 cx={20 + (bisectionMid - 1) * 170}
                 cy={70 - f(bisectionMid) * 25}
@@ -385,12 +365,10 @@ export function BisectionVsBinarySlide({ isPrintMode = false }: { isPrintMode?: 
                 mid
               </text>
               
-              {/* Root indicator (where y=0) */}
               <circle cx={20 + (targetRoot - 1) * 170} cy="70" r="3" fill="#22c55e" opacity="0.5" />
             </svg>
           </div>
 
-          {/* Current values */}
           <div className="bg-purple-50 rounded-lg p-2">
             <div className="grid grid-cols-4 gap-2 text-center text-xs">
               <div>
@@ -415,12 +393,11 @@ export function BisectionVsBinarySlide({ isPrintMode = false }: { isPrintMode?: 
               </div>
             </div>
             <div className="mt-1 text-center text-xs text-slate-600">
-              Meta: sqrt(2) = 1.41421356...
+              Meta: √2 = 1.41421356...
             </div>
           </div>
         </div>
 
-        {/* Center connector */}
         <div className="flex flex-col items-center justify-center gap-2 py-8">
           <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center shadow-lg">
             <span className="text-white font-bold text-lg">=</span>
@@ -430,7 +407,6 @@ export function BisectionVsBinarySlide({ isPrintMode = false }: { isPrintMode?: 
           </div>
         </div>
 
-        {/* Right side - Binary Search */}
         <div className="flex-1 bg-white rounded-2xl shadow-lg border border-slate-200 p-4 flex flex-col overflow-hidden">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg flex items-center justify-center">
@@ -443,7 +419,6 @@ export function BisectionVsBinarySlide({ isPrintMode = false }: { isPrintMode?: 
             {binaryFound && <Check className="w-5 h-5 text-green-500 ml-auto" />}
           </div>
 
-          {/* Current state */}
           <div className="bg-blue-50 rounded-lg p-2 mb-2">
             <div className="grid grid-cols-4 gap-2 text-center text-xs">
               <div>
@@ -469,7 +444,6 @@ export function BisectionVsBinarySlide({ isPrintMode = false }: { isPrintMode?: 
             </div>
           </div>
 
-          {/* Array visualization - larger */}
           <div className="flex-1 overflow-auto">
             <div className="flex gap-0.5 flex-wrap justify-center p-2">
               {sortedArray.map((val, i) => {
@@ -497,7 +471,6 @@ export function BisectionVsBinarySlide({ isPrintMode = false }: { isPrintMode?: 
             </div>
           </div>
 
-          {/* Comparison message */}
           <div className="bg-slate-50 rounded-lg p-2 text-center text-sm">
             {binaryFound ? (
               <span className="text-green-600 font-medium">arr[{searchMid}] = {sortedArray[searchMid]} = {target} ENCONTRADO!</span>
@@ -510,7 +483,6 @@ export function BisectionVsBinarySlide({ isPrintMode = false }: { isPrintMode?: 
         </div>
       </div>
 
-      {/* Controls */}
       <div className="flex justify-center gap-3 mt-3">
         <button
           onClick={startSimulation}
@@ -624,7 +596,6 @@ export function InstagramSearchSlide({ isPrintMode = false }: { isPrintMode?: bo
     setCurrentLetter("")
   }, [])
 
-  // Auto-scroll to center the mid element using scrollIntoView
   useEffect(() => {
     const midElement = itemRefs.current.get(midIndex)
     if (midElement) {
@@ -643,7 +614,6 @@ export function InstagramSearchSlide({ isPrintMode = false }: { isPrintMode?: bo
 
         const currentUser = instagramUsers[mid]
         
-        // Find matching prefix
         let diffPos = 0
         for (let i = 0; i < Math.min(currentUser.length, targetUser.length); i++) {
           if (currentUser[i] !== targetUser[i]) break
@@ -666,14 +636,13 @@ export function InstagramSearchSlide({ isPrintMode = false }: { isPrintMode?: bo
           return [low, mid - 1]
         }
       })
-    }, 1500)
+    }, 2500)
 
     return () => clearTimeout(timeout)
   }, [isSearching, found, isPaused, currentRange, isPrintMode])
 
   return (
     <div className="w-full h-full flex bg-gradient-to-br from-slate-50 via-white to-pink-50 relative overflow-hidden p-4">
-      {/* Left panel - Instagram-style interface */}
       <div className="flex-1 flex flex-col mr-4">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-10 h-10 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 rounded-xl flex items-center justify-center">
@@ -685,13 +654,11 @@ export function InstagramSearchSlide({ isPrintMode = false }: { isPrintMode?: bo
           </div>
         </div>
 
-        {/* Message bar */}
         <div className={`rounded-xl p-3 mb-3 text-sm font-medium ${found ? "bg-green-50 border border-green-200 text-green-700" : "bg-pink-50 border border-pink-200 text-pink-700"}`}>
           {message}
           {isPaused && <span className="ml-2 text-orange-500">| PAUSADO</span>}
         </div>
 
-        {/* Search info */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 mb-3">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
@@ -709,7 +676,6 @@ export function InstagramSearchSlide({ isPrintMode = false }: { isPrintMode?: bo
           )}
         </div>
 
-        {/* Range bar */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 mb-3">
           <div className="flex justify-between text-xs text-slate-500 mb-2">
             <span>Rango: [{currentRange[0]} - {currentRange[1]}]</span>
@@ -730,7 +696,6 @@ export function InstagramSearchSlide({ isPrintMode = false }: { isPrintMode?: bo
           </div>
         </div>
 
-        {/* User list with auto-scroll */}
         <div className="flex-1 bg-white rounded-2xl shadow-lg border border-slate-200 overflow-y-auto">
           <div className="p-2">
             {instagramUsers.map((user, i) => {
@@ -774,7 +739,6 @@ export function InstagramSearchSlide({ isPrintMode = false }: { isPrintMode?: bo
         </div>
       </div>
 
-      {/* Right panel - Stats and controls */}
       <div className="w-72 flex flex-col">
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-3">
           <h4 className="text-sm font-semibold text-slate-900 mb-3">Estadisticas</h4>
@@ -804,7 +768,6 @@ export function InstagramSearchSlide({ isPrintMode = false }: { isPrintMode?: bo
           </div>
         </div>
 
-        {/* Current comparison */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-3 flex-1">
           <h4 className="text-sm font-semibold text-slate-900 mb-2">Comparacion actual</h4>
           <div className="bg-slate-50 rounded-lg p-3 text-center">
@@ -822,7 +785,6 @@ export function InstagramSearchSlide({ isPrintMode = false }: { isPrintMode?: bo
           </div>
         </div>
 
-        {/* Controls */}
         <div className="flex flex-col gap-2">
           <button
             onClick={startSearch}
@@ -923,7 +885,6 @@ export function AmazonFilterSlide({ isPrintMode = false }: { isPrintMode?: boole
     setMessage(`Presiona 'Buscar' para encontrar producto cerca de $${targetPrice}`)
   }, [])
 
-  // Auto-scroll to center the mid element
   useEffect(() => {
     if (scrollContainerRef.current) {
       const container = scrollContainerRef.current
@@ -958,14 +919,13 @@ export function AmazonFilterSlide({ isPrintMode = false }: { isPrintMode?: boole
         setMessage(`$${currentPrice} > $${targetPrice} → buscar precios MENORES`)
         setSearchHigh(mid - 1)
       }
-    }, 1500)
+    }, 2500)
 
     return () => clearTimeout(timeout)
   }, [isFiltering, found, isPaused, searchLow, searchHigh, isPrintMode])
 
   return (
     <div className="w-full h-full flex bg-gradient-to-br from-slate-50 via-white to-orange-50 relative overflow-hidden p-4">
-      {/* Left panel */}
       <div className="flex-1 flex flex-col mr-4">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-yellow-500 rounded-xl flex items-center justify-center">
@@ -977,13 +937,11 @@ export function AmazonFilterSlide({ isPrintMode = false }: { isPrintMode?: boole
           </div>
         </div>
 
-        {/* Message bar */}
         <div className={`rounded-xl p-3 mb-3 text-sm font-medium ${found ? "bg-green-50 border border-green-200 text-green-700" : "bg-orange-50 border border-orange-200 text-orange-700"}`}>
           {message}
           {isPaused && <span className="ml-2 text-orange-500">| PAUSADO</span>}
         </div>
 
-        {/* Target price */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 mb-3">
           <div className="flex items-center justify-between">
             <span className="text-slate-500">Buscando precio cercano a:</span>
@@ -992,7 +950,6 @@ export function AmazonFilterSlide({ isPrintMode = false }: { isPrintMode?: boole
           <div className="text-xs text-slate-400 mt-1">{products.length} productos ordenados por precio</div>
         </div>
 
-        {/* Range bar */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 mb-3">
           <div className="flex justify-between text-xs text-slate-500 mb-2">
             <span>Rango: [{searchLow} - {searchHigh}]</span>
@@ -1018,7 +975,6 @@ export function AmazonFilterSlide({ isPrintMode = false }: { isPrintMode?: boole
           </div>
         </div>
 
-        {/* Products list with auto-scroll */}
         <div 
           ref={scrollContainerRef}
           className="flex-1 bg-white rounded-2xl shadow-lg border border-slate-200 overflow-y-auto"
@@ -1065,7 +1021,6 @@ export function AmazonFilterSlide({ isPrintMode = false }: { isPrintMode?: boole
         </div>
       </div>
 
-      {/* Right panel */}
       <div className="w-72 flex flex-col">
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-3">
           <h4 className="text-sm font-semibold text-slate-900 mb-3">Estadisticas</h4>
@@ -1095,7 +1050,6 @@ export function AmazonFilterSlide({ isPrintMode = false }: { isPrintMode?: boole
           </div>
         </div>
 
-        {/* Current comparison */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-3 flex-1">
           <h4 className="text-sm font-semibold text-slate-900 mb-2">Comparacion actual</h4>
           <div className="bg-slate-50 rounded-lg p-3 text-center">
@@ -1110,7 +1064,6 @@ export function AmazonFilterSlide({ isPrintMode = false }: { isPrintMode?: boole
           </div>
         </div>
 
-        {/* Controls */}
         <div className="flex flex-col gap-2">
           <button
             onClick={startFilter}
@@ -1215,7 +1168,6 @@ export function WhatsAppSlide({ isPrintMode = false }: { isPrintMode?: boolean }
     setStatusMessage(`Presiona 'Buscar' para encontrar mensaje del ${targetDate}`)
   }, [])
 
-  // Auto-scroll to center the mid element using scrollIntoView
   useEffect(() => {
     const midElement = itemRefs.current.get(midIndex)
     if (midElement) {
@@ -1247,14 +1199,13 @@ export function WhatsAppSlide({ isPrintMode = false }: { isPrintMode?: boolean }
         setStatusMessage(`${currentMsg.date} > ${targetDate} → buscar fechas ANTERIORES`)
         setSearchHigh(mid - 1)
       }
-    }, 1500)
+    }, 2500)
 
     return () => clearTimeout(timeout)
   }, [isSearching, found, isPaused, searchLow, searchHigh, isPrintMode])
 
   return (
     <div className="w-full h-full flex bg-gradient-to-br from-slate-50 via-white to-green-50 relative overflow-hidden p-4">
-      {/* Left panel - WhatsApp */}
       <div className="flex-1 flex flex-col mr-4">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center">
@@ -1266,13 +1217,11 @@ export function WhatsAppSlide({ isPrintMode = false }: { isPrintMode?: boolean }
           </div>
         </div>
 
-        {/* Message bar */}
         <div className={`rounded-xl p-3 mb-3 text-sm font-medium ${found ? "bg-green-50 border border-green-200 text-green-700" : "bg-emerald-50 border border-emerald-200 text-emerald-700"}`}>
           {statusMessage}
           {isPaused && <span className="ml-2 text-orange-500">| PAUSADO</span>}
         </div>
 
-        {/* Target date */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 mb-3">
           <div className="flex items-center justify-between">
             <span className="text-slate-500">Buscando mensaje del:</span>
@@ -1281,7 +1230,6 @@ export function WhatsAppSlide({ isPrintMode = false }: { isPrintMode?: boolean }
           <div className="text-xs text-slate-400 mt-1">{messages.length} mensajes ordenados por fecha</div>
         </div>
 
-        {/* Range bar */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 mb-3">
           <div className="flex justify-between text-xs text-slate-500 mb-2">
             <span>Rango: [{searchLow} - {searchHigh}]</span>
@@ -1302,7 +1250,6 @@ export function WhatsAppSlide({ isPrintMode = false }: { isPrintMode?: boolean }
           </div>
         </div>
 
-        {/* Messages with auto-scroll */}
         <div className="flex-1 bg-[#e5ddd5] rounded-2xl shadow-lg overflow-y-auto">
           <div className="p-3 space-y-2">
             {messages.map((msg, i) => {
@@ -1352,7 +1299,6 @@ export function WhatsAppSlide({ isPrintMode = false }: { isPrintMode?: boolean }
         </div>
       </div>
 
-      {/* Right panel */}
       <div className="w-72 flex flex-col">
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-3">
           <h4 className="text-sm font-semibold text-slate-900 mb-3">Estadisticas</h4>
@@ -1382,7 +1328,6 @@ export function WhatsAppSlide({ isPrintMode = false }: { isPrintMode?: boolean }
           </div>
         </div>
 
-        {/* Current comparison */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-3 flex-1">
           <h4 className="text-sm font-semibold text-slate-900 mb-2">Comparacion actual</h4>
           <div className="bg-slate-50 rounded-lg p-3 text-center">
@@ -1397,7 +1342,6 @@ export function WhatsAppSlide({ isPrintMode = false }: { isPrintMode?: boolean }
           </div>
         </div>
 
-        {/* Controls */}
         <div className="flex flex-col gap-2">
           <button
             onClick={startSearch}
@@ -1431,7 +1375,234 @@ export function WhatsAppSlide({ isPrintMode = false }: { isPrintMode?: boolean }
 }
 
 /* ─────────────────────────────────────────────
-   SLIDE 6 — CONCLUSION
+   SLIDE 6 — DEBILIDADES DEL METODO
+───────────────────────────────────────────── */
+export function WeaknessesSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
+  const [activeDemo, setActiveDemo] = useState<string | null>(null)
+  const [demoStep, setDemoStep] = useState(0)
+  const [isRunning, setIsRunning] = useState(false)
+
+  const unsortedArray = [23, 8, 45, 12, 67, 3, 89, 34, 56, 21, 78, 5, 90, 17, 42]
+  const sortedArrayDemo = [...unsortedArray].sort((a, b) => a - b)
+  const targetValue = 34
+
+  const startDemo = (demo: string) => {
+    setActiveDemo(demo)
+    setDemoStep(0)
+    setIsRunning(true)
+  }
+
+  useEffect(() => {
+    if (!isRunning || isPrintMode) return
+
+    const interval = setInterval(() => {
+      setDemoStep(s => {
+        if (s >= 10) {
+          setIsRunning(false)
+          return s
+        }
+        return s + 1
+      })
+    }, 800)
+
+    return () => clearInterval(interval)
+  }, [isRunning, isPrintMode])
+
+  const weaknesses = [
+    {
+      id: "sorted",
+      icon: <AlertTriangle className="w-6 h-6" />,
+      title: "Requiere datos ordenados",
+      description: "Si aplicamos binary search en una lista desordenada, podemos recorrer infinitamente o saltarnos el elemento correcto.",
+      color: "red"
+    },
+    {
+      id: "continuous",
+      icon: <XCircle className="w-6 h-6" />,
+      title: "Funcion continua requerida",
+      description: "El metodo de biseccion matematico requiere que f(a) y f(b) tengan signos opuestos y que la funcion sea continua en el intervalo.",
+      color: "orange"
+    },
+    {
+      id: "convergence",
+      icon: <ArrowRight className="w-6 h-6" />,
+      title: "Convergencia lineal",
+      description: "Solo reduce el error a la mitad en cada iteracion. Metodos como Newton-Raphson convergen mas rapido (cuadraticamente).",
+      color: "yellow"
+    },
+    {
+      id: "single",
+      icon: <Search className="w-6 h-6" />,
+      title: "Solo encuentra una raiz",
+      description: "Si la funcion tiene multiples raices en el intervalo, solo encontrara una de ellas.",
+      color: "blue"
+    }
+  ]
+
+  return (
+    <div className="w-full h-full flex flex-col bg-gradient-to-br from-slate-50 via-white to-red-50 relative overflow-hidden p-6">
+      <div className="text-center mb-4">
+        <h2 className="text-3xl font-bold text-slate-900 mb-1">
+          Debilidades del Metodo de <span className="text-red-500">Biseccion</span>
+        </h2>
+        <p className="text-slate-600 text-sm">
+          Elmer &middot; Limitaciones y alternativas mas efectivas
+        </p>
+      </div>
+
+      <div className="flex-1 flex gap-4 overflow-hidden">
+        <div className="flex-1 space-y-3 overflow-auto">
+          {weaknesses.map((w) => (
+            <div
+              key={w.id}
+              className={`bg-white rounded-xl shadow-sm border-2 p-4 transition-all cursor-pointer hover:shadow-md ${
+                activeDemo === w.id ? "border-red-400 bg-red-50" : "border-slate-200"
+              }`}
+              onClick={() => startDemo(w.id)}
+            >
+              <div className="flex items-start gap-3">
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white ${
+                  w.color === "red" ? "bg-red-500" :
+                  w.color === "orange" ? "bg-orange-500" :
+                  w.color === "yellow" ? "bg-yellow-500" :
+                  "bg-blue-500"
+                }`}>
+                  {w.icon}
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-slate-900 text-sm">{w.title}</h3>
+                  <p className="text-xs text-slate-600 mt-1">{w.description}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="w-96 bg-white rounded-2xl shadow-lg border border-slate-200 p-4 flex flex-col">
+          <h4 className="text-sm font-semibold text-slate-900 mb-3">Demostracion Interactiva</h4>
+          
+          {activeDemo === "sorted" ? (
+            <div className="flex-1 flex flex-col">
+              <div className="text-xs text-slate-600 mb-3">
+                Buscando <span className="font-bold text-red-600">{targetValue}</span> en lista desordenada vs ordenada
+              </div>
+              
+              <div className="mb-4">
+                <div className="text-xs text-slate-500 mb-2">Lista DESORDENADA (falla):</div>
+                <div className="flex gap-1 flex-wrap">
+                  {unsortedArray.map((val, i) => {
+                    const mid = Math.floor(unsortedArray.length / 2)
+                    const isMid = demoStep > 0 && i === mid
+                    const isSkipped = demoStep > 2 && val === targetValue
+                    return (
+                      <div
+                        key={i}
+                        className={`w-8 h-8 rounded text-xs flex items-center justify-center font-mono transition-all ${
+                          isMid ? "bg-red-500 text-white scale-110" :
+                          isSkipped ? "bg-yellow-300 text-yellow-800 animate-pulse" :
+                          "bg-slate-100 text-slate-600"
+                        }`}
+                      >
+                        {val}
+                      </div>
+                    )
+                  })}
+                </div>
+                {demoStep > 2 && (
+                  <div className="text-xs text-red-600 mt-2 font-medium">
+                    Se salto el {targetValue} porque no esta ordenado!
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <div className="text-xs text-slate-500 mb-2">Lista ORDENADA (funciona):</div>
+                <div className="flex gap-1 flex-wrap">
+                  {sortedArrayDemo.map((val, i) => {
+                    const isTarget = val === targetValue
+                    const foundVal = demoStep > 5 && isTarget
+                    return (
+                      <div
+                        key={i}
+                        className={`w-8 h-8 rounded text-xs flex items-center justify-center font-mono transition-all ${
+                          foundVal ? "bg-green-500 text-white scale-110" :
+                          "bg-blue-50 text-blue-600"
+                        }`}
+                      >
+                        {val}
+                      </div>
+                    )
+                  })}
+                </div>
+                {demoStep > 5 && (
+                  <div className="text-xs text-green-600 mt-2 font-medium">
+                    Encontrado correctamente en lista ordenada!
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : activeDemo === "convergence" ? (
+            <div className="flex-1 flex flex-col">
+              <div className="text-xs text-slate-600 mb-3">
+                Comparacion de velocidad de convergencia
+              </div>
+              <div className="flex-1 flex items-center justify-center">
+                <div className="space-y-4 w-full">
+                  <div>
+                    <div className="text-xs text-slate-500 mb-1">Biseccion (lineal): O(log n)</div>
+                    <div className="h-4 bg-slate-100 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-blue-500 rounded-full transition-all duration-500"
+                        style={{ width: `${Math.min(demoStep * 10, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-500 mb-1">Newton-Raphson (cuadratico): O(log log n)</div>
+                    <div className="h-4 bg-slate-100 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-green-500 rounded-full transition-all duration-300"
+                        style={{ width: `${Math.min(demoStep * 25, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="text-xs text-center text-slate-500 mt-4">
+                Newton-Raphson converge 2-3x mas rapido
+              </div>
+            </div>
+          ) : (
+            <div className="flex-1 flex items-center justify-center text-slate-400 text-sm">
+              Haz clic en una debilidad para ver la demostracion
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-4">
+        <h4 className="text-sm font-semibold text-blue-900 mb-2">Metodos mas efectivos:</h4>
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-white rounded-lg p-3 text-center">
+            <div className="text-sm font-bold text-slate-900">Newton-Raphson</div>
+            <div className="text-xs text-slate-500">Convergencia cuadratica</div>
+          </div>
+          <div className="bg-white rounded-lg p-3 text-center">
+            <div className="text-sm font-bold text-slate-900">Secante</div>
+            <div className="text-xs text-slate-500">No requiere derivada</div>
+          </div>
+          <div className="bg-white rounded-lg p-3 text-center">
+            <div className="text-sm font-bold text-slate-900">Regula Falsi</div>
+            <div className="text-xs text-slate-500">Combina lo mejor</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ─────────────────────────────────────────────
+   SLIDE 7 — CONCLUSION
 ───────────────────────────────────────────── */
 export function ConclusionSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
   const [dataSize, setDataSize] = useState(1024)
@@ -1459,6 +1630,7 @@ export function ConclusionSlide({ isPrintMode = false }: { isPrintMode?: boolean
   }, [isPrintMode])
 
   const blocks = Math.min(dataSize, 64)
+  const members = ["Frainer", "Enmanuel", "Christopher", "Elmer"]
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 via-white to-indigo-50 relative overflow-hidden p-12">
@@ -1532,8 +1704,8 @@ export function ConclusionSlide({ isPrintMode = false }: { isPrintMode?: boolean
           </p>
         </div>
 
-        <div className="mt-12 flex justify-center gap-4">
-          {["Frainer", "Enmanuel", "Christopher"].map((name) => (
+        <div className="mt-12 flex justify-center gap-4 flex-wrap">
+          {members.map((name) => (
             <span
               key={name}
               className="px-4 py-2 bg-white rounded-full shadow-sm border border-slate-200 text-slate-600 text-sm"

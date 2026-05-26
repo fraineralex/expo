@@ -10,6 +10,7 @@ import {
   InstagramSearchSlide,
   AmazonFilterSlide,
   WhatsAppSlide,
+  WeaknessesSlide,
   ConclusionSlide,
 } from "./bisection/slides"
 
@@ -135,7 +136,12 @@ export default function WebSimPresentation() {
             <WhatsAppSlide isPrintMode={isPrintMode} />
           </section>
 
-          {/* SLIDE 6: Conclusion */}
+          {/* SLIDE 6: Elmer - Debilidades */}
+          <section data-transition="slide">
+            <WeaknessesSlide isPrintMode={isPrintMode} />
+          </section>
+
+          {/* SLIDE 7: Conclusion */}
           <section data-transition="zoom">
             <ConclusionSlide isPrintMode={isPrintMode} />
           </section>
