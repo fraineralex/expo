@@ -1482,24 +1482,36 @@ export function WeaknessesSlide({ isPrintMode = false }: { isPrintMode?: boolean
           <h4 className="text-sm font-semibold text-slate-900 mb-3">Demostracion Interactiva</h4>
           
           {activeDemo === "sorted" ? (
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col overflow-auto">
               <div className="text-xs text-slate-600 mb-3">
-                Buscando <span className="font-bold text-red-600">{targetValue}</span> en lista desordenada vs ordenada
+                Buscando <span className="font-bold text-red-600">{targetValue}</span> en lista desordenada
               </div>
               
               <div className="mb-4">
-                <div className="text-xs text-slate-500 mb-2">Lista DESORDENADA (falla):</div>
-                <div className="flex gap-1 flex-wrap">
+                <div className="text-xs text-slate-500 mb-2">Lista DESORDENADA - Binary Search falla:</div>
+                <div className="flex gap-1 flex-wrap mb-2">
                   {unsortedArray.map((val, i) => {
-                    const mid = Math.floor(unsortedArray.length / 2)
-                    const isMid = demoStep > 0 && i === mid
-                    const isSkipped = demoStep > 2 && val === targetValue
+                    // Simulate 3+ iterations on unsorted array
+                    const iteration1Mid = Math.floor(unsortedArray.length / 2) // index 7 = 34
+                    const iteration2Low = iteration1Mid + 1 // 34 > target? no, 34 == target but we compare wrongly
+                    const iteration2Mid = Math.floor((iteration2Low + unsortedArray.length - 1) / 2)
+                    const iteration3Mid = Math.floor((0 + iteration1Mid - 1) / 2)
+                    
+                    const isMid1 = demoStep >= 1 && demoStep < 3 && i === iteration1Mid
+                    const isMid2 = demoStep >= 3 && demoStep < 5 && i === iteration2Mid
+                    const isMid3 = demoStep >= 5 && demoStep < 7 && i === iteration3Mid
+                    const isEliminated1 = demoStep >= 3 && i < iteration1Mid
+                    const isEliminated2 = demoStep >= 5 && i > iteration2Mid
+                    const isTarget = val === targetValue
+                    const missedTarget = demoStep >= 7 && isTarget
+                    
                     return (
                       <div
                         key={i}
                         className={`w-8 h-8 rounded text-xs flex items-center justify-center font-mono transition-all ${
-                          isMid ? "bg-red-500 text-white scale-110" :
-                          isSkipped ? "bg-yellow-300 text-yellow-800 animate-pulse" :
+                          isMid1 || isMid2 || isMid3 ? "bg-red-500 text-white scale-110 ring-2 ring-red-300" :
+                          missedTarget ? "bg-yellow-400 text-yellow-900 animate-pulse" :
+                          isEliminated1 || isEliminated2 ? "bg-slate-200 text-slate-400 opacity-40" :
                           "bg-slate-100 text-slate-600"
                         }`}
                       >
@@ -1508,24 +1520,35 @@ export function WeaknessesSlide({ isPrintMode = false }: { isPrintMode?: boolean
                     )
                   })}
                 </div>
-                {demoStep > 2 && (
-                  <div className="text-xs text-red-600 mt-2 font-medium">
-                    Se salto el {targetValue} porque no esta ordenado!
-                  </div>
-                )}
+                <div className="text-xs space-y-1 bg-slate-50 rounded p-2">
+                  {demoStep >= 1 && <div className="text-slate-600">Iter 1: mid[7]={unsortedArray[7]}. {unsortedArray[7]} &gt; {targetValue}? Si, buscar izquierda</div>}
+                  {demoStep >= 3 && <div className="text-slate-600">Iter 2: mid[3]={unsortedArray[3]}. {unsortedArray[3]} &gt; {targetValue}? No, buscar derecha</div>}
+                  {demoStep >= 5 && <div className="text-slate-600">Iter 3: mid[5]={unsortedArray[5]}. {unsortedArray[5]} &gt; {targetValue}? No, buscar derecha</div>}
+                  {demoStep >= 7 && <div className="text-red-600 font-medium">Error! El {targetValue} estaba en posicion 7 pero lo descartamos!</div>}
+                </div>
               </div>
 
               <div>
-                <div className="text-xs text-slate-500 mb-2">Lista ORDENADA (funciona):</div>
-                <div className="flex gap-1 flex-wrap">
+                <div className="text-xs text-slate-500 mb-2">Lista ORDENADA - Binary Search funciona:</div>
+                <div className="flex gap-1 flex-wrap mb-2">
                   {sortedArrayDemo.map((val, i) => {
                     const isTarget = val === targetValue
-                    const foundVal = demoStep > 5 && isTarget
+                    const targetIndex = sortedArrayDemo.indexOf(targetValue)
+                    const mid1 = Math.floor(sortedArrayDemo.length / 2)
+                    const mid2 = Math.floor((mid1 + 1 + sortedArrayDemo.length - 1) / 2)
+                    const mid3 = Math.floor((mid1 + 1 + mid2 - 1) / 2)
+                    
+                    const isMid1 = demoStep >= 1 && demoStep < 3 && i === mid1
+                    const isMid2 = demoStep >= 3 && demoStep < 5 && i === mid2
+                    const isMid3 = demoStep >= 5 && demoStep < 7 && i === mid3
+                    const foundVal = demoStep >= 8 && isTarget
+                    
                     return (
                       <div
                         key={i}
                         className={`w-8 h-8 rounded text-xs flex items-center justify-center font-mono transition-all ${
-                          foundVal ? "bg-green-500 text-white scale-110" :
+                          foundVal ? "bg-green-500 text-white scale-110 ring-2 ring-green-300" :
+                          isMid1 || isMid2 || isMid3 ? "bg-blue-500 text-white scale-105" :
                           "bg-blue-50 text-blue-600"
                         }`}
                       >
@@ -1534,11 +1557,68 @@ export function WeaknessesSlide({ isPrintMode = false }: { isPrintMode?: boolean
                     )
                   })}
                 </div>
-                {demoStep > 5 && (
-                  <div className="text-xs text-green-600 mt-2 font-medium">
-                    Encontrado correctamente en lista ordenada!
+                {demoStep >= 8 && (
+                  <div className="text-xs text-green-600 font-medium bg-green-50 rounded p-2">
+                    Encontrado {targetValue} correctamente en 3 iteraciones!
                   </div>
                 )}
+              </div>
+            </div>
+          ) : activeDemo === "continuous" ? (
+            <div className="flex-1 flex flex-col">
+              <div className="text-xs text-slate-600 mb-3">
+                La biseccion requiere que f(a) y f(b) tengan signos opuestos
+              </div>
+              
+              <div className="flex-1 flex flex-col justify-center">
+                {/* Graph showing discontinuous function */}
+                <svg viewBox="0 0 200 120" className="w-full h-32 mb-3">
+                  {/* Axes */}
+                  <line x1="20" y1="100" x2="180" y2="100" stroke="#94a3b8" strokeWidth="1" />
+                  <line x1="20" y1="10" x2="20" y2="100" stroke="#94a3b8" strokeWidth="1" />
+                  
+                  {/* Discontinuous function - two separate parts */}
+                  <path 
+                    d="M 30 80 Q 60 60 80 70" 
+                    stroke="#ef4444" 
+                    strokeWidth="2" 
+                    fill="none"
+                    className={demoStep >= 1 ? "opacity-100" : "opacity-30"}
+                  />
+                  <circle cx="80" cy="70" r="3" fill="white" stroke="#ef4444" strokeWidth="2" 
+                    className={demoStep >= 2 ? "opacity-100" : "opacity-0"} />
+                  
+                  <circle cx="100" cy="40" r="3" fill="#ef4444" 
+                    className={demoStep >= 3 ? "opacity-100" : "opacity-0"} />
+                  <path 
+                    d="M 100 40 Q 130 30 170 50" 
+                    stroke="#ef4444" 
+                    strokeWidth="2" 
+                    fill="none"
+                    className={demoStep >= 4 ? "opacity-100" : "opacity-30"}
+                  />
+                  
+                  {/* Zero line */}
+                  <line x1="20" y1="60" x2="180" y2="60" stroke="#94a3b8" strokeWidth="1" strokeDasharray="4" />
+                  <text x="185" y="63" fontSize="8" fill="#94a3b8">y=0</text>
+                  
+                  {/* Discontinuity indicator */}
+                  {demoStep >= 5 && (
+                    <>
+                      <line x1="90" y1="40" x2="90" y2="70" stroke="#f97316" strokeWidth="2" strokeDasharray="3" />
+                      <text x="75" y="90" fontSize="7" fill="#f97316">Discontinuidad!</text>
+                    </>
+                  )}
+                </svg>
+                
+                <div className="text-xs space-y-1 bg-orange-50 rounded p-2">
+                  {demoStep >= 1 && <div className="text-slate-600">Paso 1: f(a) = -2 (negativo)</div>}
+                  {demoStep >= 2 && <div className="text-slate-600">Paso 2: Funcion se acerca a x=2...</div>}
+                  {demoStep >= 3 && <div className="text-slate-600">Paso 3: Salto! La funcion no es continua</div>}
+                  {demoStep >= 4 && <div className="text-slate-600">Paso 4: f(b) = 1 (positivo)</div>}
+                  {demoStep >= 5 && <div className="text-orange-600 font-medium">Hay cambio de signo pero NO hay raiz real en el intervalo!</div>}
+                  {demoStep >= 6 && <div className="text-red-600 font-medium">La biseccion fallaria buscando una raiz que no existe</div>}
+                </div>
               </div>
             </div>
           ) : activeDemo === "convergence" ? (
@@ -1546,30 +1626,95 @@ export function WeaknessesSlide({ isPrintMode = false }: { isPrintMode?: boolean
               <div className="text-xs text-slate-600 mb-3">
                 Comparacion de velocidad de convergencia
               </div>
-              <div className="flex-1 flex items-center justify-center">
+              <div className="flex-1 flex flex-col justify-center">
                 <div className="space-y-4 w-full">
                   <div>
-                    <div className="text-xs text-slate-500 mb-1">Biseccion (lineal): O(log n)</div>
-                    <div className="h-4 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="flex justify-between text-xs text-slate-500 mb-1">
+                      <span>Biseccion (lineal)</span>
+                      <span>{Math.min(demoStep, 10)} iteraciones</span>
+                    </div>
+                    <div className="h-6 bg-slate-100 rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-blue-500 rounded-full transition-all duration-500"
+                        className="h-full bg-blue-500 rounded-full transition-all duration-500 flex items-center justify-end pr-2"
                         style={{ width: `${Math.min(demoStep * 10, 100)}%` }}
-                      />
+                      >
+                        {demoStep >= 3 && <span className="text-white text-xs font-mono">{(50 / Math.pow(2, Math.min(demoStep, 10))).toFixed(4)}</span>}
+                      </div>
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-slate-500 mb-1">Newton-Raphson (cuadratico): O(log log n)</div>
-                    <div className="h-4 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="flex justify-between text-xs text-slate-500 mb-1">
+                      <span>Newton-Raphson (cuadratico)</span>
+                      <span>{Math.min(Math.ceil(demoStep / 2.5), 4)} iteraciones</span>
+                    </div>
+                    <div className="h-6 bg-slate-100 rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-green-500 rounded-full transition-all duration-300"
+                        className="h-full bg-green-500 rounded-full transition-all duration-300 flex items-center justify-end pr-2"
                         style={{ width: `${Math.min(demoStep * 25, 100)}%` }}
-                      />
+                      >
+                        {demoStep >= 2 && <span className="text-white text-xs font-mono">{(50 / Math.pow(4, Math.min(demoStep, 4))).toFixed(6)}</span>}
+                      </div>
                     </div>
                   </div>
                 </div>
+                
+                <div className="mt-4 bg-yellow-50 rounded p-2 text-xs space-y-1">
+                  {demoStep >= 2 && <div className="text-slate-600">Biseccion: error se reduce a la mitad cada iteracion</div>}
+                  {demoStep >= 4 && <div className="text-slate-600">Newton: error se eleva al cuadrado (converge mucho mas rapido)</div>}
+                  {demoStep >= 6 && <div className="text-green-600 font-medium">Newton alcanza precision en ~4 iteraciones vs ~10 de Biseccion</div>}
+                </div>
               </div>
-              <div className="text-xs text-center text-slate-500 mt-4">
-                Newton-Raphson converge 2-3x mas rapido
+            </div>
+          ) : activeDemo === "single" ? (
+            <div className="flex-1 flex flex-col">
+              <div className="text-xs text-slate-600 mb-3">
+                f(x) = x(x-2)(x+2) tiene 3 raices: -2, 0, 2
+              </div>
+              
+              <div className="flex-1 flex flex-col justify-center">
+                {/* Graph showing function with 3 roots */}
+                <svg viewBox="0 0 200 100" className="w-full h-28 mb-3">
+                  {/* Axes */}
+                  <line x1="20" y1="50" x2="180" y2="50" stroke="#94a3b8" strokeWidth="1" />
+                  <line x1="100" y1="10" x2="100" y2="90" stroke="#94a3b8" strokeWidth="1" />
+                  
+                  {/* Function curve with 3 zeros */}
+                  <path 
+                    d="M 30 70 Q 50 90 60 50 Q 70 10 100 50 Q 130 90 140 50 Q 150 10 170 30" 
+                    stroke="#3b82f6" 
+                    strokeWidth="2" 
+                    fill="none"
+                  />
+                  
+                  {/* Root markers */}
+                  <circle cx="60" cy="50" r="4" fill={demoStep >= 1 ? "#22c55e" : "#94a3b8"} className="transition-all" />
+                  <text x="55" y="65" fontSize="8" fill={demoStep >= 1 ? "#22c55e" : "#94a3b8"}>-2</text>
+                  
+                  <circle cx="100" cy="50" r="4" fill={demoStep >= 3 ? "#f97316" : "#94a3b8"} className="transition-all" />
+                  <text x="97" y="65" fontSize="8" fill={demoStep >= 3 ? "#f97316" : "#94a3b8"}>0</text>
+                  
+                  <circle cx="140" cy="50" r="4" fill={demoStep >= 5 ? "#f97316" : "#94a3b8"} className="transition-all" />
+                  <text x="137" y="65" fontSize="8" fill={demoStep >= 5 ? "#f97316" : "#94a3b8"}>2</text>
+                  
+                  {/* Interval brackets */}
+                  {demoStep >= 2 && (
+                    <>
+                      <line x1="30" y1="85" x2="170" y2="85" stroke="#ef4444" strokeWidth="2" />
+                      <line x1="30" y1="80" x2="30" y2="90" stroke="#ef4444" strokeWidth="2" />
+                      <line x1="170" y1="80" x2="170" y2="90" stroke="#ef4444" strokeWidth="2" />
+                      <text x="85" y="95" fontSize="7" fill="#ef4444">Intervalo [-3, 3]</text>
+                    </>
+                  )}
+                </svg>
+                
+                <div className="text-xs space-y-1 bg-blue-50 rounded p-2">
+                  {demoStep >= 1 && <div className="text-slate-600">La funcion tiene 3 raices: x = -2, x = 0, x = 2</div>}
+                  {demoStep >= 2 && <div className="text-slate-600">Aplicamos biseccion en [-3, 3]...</div>}
+                  {demoStep >= 3 && <div className="text-slate-600">f(-3) = -15, f(3) = 15, hay cambio de signo</div>}
+                  {demoStep >= 4 && <div className="text-slate-600">Biseccion converge hacia UNA raiz (probablemente x=0)</div>}
+                  {demoStep >= 5 && <div className="text-orange-600 font-medium">Las raices x=-2 y x=2 fueron ignoradas!</div>}
+                  {demoStep >= 6 && <div className="text-blue-600 font-medium">Solucion: Dividir el intervalo y aplicar biseccion multiples veces</div>}
+                </div>
               </div>
             </div>
           ) : (
