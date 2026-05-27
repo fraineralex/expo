@@ -1689,8 +1689,195 @@ export function AdvantagesSlide({ isPrintMode = false }: { isPrintMode?: boolean
 }
 
 /* ─────────────────────────────────────────────
-   SLIDE 7 — ENMANUEL: DEBILIDADES DEL METODO
+   SLIDE 7 — VENTAJAS DEL METODO DE BISECCION
 ───────────────────────────────────────────── */
+export function StrengthsSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
+  const [activeStrength, setActiveStrength] = useState<string | null>(null)
+  
+  const strengths = [
+    {
+      id: "guaranteed",
+      icon: <Check className="w-6 h-6" />,
+      title: "Convergencia garantizada",
+      description: "Si existe una raiz en el intervalo [a, b] y la funcion es continua con signos opuestos en los extremos, el metodo SIEMPRE encontrara la raiz.",
+      color: "green",
+      detail: "A diferencia de otros metodos que pueden diverger o fallar, la biseccion nunca falla si se cumplen las condiciones iniciales."
+    },
+    {
+      id: "simple",
+      icon: <Zap className="w-6 h-6" />,
+      title: "Simplicidad de implementacion",
+      description: "El algoritmo es muy facil de entender y programar. Solo requiere comparaciones y divisiones por 2.",
+      color: "blue",
+      detail: "No requiere calcular derivadas ni operaciones complejas, lo que reduce errores de programacion."
+    },
+    {
+      id: "robust",
+      icon: <Globe className="w-6 h-6" />,
+      title: "Robusto y estable",
+      description: "No es sensible a la forma de la funcion ni a valores iniciales problematicos. Funciona bien con funciones dificiles.",
+      color: "purple",
+      detail: "Metodos como Newton-Raphson pueden fallar con derivadas cercanas a cero, pero la biseccion sigue funcionando."
+    },
+    {
+      id: "predictable",
+      icon: <ArrowRight className="w-6 h-6" />,
+      title: "Error predecible",
+      description: "El error maximo en cada iteracion es conocido: (b-a)/2^n. Podemos calcular exactamente cuantas iteraciones necesitamos.",
+      color: "orange",
+      detail: "Esto permite planificar el tiempo de ejecucion y garantizar la precision deseada."
+    }
+  ]
+
+  return (
+    <div className="w-full h-full flex flex-col bg-gradient-to-br from-slate-50 via-white to-green-50 relative overflow-hidden p-6">
+      <div className="text-center mb-4">
+        <h2 className="text-3xl font-bold text-slate-900 mb-1">
+          Ventajas del Metodo de <span className="text-green-500">Biseccion</span>
+        </h2>
+        <p className="text-slate-600 text-sm">
+          Por que el metodo sigue siendo util a pesar de su simplicidad
+        </p>
+      </div>
+
+      <div className="flex-1 flex gap-6 overflow-hidden">
+        {/* Lista de ventajas */}
+        <div className="flex-1 grid grid-cols-2 gap-4 overflow-auto">
+          {strengths.map((s) => (
+            <div
+              key={s.id}
+              className={`bg-white rounded-xl shadow-sm border-2 p-4 transition-all cursor-pointer hover:shadow-md ${
+                activeStrength === s.id ? "border-green-400 bg-green-50" : "border-slate-200"
+              }`}
+              onClick={() => setActiveStrength(activeStrength === s.id ? null : s.id)}
+            >
+              <div className="flex items-start gap-3">
+                <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-white shrink-0 ${
+                  s.color === "green" ? "bg-green-500" :
+                  s.color === "blue" ? "bg-blue-500" :
+                  s.color === "purple" ? "bg-purple-500" :
+                  "bg-orange-500"
+                }`}>
+                  {s.icon}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-slate-900 text-sm">{s.title}</h3>
+                  <p className="text-xs text-slate-600 mt-1">{s.description}</p>
+                  {activeStrength === s.id && (
+                    <div className="mt-2 p-2 bg-green-100 rounded-lg">
+                      <p className="text-xs text-green-800">{s.detail}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Panel de comparacion visual */}
+        <div className="w-80 bg-white rounded-2xl shadow-lg border border-slate-200 p-4 flex flex-col">
+          <h3 className="font-semibold text-slate-900 mb-3 text-center">Comparacion de Metodos</h3>
+          
+          <div className="flex-1 space-y-4">
+            {/* Convergencia */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs">
+                <span className="text-slate-600">Garantia de convergencia</span>
+              </div>
+              <div className="flex gap-2 items-center">
+                <span className="text-xs w-20 text-slate-500">Biseccion</span>
+                <div className="flex-1 bg-slate-100 rounded-full h-4 overflow-hidden">
+                  <div className="h-full bg-green-500 rounded-full" style={{ width: "100%" }} />
+                </div>
+                <span className="text-xs text-green-600 font-medium">100%</span>
+              </div>
+              <div className="flex gap-2 items-center">
+                <span className="text-xs w-20 text-slate-500">Newton</span>
+                <div className="flex-1 bg-slate-100 rounded-full h-4 overflow-hidden">
+                  <div className="h-full bg-yellow-500 rounded-full" style={{ width: "60%" }} />
+                </div>
+                <span className="text-xs text-yellow-600 font-medium">60%</span>
+              </div>
+            </div>
+
+            {/* Simplicidad */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs">
+                <span className="text-slate-600">Simplicidad</span>
+              </div>
+              <div className="flex gap-2 items-center">
+                <span className="text-xs w-20 text-slate-500">Biseccion</span>
+                <div className="flex-1 bg-slate-100 rounded-full h-4 overflow-hidden">
+                  <div className="h-full bg-green-500 rounded-full" style={{ width: "95%" }} />
+                </div>
+                <span className="text-xs text-green-600 font-medium">95%</span>
+              </div>
+              <div className="flex gap-2 items-center">
+                <span className="text-xs w-20 text-slate-500">Newton</span>
+                <div className="flex-1 bg-slate-100 rounded-full h-4 overflow-hidden">
+                  <div className="h-full bg-orange-500 rounded-full" style={{ width: "40%" }} />
+                </div>
+                <span className="text-xs text-orange-600 font-medium">40%</span>
+              </div>
+            </div>
+
+            {/* Robustez */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs">
+                <span className="text-slate-600">Robustez</span>
+              </div>
+              <div className="flex gap-2 items-center">
+                <span className="text-xs w-20 text-slate-500">Biseccion</span>
+                <div className="flex-1 bg-slate-100 rounded-full h-4 overflow-hidden">
+                  <div className="h-full bg-green-500 rounded-full" style={{ width: "90%" }} />
+                </div>
+                <span className="text-xs text-green-600 font-medium">90%</span>
+              </div>
+              <div className="flex gap-2 items-center">
+                <span className="text-xs w-20 text-slate-500">Newton</span>
+                <div className="flex-1 bg-slate-100 rounded-full h-4 overflow-hidden">
+                  <div className="h-full bg-red-500 rounded-full" style={{ width: "50%" }} />
+                </div>
+                <span className="text-xs text-red-600 font-medium">50%</span>
+              </div>
+            </div>
+
+            {/* Velocidad (donde Newton gana) */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs">
+                <span className="text-slate-600">Velocidad</span>
+              </div>
+              <div className="flex gap-2 items-center">
+                <span className="text-xs w-20 text-slate-500">Biseccion</span>
+                <div className="flex-1 bg-slate-100 rounded-full h-4 overflow-hidden">
+                  <div className="h-full bg-yellow-500 rounded-full" style={{ width: "50%" }} />
+                </div>
+                <span className="text-xs text-yellow-600 font-medium">50%</span>
+              </div>
+              <div className="flex gap-2 items-center">
+                <span className="text-xs w-20 text-slate-500">Newton</span>
+                <div className="flex-1 bg-slate-100 rounded-full h-4 overflow-hidden">
+                  <div className="h-full bg-green-500 rounded-full" style={{ width: "90%" }} />
+                </div>
+                <span className="text-xs text-green-600 font-medium">90%</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+            <p className="text-xs text-green-800 text-center">
+              La biseccion es ideal cuando se prioriza la <strong>confiabilidad</strong> sobre la velocidad
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+  
+  /* ─────────────────────────────────────────────
+  SLIDE 8 — ENMANUEL: DEBILIDADES DEL METODO
+  ───────────────────────────────────────────── */
 export function WeaknessesSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
   const [activeDemo, setActiveDemo] = useState<string | null>(null)
   const [demoStep, setDemoStep] = useState(0)
