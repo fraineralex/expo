@@ -2202,7 +2202,7 @@ export function WeaknessesSlide({ isPrintMode = false }: { isPrintMode?: boolean
     <div className="w-full h-full flex flex-col bg-gradient-to-br from-slate-50 via-white to-red-50 relative overflow-hidden p-6">
       <div className="text-center mb-4">
         <h2 className="text-3xl font-bold text-slate-900 mb-1">
-          Debilidades del Metodo de <span className="text-red-500">Biseccion</span>
+          Desventajas del Metodo de <span className="text-red-500">Biseccion</span>
         </h2>
         <p className="text-slate-600 text-sm">
           Enmanuel &middot; Limitaciones y alternativas mas efectivas
