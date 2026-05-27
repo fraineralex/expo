@@ -1692,183 +1692,373 @@ export function AdvantagesSlide({ isPrintMode = false }: { isPrintMode?: boolean
    SLIDE 7 — VENTAJAS DEL METODO DE BISECCION
 ───────────────────────────────────────────── */
 export function StrengthsSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
-  const [activeStrength, setActiveStrength] = useState<string | null>(null)
+  const [activeStrength, setActiveStrength] = useState<number>(0)
+  const [demoState, setDemoState] = useState<Record<string, unknown>>({})
   
+  // Demo states for each advantage
+  const [convergenceStep, setConvergenceStep] = useState(0)
+  const [codeHighlight, setCodeHighlight] = useState(0)
+  const [robustDemo, setRobustDemo] = useState(0)
+  const [errorCalcN, setErrorCalcN] = useState(5)
+
   const strengths = [
     {
-      id: "guaranteed",
-      icon: <Check className="w-6 h-6" />,
-      title: "Convergencia garantizada",
-      description: "Si existe una raiz en el intervalo [a, b] y la funcion es continua con signos opuestos en los extremos, el metodo SIEMPRE encontrara la raiz.",
-      color: "green",
-      detail: "A diferencia de otros metodos que pueden diverger o fallar, la biseccion nunca falla si se cumplen las condiciones iniciales."
+      title: "Convergencia Garantizada",
+      description: "Si la funcion es continua y hay cambio de signo en [a,b], el metodo SIEMPRE encuentra la raiz.",
+      color: "bg-green-500",
+      example: "Ejemplo: Encontrar donde f(x) = x² - 2 cruza el cero"
     },
     {
-      id: "simple",
-      icon: <Zap className="w-6 h-6" />,
-      title: "Simplicidad de implementacion",
-      description: "El algoritmo es muy facil de entender y programar. Solo requiere comparaciones y divisiones por 2.",
-      color: "blue",
-      detail: "No requiere calcular derivadas ni operaciones complejas, lo que reduce errores de programacion."
+      title: "Facil de Programar",
+      description: "Solo necesitas: calcular punto medio, evaluar funcion y comparar signos. No requiere derivadas.",
+      color: "bg-blue-500",
+      example: "El codigo es tan simple que cabe en pocas lineas"
     },
     {
-      id: "robust",
-      icon: <Globe className="w-6 h-6" />,
-      title: "Robusto y estable",
-      description: "No es sensible a la forma de la funcion ni a valores iniciales problematicos. Funciona bien con funciones dificiles.",
-      color: "purple",
-      detail: "Metodos como Newton-Raphson pueden fallar con derivadas cercanas a cero, pero la biseccion sigue funcionando."
+      title: "Robusto y Estable",
+      description: "Funciona con cualquier funcion continua, sin importar su complejidad o forma.",
+      color: "bg-purple-500",
+      example: "Funciona incluso con funciones dificiles o irregulares"
     },
     {
-      id: "predictable",
-      icon: <ArrowRight className="w-6 h-6" />,
-      title: "Error predecible",
-      description: "El error maximo en cada iteracion es conocido: (b-a)/2^n. Podemos calcular exactamente cuantas iteraciones necesitamos.",
-      color: "orange",
-      detail: "Esto permite planificar el tiempo de ejecucion y garantizar la precision deseada."
+      title: "Error Predecible",
+      description: "Puedes calcular exactamente cuantas iteraciones necesitas para alcanzar cierta precision.",
+      color: "bg-orange-500",
+      example: "Formula: Error ≤ (b-a) / 2ⁿ"
     }
   ]
 
+  // Convergence demo data
+  const convergenceSteps = [
+    { a: 1, b: 2, m: 1.5, fa: -1, fb: 2, fm: 0.25, interval: "[1, 2]", action: "Intervalo inicial" },
+    { a: 1, b: 1.5, m: 1.25, fa: -1, fb: 0.25, fm: -0.44, interval: "[1, 1.5]", action: "f(m) > 0, nuevo b = m" },
+    { a: 1.25, b: 1.5, m: 1.375, fa: -0.44, fb: 0.25, fm: -0.11, interval: "[1.25, 1.5]", action: "f(m) < 0, nuevo a = m" },
+    { a: 1.375, b: 1.5, m: 1.4375, fa: -0.11, fb: 0.25, fm: 0.07, interval: "[1.375, 1.5]", action: "f(m) < 0, nuevo a = m" },
+    { a: 1.375, b: 1.4375, m: 1.406, fa: -0.11, fb: 0.07, fm: -0.02, interval: "[1.375, 1.4375]", action: "Convergiendo a √2 ≈ 1.414" },
+  ]
+
+  const codeLines = [
+    { code: "while (b - a) > tolerancia:", desc: "Mientras no alcancemos precision" },
+    { code: "    m = (a + b) / 2", desc: "Calcular punto medio" },
+    { code: "    if f(a) * f(m) < 0:", desc: "Si hay cambio de signo en [a,m]" },
+    { code: "        b = m", desc: "La raiz esta en [a,m]" },
+    { code: "    else:", desc: "Si no..." },
+    { code: "        a = m", desc: "La raiz esta en [m,b]" },
+  ]
+
+  useEffect(() => {
+    if (activeStrength === 0) {
+      const timer = setInterval(() => {
+        setConvergenceStep(prev => (prev + 1) % convergenceSteps.length)
+      }, 2000)
+      return () => clearInterval(timer)
+    }
+    if (activeStrength === 1) {
+      const timer = setInterval(() => {
+        setCodeHighlight(prev => (prev + 1) % codeLines.length)
+      }, 1500)
+      return () => clearInterval(timer)
+    }
+    if (activeStrength === 2) {
+      const timer = setInterval(() => {
+        setRobustDemo(prev => (prev + 1) % 3)
+      }, 2500)
+      return () => clearInterval(timer)
+    }
+  }, [activeStrength])
+
+  const renderDemo = () => {
+    switch (activeStrength) {
+      case 0: // Convergencia
+        const step = convergenceSteps[convergenceStep]
+        return (
+          <div className="h-full flex flex-col">
+            <div className="text-center mb-2">
+              <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                f(x) = x² - 2 | Buscando √2
+              </span>
+            </div>
+            
+            {/* Visual interval */}
+            <div className="flex-1 flex flex-col justify-center">
+              <div className="relative h-16 bg-slate-100 rounded-lg mx-4 mb-4">
+                <div className="absolute top-0 left-0 w-full h-full flex items-center justify-between px-2 text-xs text-slate-500">
+                  <span>1.0</span>
+                  <span>1.5</span>
+                  <span>2.0</span>
+                </div>
+                {/* Interval bar */}
+                <div 
+                  className="absolute top-1/2 -translate-y-1/2 h-6 bg-green-400 rounded transition-all duration-500"
+                  style={{
+                    left: `${((step.a - 1) / 1) * 100}%`,
+                    width: `${((step.b - step.a) / 1) * 100}%`
+                  }}
+                />
+                {/* Midpoint marker */}
+                <div 
+                  className="absolute top-1/2 -translate-y-1/2 w-3 h-10 bg-green-600 rounded transition-all duration-500"
+                  style={{ left: `calc(${((step.m - 1) / 1) * 100}% - 6px)` }}
+                />
+                {/* Root indicator */}
+                <div 
+                  className="absolute top-0 h-full w-0.5 bg-red-500"
+                  style={{ left: `${((1.414 - 1) / 1) * 100}%` }}
+                >
+                  <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-xs text-red-500">√2</span>
+                </div>
+              </div>
+
+              {/* Step info */}
+              <div className="bg-white rounded-lg p-3 mx-4 border border-green-200">
+                <div className="flex justify-between text-xs mb-2">
+                  <span className="text-slate-600">Iteracion {convergenceStep + 1}</span>
+                  <span className="text-green-600 font-medium">{step.interval}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                  <div className="bg-slate-50 rounded p-1">
+                    <div className="text-slate-500">a</div>
+                    <div className="font-mono font-medium">{step.a}</div>
+                  </div>
+                  <div className="bg-green-50 rounded p-1">
+                    <div className="text-green-600">m</div>
+                    <div className="font-mono font-medium">{step.m}</div>
+                  </div>
+                  <div className="bg-slate-50 rounded p-1">
+                    <div className="text-slate-500">b</div>
+                    <div className="font-mono font-medium">{step.b}</div>
+                  </div>
+                </div>
+                <div className="mt-2 text-center text-xs text-green-700 bg-green-50 rounded py-1">
+                  {step.action}
+                </div>
+              </div>
+            </div>
+
+            {/* Progress dots */}
+            <div className="flex justify-center gap-1 mt-2">
+              {convergenceSteps.map((_, i) => (
+                <div 
+                  key={i} 
+                  className={`w-2 h-2 rounded-full transition-colors ${i === convergenceStep ? "bg-green-500" : "bg-slate-300"}`}
+                />
+              ))}
+            </div>
+          </div>
+        )
+
+      case 1: // Facil de programar
+        return (
+          <div className="h-full flex flex-col">
+            <div className="text-center mb-2">
+              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                Solo 6 lineas de codigo esencial
+              </span>
+            </div>
+            
+            <div className="flex-1 bg-slate-900 rounded-lg p-3 font-mono text-xs overflow-hidden">
+              {codeLines.map((line, i) => (
+                <div 
+                  key={i}
+                  className={`py-1 px-2 rounded transition-all duration-300 ${
+                    i === codeHighlight ? "bg-blue-500/30 text-blue-300" : "text-slate-400"
+                  }`}
+                >
+                  <span className="text-slate-600 mr-2">{i + 1}</span>
+                  {line.code}
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-2 bg-blue-50 rounded-lg p-2 border border-blue-200">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs">
+                  {codeHighlight + 1}
+                </div>
+                <p className="text-xs text-blue-800">{codeLines[codeHighlight].desc}</p>
+              </div>
+            </div>
+          </div>
+        )
+
+      case 2: // Robusto
+        const functions = [
+          { name: "f(x) = x³ - x - 2", desc: "Polinomio cubico", path: "M 10 80 Q 30 90 50 50 Q 70 10 90 30" },
+          { name: "f(x) = sin(x) - 0.5", desc: "Funcion trigonometrica", path: "M 10 50 Q 30 20 50 50 Q 70 80 90 50" },
+          { name: "f(x) = eˣ - 3x", desc: "Funcion exponencial", path: "M 10 70 Q 30 80 50 40 Q 70 10 90 60" },
+        ]
+        const currentFunc = functions[robustDemo]
+        
+        return (
+          <div className="h-full flex flex-col">
+            <div className="text-center mb-2">
+              <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+                Funciona con cualquier funcion continua
+              </span>
+            </div>
+            
+            <div className="flex-1 flex flex-col items-center justify-center">
+              {/* Function graph */}
+              <div className="w-full h-32 bg-white rounded-lg border border-purple-200 p-2 relative">
+                <svg viewBox="0 0 100 100" className="w-full h-full">
+                  {/* Grid */}
+                  <line x1="10" y1="50" x2="90" y2="50" stroke="#e2e8f0" strokeWidth="1" />
+                  <line x1="50" y1="10" x2="50" y2="90" stroke="#e2e8f0" strokeWidth="1" />
+                  
+                  {/* Function curve */}
+                  <path 
+                    d={currentFunc.path} 
+                    fill="none" 
+                    stroke="#8b5cf6" 
+                    strokeWidth="2"
+                    className="transition-all duration-500"
+                  />
+                  
+                  {/* Root point */}
+                  <circle cx="50" cy="50" r="4" fill="#22c55e" className="animate-pulse" />
+                </svg>
+                
+                {/* Function label */}
+                <div className="absolute bottom-1 right-2 text-xs font-mono text-purple-600 bg-white/80 px-1 rounded">
+                  {currentFunc.name}
+                </div>
+              </div>
+
+              {/* Info */}
+              <div className="mt-3 text-center">
+                <p className="text-sm font-medium text-slate-700">{currentFunc.desc}</p>
+                <div className="flex items-center justify-center gap-2 mt-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  <span className="text-xs text-green-600">Biseccion encuentra la raiz</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Function selector */}
+            <div className="flex justify-center gap-2 mt-2">
+              {functions.map((_, i) => (
+                <button 
+                  key={i}
+                  onClick={() => setRobustDemo(i)}
+                  className={`w-8 h-2 rounded-full transition-colors ${i === robustDemo ? "bg-purple-500" : "bg-slate-300"}`}
+                />
+              ))}
+            </div>
+          </div>
+        )
+
+      case 3: // Error predecible
+        const errorAfterN = (1 / Math.pow(2, errorCalcN)).toFixed(6)
+        return (
+          <div className="h-full flex flex-col">
+            <div className="text-center mb-2">
+              <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">
+                Calculadora de precisión
+              </span>
+            </div>
+            
+            <div className="flex-1 flex flex-col justify-center px-4">
+              {/* Formula */}
+              <div className="bg-white rounded-lg p-3 border border-orange-200 text-center mb-4">
+                <p className="text-xs text-slate-500 mb-1">Formula del error maximo</p>
+                <p className="text-lg font-mono font-bold text-orange-600">
+                  Error ≤ (b - a) / 2<sup>n</sup>
+                </p>
+              </div>
+
+              {/* Interactive calculator */}
+              <div className="bg-orange-50 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm text-slate-700">Iteraciones (n):</span>
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => setErrorCalcN(Math.max(1, errorCalcN - 1))}
+                      className="w-7 h-7 bg-orange-200 rounded-full text-orange-700 font-bold hover:bg-orange-300"
+                    >
+                      -
+                    </button>
+                    <span className="w-8 text-center font-bold text-orange-600">{errorCalcN}</span>
+                    <button 
+                      onClick={() => setErrorCalcN(Math.min(20, errorCalcN + 1))}
+                      className="w-7 h-7 bg-orange-200 rounded-full text-orange-700 font-bold hover:bg-orange-300"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                <div className="text-center">
+                  <p className="text-xs text-slate-500">Si el intervalo inicial es [0, 1]:</p>
+                  <p className="text-xl font-mono font-bold text-orange-600 mt-1">
+                    Error ≤ {errorAfterN}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    ({errorCalcN} iteraciones = {Math.pow(2, errorCalcN)} divisiones)
+                  </p>
+                </div>
+              </div>
+
+              {/* Quick reference */}
+              <div className="mt-3 grid grid-cols-4 gap-1 text-center text-xs">
+                {[5, 10, 15, 20].map(n => (
+                  <button
+                    key={n}
+                    onClick={() => setErrorCalcN(n)}
+                    className={`py-1 rounded ${errorCalcN === n ? "bg-orange-500 text-white" : "bg-slate-100 text-slate-600"}`}
+                  >
+                    n={n}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )
+
+      default:
+        return null
+    }
+  }
+
   return (
-    <div className="w-full h-full flex flex-col bg-gradient-to-br from-slate-50 via-white to-green-50 relative overflow-hidden p-6">
-      <div className="text-center mb-4">
-        <h2 className="text-3xl font-bold text-slate-900 mb-1">
+    <div className="w-full h-full flex flex-col bg-gradient-to-br from-slate-50 via-white to-green-50 relative overflow-hidden p-4">
+      <div className="text-center mb-3">
+        <h2 className="text-2xl font-bold text-slate-900 mb-1">
           Ventajas del Metodo de <span className="text-green-500">Biseccion</span>
         </h2>
-        <p className="text-slate-600 text-sm">
-          Por que el metodo sigue siendo util a pesar de su simplicidad
+        <p className="text-slate-600 text-xs">
+          Haz clic en cada ventaja para ver una demostracion interactiva
         </p>
       </div>
 
-      <div className="flex-1 flex gap-6 overflow-hidden">
-        {/* Lista de ventajas */}
-        <div className="flex-1 grid grid-cols-2 gap-4 overflow-auto">
-          {strengths.map((s) => (
-            <div
-              key={s.id}
-              className={`bg-white rounded-xl shadow-sm border-2 p-4 transition-all cursor-pointer hover:shadow-md ${
-                activeStrength === s.id ? "border-green-400 bg-green-50" : "border-slate-200"
+      <div className="flex-1 flex gap-4 overflow-hidden">
+        {/* Left: Advantage buttons */}
+        <div className="w-64 flex flex-col gap-2">
+          {strengths.map((s, i) => (
+            <button
+              key={i}
+              onClick={() => setActiveStrength(i)}
+              className={`text-left p-3 rounded-xl transition-all ${
+                activeStrength === i 
+                  ? "bg-white shadow-lg border-2 border-green-400" 
+                  : "bg-white/50 border border-slate-200 hover:bg-white hover:shadow"
               }`}
-              onClick={() => setActiveStrength(activeStrength === s.id ? null : s.id)}
             >
-              <div className="flex items-start gap-3">
-                <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-white shrink-0 ${
-                  s.color === "green" ? "bg-green-500" :
-                  s.color === "blue" ? "bg-blue-500" :
-                  s.color === "purple" ? "bg-purple-500" :
-                  "bg-orange-500"
-                }`}>
-                  {s.icon}
+              <div className="flex items-start gap-2">
+                <div className={`w-8 h-8 ${s.color} rounded-lg flex items-center justify-center text-white text-sm font-bold shrink-0`}>
+                  {i + 1}
                 </div>
-                <div className="flex-1 min-w-0">
+                <div>
                   <h3 className="font-semibold text-slate-900 text-sm">{s.title}</h3>
-                  <p className="text-xs text-slate-600 mt-1">{s.description}</p>
-                  {activeStrength === s.id && (
-                    <div className="mt-2 p-2 bg-green-100 rounded-lg">
-                      <p className="text-xs text-green-800">{s.detail}</p>
-                    </div>
-                  )}
+                  <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{s.description}</p>
                 </div>
               </div>
-            </div>
+            </button>
           ))}
         </div>
 
-        {/* Panel de comparacion visual */}
-        <div className="w-80 bg-white rounded-2xl shadow-lg border border-slate-200 p-4 flex flex-col">
-          <h3 className="font-semibold text-slate-900 mb-3 text-center">Comparacion de Metodos</h3>
-          
-          <div className="flex-1 space-y-4">
-            {/* Convergencia */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs">
-                <span className="text-slate-600">Garantia de convergencia</span>
-              </div>
-              <div className="flex gap-2 items-center">
-                <span className="text-xs w-20 text-slate-500">Biseccion</span>
-                <div className="flex-1 bg-slate-100 rounded-full h-4 overflow-hidden">
-                  <div className="h-full bg-green-500 rounded-full" style={{ width: "100%" }} />
-                </div>
-                <span className="text-xs text-green-600 font-medium">100%</span>
-              </div>
-              <div className="flex gap-2 items-center">
-                <span className="text-xs w-20 text-slate-500">Newton</span>
-                <div className="flex-1 bg-slate-100 rounded-full h-4 overflow-hidden">
-                  <div className="h-full bg-yellow-500 rounded-full" style={{ width: "60%" }} />
-                </div>
-                <span className="text-xs text-yellow-600 font-medium">60%</span>
-              </div>
-            </div>
-
-            {/* Simplicidad */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs">
-                <span className="text-slate-600">Simplicidad</span>
-              </div>
-              <div className="flex gap-2 items-center">
-                <span className="text-xs w-20 text-slate-500">Biseccion</span>
-                <div className="flex-1 bg-slate-100 rounded-full h-4 overflow-hidden">
-                  <div className="h-full bg-green-500 rounded-full" style={{ width: "95%" }} />
-                </div>
-                <span className="text-xs text-green-600 font-medium">95%</span>
-              </div>
-              <div className="flex gap-2 items-center">
-                <span className="text-xs w-20 text-slate-500">Newton</span>
-                <div className="flex-1 bg-slate-100 rounded-full h-4 overflow-hidden">
-                  <div className="h-full bg-orange-500 rounded-full" style={{ width: "40%" }} />
-                </div>
-                <span className="text-xs text-orange-600 font-medium">40%</span>
-              </div>
-            </div>
-
-            {/* Robustez */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs">
-                <span className="text-slate-600">Robustez</span>
-              </div>
-              <div className="flex gap-2 items-center">
-                <span className="text-xs w-20 text-slate-500">Biseccion</span>
-                <div className="flex-1 bg-slate-100 rounded-full h-4 overflow-hidden">
-                  <div className="h-full bg-green-500 rounded-full" style={{ width: "90%" }} />
-                </div>
-                <span className="text-xs text-green-600 font-medium">90%</span>
-              </div>
-              <div className="flex gap-2 items-center">
-                <span className="text-xs w-20 text-slate-500">Newton</span>
-                <div className="flex-1 bg-slate-100 rounded-full h-4 overflow-hidden">
-                  <div className="h-full bg-red-500 rounded-full" style={{ width: "50%" }} />
-                </div>
-                <span className="text-xs text-red-600 font-medium">50%</span>
-              </div>
-            </div>
-
-            {/* Velocidad (donde Newton gana) */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs">
-                <span className="text-slate-600">Velocidad</span>
-              </div>
-              <div className="flex gap-2 items-center">
-                <span className="text-xs w-20 text-slate-500">Biseccion</span>
-                <div className="flex-1 bg-slate-100 rounded-full h-4 overflow-hidden">
-                  <div className="h-full bg-yellow-500 rounded-full" style={{ width: "50%" }} />
-                </div>
-                <span className="text-xs text-yellow-600 font-medium">50%</span>
-              </div>
-              <div className="flex gap-2 items-center">
-                <span className="text-xs w-20 text-slate-500">Newton</span>
-                <div className="flex-1 bg-slate-100 rounded-full h-4 overflow-hidden">
-                  <div className="h-full bg-green-500 rounded-full" style={{ width: "90%" }} />
-                </div>
-                <span className="text-xs text-green-600 font-medium">90%</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
-            <p className="text-xs text-green-800 text-center">
-              La biseccion es ideal cuando se prioriza la <strong>confiabilidad</strong> sobre la velocidad
-            </p>
-          </div>
+        {/* Right: Demo area */}
+        <div className="flex-1 bg-white rounded-2xl shadow-lg border border-slate-200 p-4 overflow-hidden">
+          {renderDemo()}
         </div>
       </div>
     </div>
@@ -2247,7 +2437,7 @@ export function WeaknessesSlide({ isPrintMode = false }: { isPrintMode?: boolean
   )
 }
 
-/* ─────────────────────────────────────────────
+/* ────���────────────────────────────────────────
    SLIDE 7 — CONCLUSION
 ───────────────────────────────────────────── */
 export function ConclusionSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
