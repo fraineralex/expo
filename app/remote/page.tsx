@@ -41,61 +41,46 @@ export default function RemoteControlPage() {
     isPlaying: false,
   })
   const [isConnected, setIsConnected] = useState(false)
+  const [lastPing, setLastPing] = useState<number>(Date.now())
   const [isSending, setIsSending] = useState(false)
 
+  // Fetch current state from presentation
   const fetchState = useCallback(async () => {
     try {
-      const res = await fetch("/api/presentation/state", {
-        cache: "no-store",
-      })
-      if (!res.ok) {
-        setIsConnected(false)
-        return
+      const res = await fetch("/api/presentation/state")
+      if (res.ok) {
+        const data = await res.json()
+        if (data.state) {
+          setState(data.state)
+          setIsConnected(Date.now() - (data.state.timestamp || 0) < 10000)
+          setLastPing(Date.now())
+        }
       }
-
-      const data = await res.json()
-      if (!data.state || data.warning === "Redis not configured") {
-        setIsConnected(false)
-        return
-      }
-
-      setState(data.state)
-      setIsConnected(Date.now() - (data.state.timestamp || 0) < 10000)
     } catch {
       setIsConnected(false)
     }
   }, [])
 
+  // Poll for state updates
   useEffect(() => {
     fetchState()
     const interval = setInterval(fetchState, 2000)
     return () => clearInterval(interval)
   }, [fetchState])
 
+  // Send command to presentation
   const sendCommand = async (action: string, slideIndex?: number) => {
     if (isSending) return
     setIsSending(true)
     
     try {
-      const res = await fetch("/api/presentation/command", {
+      await fetch("/api/presentation/command", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action, slideIndex }),
       })
-
-      if (!res.ok) {
-        setIsConnected(false)
-        return
-      }
-
-      const data = await res.json()
-      if (!data.success) {
-        setIsConnected(false)
-        return
-      }
-
-      setIsConnected(true)
       
+      // Optimistic update
       if (action === "next" && state.currentSlide < state.totalSlides - 1) {
         setState(s => ({ ...s, currentSlide: s.currentSlide + 1 }))
       } else if (action === "prev" && state.currentSlide > 0) {
@@ -118,6 +103,7 @@ export default function RemoteControlPage() {
 
   return (
     <div className="min-h-screen bg-slate-900 text-white flex flex-col">
+      {/* Header */}
       <header className="bg-slate-800 border-b border-slate-700 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Monitor className="w-5 h-5 text-indigo-400" />
@@ -129,20 +115,18 @@ export default function RemoteControlPage() {
         </div>
       </header>
 
+      {/* Current Slide Info */}
       <div className="bg-slate-800/50 px-4 py-4 text-center border-b border-slate-700">
         <div className="text-slate-400 text-sm mb-1">Diapositiva Actual</div>
         <div className="text-2xl font-bold text-white">
           {state.currentSlide + 1} <span className="text-slate-500">/ {state.totalSlides}</span>
         </div>
         <div className="text-indigo-400 mt-1">{SLIDE_NAMES[state.currentSlide] || "Slide"}</div>
-        {!isConnected && (
-          <div className="mt-3 text-xs text-amber-300">
-            Abre primero la presentacion principal en otra pantalla para sincronizar el control remoto.
-          </div>
-        )}
       </div>
 
+      {/* Main Controls */}
       <div className="flex-1 flex flex-col justify-center p-6 gap-6">
+        {/* Navigation - Big Buttons */}
         <div className="grid grid-cols-2 gap-4">
           <button
             onClick={() => sendCommand("prev")}
@@ -163,6 +147,7 @@ export default function RemoteControlPage() {
           </button>
         </div>
 
+        {/* Simulation Controls - Only show on simulation slides */}
         {hasSimulation && (
           <div className="bg-slate-800 rounded-2xl p-4 border border-slate-700">
             <div className="text-center text-slate-400 text-sm mb-3">Controles de Simulacion</div>
@@ -195,6 +180,7 @@ export default function RemoteControlPage() {
         )}
       </div>
 
+      {/* Quick Jump */}
       <div className="bg-slate-800 border-t border-slate-700 p-4">
         <div className="text-slate-400 text-xs mb-2 text-center">Ir a diapositiva</div>
         <div className="flex gap-2 overflow-x-auto pb-2">

@@ -62,49 +62,33 @@ function Presenter({ name }: { name: string }) {
    SHARED NAVIGATION COMPONENT
 ───────────────────────────────────────────── */
 function SlideNavigation({ slideNumber, totalSlides }: { slideNumber: number; totalSlides: number }) {
-  const goToPrev = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault()
-    event.stopPropagation()
-    if (typeof window !== "undefined") {
-      const reveal = (window as unknown as { Reveal?: { slide?: (h: number, v?: number) => void; prev?: () => void } }).Reveal
-      if (reveal?.slide) {
-        reveal.slide(Math.max(0, slideNumber - 2), 0)
-        return
-      }
-      reveal?.prev?.()
+  const goToPrev = () => {
+    if (typeof window !== "undefined" && (window as unknown as { Reveal?: { prev: () => void } }).Reveal) {
+      (window as unknown as { Reveal: { prev: () => void } }).Reveal.prev()
     }
   }
 
-  const goToNext = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault()
-    event.stopPropagation()
-    if (typeof window !== "undefined") {
-      const reveal = (window as unknown as { Reveal?: { slide?: (h: number, v?: number) => void; next?: () => void } }).Reveal
-      if (reveal?.slide) {
-        reveal.slide(Math.min(totalSlides - 1, slideNumber), 0)
-        return
-      }
-      reveal?.next?.()
+  const goToNext = () => {
+    if (typeof window !== "undefined" && (window as unknown as { Reveal?: { next: () => void } }).Reveal) {
+      (window as unknown as { Reveal: { next: () => void } }).Reveal.next()
     }
   }
 
   return (
-    <div className="mt-auto pt-3 flex justify-end items-center gap-3 relative z-30 pointer-events-auto">
+    <div className="mt-auto pt-2 flex justify-end items-center gap-3">
       <span className="text-slate-500 text-sm font-mono">{slideNumber}/{totalSlides}</span>
       <button
-        type="button"
         onClick={goToPrev}
         disabled={slideNumber === 1}
-        className="px-3 py-2 rounded-lg bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1 transition-all border border-slate-200 shadow-sm text-sm font-medium text-slate-700"
+        className="px-3 py-2 rounded-lg bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 transition-all border border-slate-200 shadow-sm text-sm font-medium text-slate-700"
       >
         <ChevronLeft className="w-4 h-4" />
         Anterior
       </button>
       <button
-        type="button"
         onClick={goToNext}
         disabled={slideNumber === totalSlides}
-        className="px-3 py-2 rounded-lg bg-teal-500 hover:bg-teal-600 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1 transition-all shadow-sm text-sm font-medium text-white"
+        className="px-3 py-2 rounded-lg bg-teal-500 hover:bg-teal-600 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 transition-all shadow-sm text-sm font-medium text-white"
       >
         Siguiente
         <ChevronRight className="w-4 h-4" />
@@ -115,7 +99,6 @@ function SlideNavigation({ slideNumber, totalSlides }: { slideNumber: number; to
 
 /* ─────────────────────────────────────────────
    TITLE SLIDE
-   Participantes: portada general del equipo Los Ingenieros
 ───────────────────────────────────────────── */
 export function TitleSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
   const [tick, setTick] = useState(0)
@@ -138,7 +121,8 @@ export function TitleSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
   const pipelineColors = ["#0d9488", "#7c3aed", "#db2777", "#ea580c", "#16a34a"]
 
   return (
-    <div className="w-full h-full flex flex-col bg-gradient-to-br from-slate-50 via-white to-teal-50 relative overflow-hidden">
+    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-teal-50 relative overflow-hidden">
+      {/* Subtle grid background */}
       <div
         className="absolute inset-0 opacity-30"
         style={{
@@ -147,67 +131,65 @@ export function TitleSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
         }}
       />
 
-      <div className="relative z-10 pt-12 px-12">
-        <div className="flex justify-center flex-wrap gap-4">
-          {stages.map((stage, i) => {
-            const isActive = (tick + i) % 8 < 5
-            return (
-              <div key={stage} className="flex items-center gap-4">
-                <div
-                  className="w-16 h-16 rounded-xl flex items-center justify-center font-bold text-lg transition-all duration-300 border-2 shadow-lg"
-                  style={{
-                    backgroundColor: isActive ? pipelineColors[i] : "white",
-                    borderColor: pipelineColors[i],
-                    color: isActive ? "white" : pipelineColors[i],
-                    boxShadow: isActive ? `0 8px 30px ${pipelineColors[i]}40` : "0 4px 15px rgba(0,0,0,0.1)",
-                    transform: isActive ? "scale(1.08) translateY(-4px)" : "scale(1)",
-                  }}
-                >
-                  {stage}
-                </div>
-                {i < stages.length - 1 && (
-                  <ChevronRight
-                    className="w-6 h-6 transition-all duration-300"
-                    style={{ color: pipelineColors[i], opacity: isActive ? 1 : 0.4 }}
-                  />
-                )}
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
-      <div className="relative z-10 flex-1 flex items-center">
-        <div className="max-w-5xl w-full px-16 space-y-8">
-          <div className="space-y-5">
-            <div className="text-teal-600 font-mono text-sm tracking-widest uppercase font-semibold">
-              Arquitectura del Computador - Proyecto Final
-            </div>
-            <h1 className="text-5xl font-bold text-slate-800 leading-tight">
-              Comparador de Rendimiento:
-              <br />
-              <span className="text-teal-600">Procesador Monociclo</span>
-              <br />
-              vs <span className="text-purple-600">Procesador Segmentado (Pipeline de 5 Etapas)</span>
-            </h1>
-            <div className="h-1.5 w-32 bg-gradient-to-r from-teal-500 to-purple-500 rounded-full" />
-          </div>
-
-          <div className="flex gap-3 flex-wrap mt-10">
-            {members.map((m) => (
-              <span
-                key={m}
-                className="text-sm font-medium text-slate-600 border border-slate-300 px-4 py-2 rounded-full bg-white/80 shadow-sm hover:border-teal-400 hover:text-teal-700 transition-all"
+      {/* Animated pipeline stages at top */}
+      <div className="absolute top-20 left-1/2 -translate-x-1/2 flex gap-4">
+        {stages.map((stage, i) => {
+          const isActive = (tick + i) % 8 < 5
+          return (
+            <div key={stage} className="flex items-center gap-4">
+              <div
+                className="w-16 h-16 rounded-xl flex items-center justify-center font-bold text-lg transition-all duration-300 border-2 shadow-lg"
+                style={{
+                  backgroundColor: isActive ? pipelineColors[i] : "white",
+                  borderColor: pipelineColors[i],
+                  color: isActive ? "white" : pipelineColors[i],
+                  boxShadow: isActive ? `0 8px 30px ${pipelineColors[i]}40` : "0 4px 15px rgba(0,0,0,0.1)",
+                  transform: isActive ? "scale(1.08) translateY(-4px)" : "scale(1)",
+                }}
               >
-                {m}
-              </span>
-            ))}
-          </div>
-
-          <div className="text-slate-400 text-sm font-semibold mt-6 tracking-wide">Los Ingenieros</div>
-        </div>
+                {stage}
+              </div>
+              {i < stages.length - 1 && (
+                <ChevronRight
+                  className="w-6 h-6 transition-all duration-300"
+                  style={{ color: pipelineColors[i], opacity: isActive ? 1 : 0.4 }}
+                />
+              )}
+            </div>
+          )
+        })}
       </div>
 
+      <div className="max-w-5xl w-full px-16 space-y-8 z-10">
+        <div className="space-y-5">
+          <div className="text-teal-600 font-mono text-sm tracking-widest uppercase font-semibold">
+            Arquitectura del Computador - Proyecto Final
+          </div>
+          <h1 className="text-5xl font-bold text-slate-800 leading-tight">
+            Comparador de Rendimiento:
+            <br />
+            <span className="text-teal-600">Procesador Monociclo</span>
+            <br />
+            vs <span className="text-purple-600">Pipeline de 5 Etapas</span>
+          </h1>
+          <div className="h-1.5 w-32 bg-gradient-to-r from-teal-500 to-purple-500 rounded-full" />
+        </div>
+
+        <div className="flex gap-3 flex-wrap mt-10">
+          {members.map((m) => (
+            <span
+              key={m}
+              className="text-sm font-medium text-slate-600 border border-slate-300 px-4 py-2 rounded-full bg-white/80 shadow-sm hover:border-teal-400 hover:text-teal-700 transition-all"
+            >
+              {m}
+            </span>
+          ))}
+        </div>
+
+        <div className="text-slate-400 text-sm font-semibold mt-6 tracking-wide">Los Ingenieros</div>
+      </div>
+
+      {/* Floating formulas */}
       <div className="absolute bottom-28 right-20 text-right space-y-3 opacity-60">
         <div className="font-mono text-teal-600 text-sm bg-white/80 px-4 py-2 rounded-lg shadow-sm">
           T_CPU = I × CPI × T_ciclo
@@ -224,7 +206,6 @@ export function TitleSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
 
 /* ─────────────────────────────────────────────
    SLIDE 1: ALGENIS - Medición de Rendimiento
-   Participante: Algenis De los Santos Lopez
    REAL-TIME CPU SIMULATOR with animation
 ───────────────────────────────────────────── */
 type SimulationState = 'idle' | 'running' | 'paused' | 'completed'
@@ -737,9 +718,8 @@ export function AlgenisSlide({ isPrintMode = false }: { isPrintMode?: boolean })
   )
 }
 
-/* ─────────────────────────────────────────────
+/* ─────────────────────��─────────��─────────�������───
    SLIDE 2: CHRISTOPHER - Procesador Monociclo
-   Participante: Christopher Enrique Marrero Liriano
    REDESIGNED: Cleaner, more visual, less text
 ───────────────────────────────────────────── */
 const MONOCYCLE_INSTRUCTIONS = [
@@ -1052,8 +1032,7 @@ export function ChristopherSlide({ isPrintMode = false }: { isPrintMode?: boolea
 
 /* ─────────────────────────────────────────────
    SLIDE 3: ENMANUEL - Pipeline de 5 Etapas
-   Participante: Enmanuel Santos Diaz
-───────────────────────────────────────────── */
+──────────────────────��────────────────────── */
 const PIPELINE_STAGES = ["IF", "ID", "EX", "MEM", "WB"]
 const STAGE_COLORS = {
   IF: "#0d9488",
@@ -1686,7 +1665,6 @@ export function EnmanuelSlide({ isPrintMode = false }: { isPrintMode?: boolean }
 
 /* ─────────────────────────────────────────────
    SLIDE 4: FRAINER - Comparación y Speedup
-   Participante: Frainer Encarnacion
    Advanced Multi-Tab Simulation Dashboard
 ───────────────────────────────────────────── */
 
@@ -3184,9 +3162,8 @@ export function FrainerSlide({ isPrintMode = false }: { isPrintMode?: boolean })
 
 /* ─────────────────────────────────────────────
    SLIDE 5: OLIVER - Limitaciones del Pipeline
-   Participante: Oliver Abreu Mateo
    Interactive Simulator with 3 Scenarios
-───────────────────────────────────────────── */
+  ─��─────────────────────────────────────────── */
 
 type PipelineScenario = "normal" | "data" | "control"
 
@@ -3533,7 +3510,6 @@ export function OliverSlide({ isPrintMode = false }: { isPrintMode?: boolean }) 
 
 /* ─────────────────────────────────────────────
    GRACIAS SLIDE (replaces Conclusiones)
-   Participantes: cierre general del equipo Los Ingenieros
 ───────────────────────────────────────────── */
 export function GraciasSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
   const members = [
@@ -3584,21 +3560,21 @@ export function GraciasSlide({ isPrintMode = false }: { isPrintMode?: boolean })
   )
 }
 
-/* ─────────────────────────────────────────────
+/* ──────��──────────────────────────────────────
    QR SLIDE - Remote Control
-   Participantes: apoyo general para control de la presentacion
 ───────────────────────────────────────────── */
 export function QRSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
   const [qrDataUrl, setQrDataUrl] = useState("")
   const [remoteUrl, setRemoteUrl] = useState("")
-  const [hasRestrictedOrigin, setHasRestrictedOrigin] = useState(false)
+  const [isPreview, setIsPreview] = useState(false)
 
   useEffect(() => {
     if (typeof window === "undefined") return
     const baseUrl = window.location.origin
     const url = `${baseUrl}/remote`
     setRemoteUrl(url)
-    setHasRestrictedOrigin(baseUrl.includes("vusercontent.net"))
+    // Check if we're in v0 preview (vusercontent.net) which requires auth
+    setIsPreview(baseUrl.includes("vusercontent.net") || baseUrl.includes("localhost"))
 
     QRCode.toDataURL(url, {
       width: 300,
@@ -3621,26 +3597,26 @@ export function QRSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
         <h2 className="text-3xl font-bold text-slate-800">Control Remoto</h2>
       </div>
 
-      {hasRestrictedOrigin ? (
+      {isPreview ? (
         <div className="z-10 max-w-xl text-center">
           <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-6 mb-6">
             <div className="flex items-center justify-center gap-2 mb-3">
               <div className="w-3 h-3 bg-amber-400 rounded-full animate-pulse"></div>
-              <span className="font-semibold text-amber-700">Acceso restringido</span>
+              <span className="font-semibold text-amber-700">Modo Preview</span>
             </div>
             <p className="text-amber-800 text-sm mb-4">
-              El control remoto no funcionara desde esta URL porque requiere autenticacion para acceder al sitio.
+              El control remoto no funcionara desde el preview porque requiere autenticacion de v0.
             </p>
             <div className="bg-white rounded-xl p-4 border border-amber-200">
               <p className="text-slate-700 text-sm font-medium mb-2">Para usar el control remoto:</p>
               <ol className="text-left text-sm text-slate-600 space-y-2">
                 <li className="flex items-start gap-2">
                   <span className="bg-indigo-100 text-indigo-700 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shrink-0">1</span>
-                  <span>Abre la version publica del proyecto</span>
+                  <span>Haz clic en <strong>&quot;Publish&quot;</strong> en la esquina superior derecha</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="bg-indigo-100 text-indigo-700 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shrink-0">2</span>
-                  <span>Verifica que la presentacion principal este abierta en esa misma URL</span>
+                  <span>Espera que se despliegue en Vercel</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="bg-indigo-100 text-indigo-700 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shrink-0">3</span>
@@ -3653,7 +3629,7 @@ export function QRSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
           <div className="opacity-50">
             <div className="bg-white rounded-3xl shadow-xl p-6 border border-slate-200 inline-block">
               {qrDataUrl ? (
-                <img src={qrDataUrl} alt="QR para control remoto" className="w-48 h-48" />
+                <img src={qrDataUrl} alt="QR (solo funciona despues de publicar)" className="w-48 h-48" />
               ) : (
                 <div className="w-48 h-48 bg-slate-100 rounded-xl animate-pulse" />
               )}
