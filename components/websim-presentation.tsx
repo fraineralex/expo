@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { FileDown } from "lucide-react"
 import Reveal from "reveal.js"
 import "reveal.js/dist/reveal.css"
 
@@ -38,6 +39,10 @@ export default function WebSimPresentation() {
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [])
+
+  const handleExportPDF = () => {
+    window.open("/print", "_blank")
+  }
 
   useEffect(() => {
     if (!deckRef.current || revealRef.current) return
@@ -110,6 +115,18 @@ export default function WebSimPresentation() {
 
   return (
     <div style={{ position: isPrintMode ? "relative" : "fixed", inset: isPrintMode ? undefined : 0, overflow: isPrintMode ? "visible" : "hidden" }}>
+      {/* Export PDF Button - only show in presentation mode */}
+      {!isPrintMode && (
+        <button
+          onClick={handleExportPDF}
+          className="fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-2 bg-white/90 hover:bg-white text-slate-700 rounded-lg shadow-lg border border-slate-200 transition-all hover:shadow-xl"
+          title="Exportar a PDF"
+        >
+          <FileDown className="w-4 h-4" />
+          <span className="text-sm font-medium">Exportar PDF</span>
+        </button>
+      )}
+      
       <div className="reveal" ref={deckRef} style={{ width: "100%", height: isPrintMode ? "auto" : "100%" }}>
         <div className="slides">
           {/* SLIDE 1: Portada */}
