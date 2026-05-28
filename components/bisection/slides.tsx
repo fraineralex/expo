@@ -1689,8 +1689,453 @@ export function AdvantagesSlide({ isPrintMode = false }: { isPrintMode?: boolean
 }
 
 /* ─────────────────────────────────────────────
-   SLIDE 7 — ENMANUEL: DEBILIDADES DEL METODO
+   SLIDE 7 — VENTAJAS DEL METODO DE BISECCION
 ───────────────────────────────────────────── */
+export function StrengthsSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
+  const [activeStrength, setActiveStrength] = useState<number>(0)
+  
+  // Demo states for each advantage
+  const [convergenceStep, setConvergenceStep] = useState(0)
+  const [codeHighlight, setCodeHighlight] = useState(0)
+  const [contextDemo, setContextDemo] = useState(0)
+  const [errorCalcN, setErrorCalcN] = useState(5)
+
+  const strengths = [
+    {
+      title: "Resultado Confiable",
+      description: "Si el intervalo inicial es correcto, el metodo reduce el rango paso a paso hasta acercarse a la solucion.",
+      color: "bg-emerald-500",
+      icon: "01"
+    },
+    {
+      title: "Facil de Implementar",
+      description: "Su logica es simple: dividir el intervalo, evaluar y repetir.",
+      color: "bg-cyan-500",
+      icon: "02"
+    },
+    {
+      title: "Estable en la Ejecucion",
+      description: "Funciona de forma estable en distintos tipos de problemas computacionales.",
+      color: "bg-violet-500",
+      icon: "03"
+    },
+    {
+      title: "Precision Controlable",
+      description: "Permite estimar el error y decidir cuantas iteraciones usar.",
+      color: "bg-amber-500",
+      icon: "04"
+    }
+  ]
+
+  // Convergence demo - system limit search
+  const convergenceSteps = [
+    { a: 0, b: 100, m: 50, label: "Buscando limite del sistema...", found: false },
+    { a: 50, b: 100, m: 75, label: "El punto critico esta arriba", found: false },
+    { a: 50, b: 75, m: 62.5, label: "Reduciendo el rango", found: false },
+    { a: 62.5, b: 75, m: 68.75, label: "Acercandose al limite", found: false },
+    { a: 68.75, b: 75, m: 71.87, label: "Punto critico encontrado!", found: true },
+  ]
+
+  // Code demo
+  const codeLines = [
+    { code: "def biseccion(f, a, b, tol):", highlight: false },
+    { code: "    while (b - a) > tol:", highlight: false },
+    { code: "        m = (a + b) / 2", highlight: false },
+    { code: "        if f(a) * f(m) < 0:", highlight: false },
+    { code: "            b = m", highlight: false },
+    { code: "        else:", highlight: false },
+    { code: "            a = m", highlight: false },
+    { code: "    return m", highlight: false },
+  ]
+
+  // Context demos - different applications
+  const contexts = [
+    { 
+      name: "Rendimiento", 
+      icon: "CPU",
+      desc: "Encontrar carga maxima de un servidor",
+      example: "Buscar cuando el CPU llega al 100%",
+      color: "bg-blue-500"
+    },
+    { 
+      name: "Temperatura", 
+      icon: "TEMP",
+      desc: "Detectar punto de sobrecalentamiento",
+      example: "Buscar temperatura critica del sistema",
+      color: "bg-red-500"
+    },
+    { 
+      name: "Costo", 
+      icon: "$",
+      desc: "Optimizar gastos de infraestructura",
+      example: "Buscar punto de equilibrio financiero",
+      color: "bg-green-500"
+    },
+    { 
+      name: "Error", 
+      icon: "ERR",
+      desc: "Encontrar tasa de error aceptable",
+      example: "Buscar umbral de tolerancia",
+      color: "bg-orange-500"
+    },
+  ]
+
+  useEffect(() => {
+    if (activeStrength === 0 && !isPrintMode) {
+      const timer = setInterval(() => {
+        setConvergenceStep(prev => (prev + 1) % convergenceSteps.length)
+      }, 1800)
+      return () => clearInterval(timer)
+    }
+    if (activeStrength === 1 && !isPrintMode) {
+      const timer = setInterval(() => {
+        setCodeHighlight(prev => (prev + 1) % codeLines.length)
+      }, 1200)
+      return () => clearInterval(timer)
+    }
+    if (activeStrength === 2 && !isPrintMode) {
+      const timer = setInterval(() => {
+        setContextDemo(prev => (prev + 1) % contexts.length)
+      }, 2500)
+      return () => clearInterval(timer)
+    }
+  }, [activeStrength, isPrintMode])
+
+  const renderDemo = () => {
+    switch (activeStrength) {
+      case 0: // Resultado Confiable
+        const step = convergenceSteps[convergenceStep]
+        const targetPoint = 71.87
+        return (
+          <div className="h-full flex flex-col">
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <div className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-medium">
+                Buscando el limite del sistema
+              </div>
+            </div>
+            
+            <div className="flex-1 flex flex-col justify-center px-2">
+              {/* Visual number line */}
+              <div className="relative h-20 bg-slate-50 rounded-xl border border-slate-200 mx-2 mb-4">
+                {/* Scale markers */}
+                <div className="absolute bottom-2 left-0 w-full flex justify-between px-4 text-xs text-slate-400">
+                  <span>0%</span>
+                  <span>25%</span>
+                  <span>50%</span>
+                  <span>75%</span>
+                  <span>100%</span>
+                </div>
+                
+                {/* Target indicator */}
+                <div 
+                  className="absolute top-3 h-8 w-1 bg-red-400 rounded"
+                  style={{ left: `calc(${targetPoint}% - 2px)` }}
+                >
+                  <div className="absolute -top-5 left-1/2 -translate-x-1/2 text-xs text-red-500 whitespace-nowrap font-medium">
+                    Punto Critico
+                  </div>
+                </div>
+                
+                {/* Search interval */}
+                <div 
+                  className="absolute top-5 h-4 bg-emerald-400/60 rounded transition-all duration-700"
+                  style={{
+                    left: `${step.a}%`,
+                    width: `${step.b - step.a}%`
+                  }}
+                />
+                
+                {/* Midpoint marker */}
+                <div 
+                  className={`absolute top-4 w-3 h-6 rounded transition-all duration-700 ${step.found ? "bg-emerald-600" : "bg-emerald-500"}`}
+                  style={{ left: `calc(${step.m}% - 6px)` }}
+                />
+              </div>
+
+              {/* Step info cards */}
+              <div className="grid grid-cols-3 gap-2 mx-2 mb-3">
+                <div className="bg-white rounded-lg p-2 border border-slate-200 text-center">
+                  <div className="text-xs text-slate-500">Limite Inferior</div>
+                  <div className="font-mono font-bold text-slate-800">{step.a}%</div>
+                </div>
+                <div className={`rounded-lg p-2 border text-center ${step.found ? "bg-emerald-50 border-emerald-300" : "bg-emerald-50/50 border-emerald-200"}`}>
+                  <div className="text-xs text-emerald-600">Punto Medio</div>
+                  <div className="font-mono font-bold text-emerald-700">{step.m}%</div>
+                </div>
+                <div className="bg-white rounded-lg p-2 border border-slate-200 text-center">
+                  <div className="text-xs text-slate-500">Limite Superior</div>
+                  <div className="font-mono font-bold text-slate-800">{step.b}%</div>
+                </div>
+              </div>
+
+              {/* Status message */}
+              <div className={`mx-2 p-2 rounded-lg text-center text-sm font-medium ${
+                step.found 
+                  ? "bg-emerald-100 text-emerald-700 border border-emerald-300" 
+                  : "bg-slate-100 text-slate-600"
+              }`}>
+                {step.label}
+              </div>
+            </div>
+
+            {/* Progress indicator */}
+            <div className="flex justify-center gap-1.5 mt-2">
+              {convergenceSteps.map((_, i) => (
+                <div 
+                  key={i} 
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    i === convergenceStep ? "w-6 bg-emerald-500" : "w-1.5 bg-slate-300"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        )
+
+      case 1: // Facil de Implementar
+        return (
+          <div className="h-full flex flex-col">
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <div className="px-3 py-1 bg-cyan-100 text-cyan-700 rounded-full text-xs font-medium">
+                Pocas lineas de codigo
+              </div>
+            </div>
+            
+            <div className="flex-1 bg-slate-900 rounded-xl p-4 font-mono text-sm overflow-hidden mx-2">
+              <div className="flex items-center gap-2 mb-3 pb-2 border-b border-slate-700">
+                <div className="w-3 h-3 rounded-full bg-red-500" />
+                <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                <div className="w-3 h-3 rounded-full bg-green-500" />
+                <span className="text-slate-500 text-xs ml-2">biseccion.py</span>
+              </div>
+              {codeLines.map((line, i) => (
+                <div 
+                  key={i}
+                  className={`py-1 px-2 rounded transition-all duration-300 flex items-center gap-3 ${
+                    i === codeHighlight ? "bg-cyan-500/20" : ""
+                  }`}
+                >
+                  <span className="text-slate-600 w-4 text-right text-xs">{i + 1}</span>
+                  <span className={i === codeHighlight ? "text-cyan-300" : "text-slate-400"}>
+                    {line.code}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-3 mx-2 p-3 bg-cyan-50 rounded-xl border border-cyan-200">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-cyan-500 rounded-lg flex items-center justify-center text-white font-bold">
+                  8
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-cyan-800">Solo 8 lineas</p>
+                  <p className="text-xs text-cyan-600">Sin librerias externas, sin derivadas, sin complicaciones</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+
+      case 2: // Estable en la Ejecucion
+        const ctx = contexts[contextDemo]
+        return (
+          <div className="h-full flex flex-col">
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <div className="px-3 py-1 bg-violet-100 text-violet-700 rounded-full text-xs font-medium">
+                Multiples aplicaciones en software
+              </div>
+            </div>
+            
+            <div className="flex-1 flex flex-col justify-center px-2">
+              {/* Context card */}
+              <div className={`p-5 rounded-2xl border-2 transition-all duration-500 ${
+                ctx.color === "bg-blue-500" ? "bg-blue-50 border-blue-300" :
+                ctx.color === "bg-red-500" ? "bg-red-50 border-red-300" :
+                ctx.color === "bg-green-500" ? "bg-green-50 border-green-300" :
+                "bg-orange-50 border-orange-300"
+              }`}>
+                <div className="flex items-center gap-4 mb-4">
+                  <div className={`w-14 h-14 ${ctx.color} rounded-xl flex items-center justify-center text-white font-bold text-lg`}>
+                    {ctx.icon}
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-bold text-slate-800">{ctx.name}</h4>
+                    <p className="text-sm text-slate-600">{ctx.desc}</p>
+                  </div>
+                </div>
+                <div className="bg-white/70 rounded-lg p-3 border border-slate-200">
+                  <p className="text-sm text-slate-700 text-center">{ctx.example}</p>
+                </div>
+              </div>
+
+              {/* Context selector */}
+              <div className="grid grid-cols-4 gap-2 mt-4">
+                {contexts.map((c, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setContextDemo(i)}
+                    className={`p-2 rounded-lg text-center transition-all ${
+                      i === contextDemo 
+                        ? `${c.color} text-white shadow-md` 
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    <div className="text-xs font-medium">{c.name}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-3 mx-2 p-2 bg-violet-50 rounded-lg border border-violet-200 text-center">
+              <p className="text-xs text-violet-700">
+                El mismo algoritmo funciona para <strong>cualquier</strong> problema de busqueda
+              </p>
+            </div>
+          </div>
+        )
+
+      case 3: // Precision Controlable
+        const errorAfterN = (100 / Math.pow(2, errorCalcN)).toFixed(4)
+        const precisionPercent = Math.min(100, (errorCalcN / 20) * 100)
+        return (
+          <div className="h-full flex flex-col">
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <div className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium">
+                Mas iteraciones = Mas precision
+              </div>
+            </div>
+            
+            <div className="flex-1 flex flex-col justify-center px-2">
+              {/* Formula card */}
+              <div className="bg-white rounded-xl p-4 border border-amber-200 text-center mb-4 shadow-sm">
+                <p className="text-xs text-slate-500 mb-1">Formula del error maximo</p>
+                <p className="text-xl font-mono font-bold text-amber-600">
+                  Error ≤ (b - a) / 2<sup>n</sup>
+                </p>
+              </div>
+
+              {/* Interactive calculator */}
+              <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-sm font-medium text-slate-700">Iteraciones (n):</span>
+                  <div className="flex items-center gap-3">
+                    <button 
+                      onClick={() => setErrorCalcN(Math.max(1, errorCalcN - 1))}
+                      className="w-8 h-8 bg-amber-200 rounded-lg text-amber-700 font-bold hover:bg-amber-300 transition-colors"
+                    >
+                      -
+                    </button>
+                    <span className="w-10 text-center font-bold text-xl text-amber-600">{errorCalcN}</span>
+                    <button 
+                      onClick={() => setErrorCalcN(Math.min(20, errorCalcN + 1))}
+                      className="w-8 h-8 bg-amber-200 rounded-lg text-amber-700 font-bold hover:bg-amber-300 transition-colors"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                {/* Precision bar */}
+                <div className="mb-4">
+                  <div className="flex justify-between text-xs text-slate-500 mb-1">
+                    <span>Precision</span>
+                    <span>{precisionPercent.toFixed(0)}%</span>
+                  </div>
+                  <div className="h-3 bg-slate-200 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-amber-400 to-amber-600 rounded-full transition-all duration-300"
+                      style={{ width: `${precisionPercent}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-lg p-3 text-center border border-amber-200">
+                  <p className="text-xs text-slate-500">Con intervalo inicial [0, 100]:</p>
+                  <p className="text-2xl font-mono font-bold text-amber-600 mt-1">
+                    Error ≤ {errorAfterN}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    El rango se divide en {Math.pow(2, errorCalcN).toLocaleString()} partes
+                  </p>
+                </div>
+              </div>
+
+              {/* Quick presets */}
+              <div className="grid grid-cols-4 gap-2 mt-3">
+                {[5, 10, 15, 20].map(n => (
+                  <button
+                    key={n}
+                    onClick={() => setErrorCalcN(n)}
+                    className={`py-2 rounded-lg text-xs font-medium transition-all ${
+                      errorCalcN === n 
+                        ? "bg-amber-500 text-white shadow-md" 
+                        : "bg-white text-slate-600 border border-slate-200 hover:border-amber-300"
+                    }`}
+                  >
+                    n = {n}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )
+
+      default:
+        return null
+    }
+  }
+
+  return (
+    <div className="w-full h-full flex flex-col bg-gradient-to-br from-slate-50 via-white to-emerald-50/30 relative overflow-hidden p-4">
+      {/* Header */}
+      <div className="text-center mb-3">
+        <h2 className="text-2xl font-bold text-slate-900 mb-1">
+          Ventajas del Metodo de <span className="text-emerald-500">Biseccion</span>
+        </h2>
+        <p className="text-slate-500 text-xs">
+          Selecciona cada ventaja para ver una demostracion interactiva
+        </p>
+      </div>
+
+      <div className="flex-1 flex gap-4 overflow-hidden">
+        {/* Left: Advantage cards */}
+        <div className="w-60 flex flex-col gap-2">
+          {strengths.map((s, i) => (
+            <button
+              key={i}
+              onClick={() => setActiveStrength(i)}
+              className={`text-left p-3 rounded-xl transition-all duration-300 ${
+                activeStrength === i 
+                  ? "bg-white shadow-lg border-2 border-emerald-400 scale-[1.02]" 
+                  : "bg-white/60 border border-slate-200 hover:bg-white hover:shadow-md"
+              }`}
+            >
+              <div className="flex items-start gap-3">
+                <div className={`w-9 h-9 ${s.color} rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0`}>
+                  {s.icon}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-slate-900 text-sm leading-tight">{s.title}</h3>
+                  <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{s.description}</p>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+
+        {/* Right: Demo area */}
+        <div className="flex-1 bg-white rounded-2xl shadow-lg border border-slate-200 p-4 overflow-hidden">
+          {renderDemo()}
+        </div>
+      </div>
+    </div>
+  )
+}
+  
+  /* ─────────────────────────────────────────────
+  SLIDE 8 — ENMANUEL: DEBILIDADES DEL METODO
+  ───────────────────────────────────────────── */
 export function WeaknessesSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
   const [activeDemo, setActiveDemo] = useState<string | null>(null)
   const [demoStep, setDemoStep] = useState(0)
@@ -1757,7 +2202,7 @@ export function WeaknessesSlide({ isPrintMode = false }: { isPrintMode?: boolean
     <div className="w-full h-full flex flex-col bg-gradient-to-br from-slate-50 via-white to-red-50 relative overflow-hidden p-6">
       <div className="text-center mb-4">
         <h2 className="text-3xl font-bold text-slate-900 mb-1">
-          Debilidades del Metodo de <span className="text-red-500">Biseccion</span>
+          Desventajas del Metodo de <span className="text-red-500">Biseccion</span>
         </h2>
         <p className="text-slate-600 text-sm">
           Enmanuel &middot; Limitaciones y alternativas mas efectivas
@@ -2060,7 +2505,7 @@ export function WeaknessesSlide({ isPrintMode = false }: { isPrintMode?: boolean
   )
 }
 
-/* ─────────────────────────────────────────────
+/* ────���────────────────────────────────────────
    SLIDE 7 — CONCLUSION
 ───────────────────────────────────────────── */
 export function ConclusionSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {

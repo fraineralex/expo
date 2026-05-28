@@ -10,6 +10,7 @@ import {
   InstagramSearchSlide,
   AmazonFilterSlide,
   WhatsAppSlide,
+  StrengthsSlide,
   WeaknessesSlide,
   ConclusionSlide,
 } from "./bisection/slides"
@@ -26,11 +27,11 @@ export default function WebSimPresentation() {
     const printMode = urlParams.has("print-pdf")
     setIsPrintMode(printMode)
 
-    // Keyboard shortcut: Ctrl+P to open print-friendly version
+    // Keyboard shortcut: Ctrl+P to print directly
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === "p") {
         e.preventDefault()
-        window.open("/print", "_blank")
+        window.print()
       }
     }
 
@@ -136,12 +137,17 @@ export default function WebSimPresentation() {
             <WhatsAppSlide isPrintMode={isPrintMode} />
           </section>
 
-          {/* SLIDE 6: Elmer - Debilidades */}
+          {/* SLIDE 6: Ventajas del Metodo */}
+          <section data-transition="slide">
+            <StrengthsSlide isPrintMode={isPrintMode} />
+          </section>
+
+          {/* SLIDE 7: Elmer - Desventajas */}
           <section data-transition="slide">
             <WeaknessesSlide isPrintMode={isPrintMode} />
           </section>
 
-          {/* SLIDE 7: Conclusion */}
+          {/* SLIDE 8: Conclusion */}
           <section data-transition="zoom">
             <ConclusionSlide isPrintMode={isPrintMode} />
           </section>
@@ -235,43 +241,65 @@ export default function WebSimPresentation() {
         }
 
         /* ============================================
-           PDF EXPORT STYLES (when ?print-pdf is in URL)
+           PRINT / PDF EXPORT STYLES
            ============================================ */
         
-        /* PDF mode: each slide becomes a page */
         @media print {
-          html, body {
+          @page {
+            size: landscape;
+            margin: 0;
+          }
+
+          html, body, #__next {
             width: 100% !important;
-            height: 100% !important;
+            height: auto !important;
             overflow: visible !important;
-            background: #f8fafc !important;
+            background: white !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
             color-adjust: exact !important;
           }
 
+          /* Hide export button and navigation */
+          button[title="Exportar a PDF"],
+          .reveal .controls,
+          .reveal .progress,
+          .reveal .slide-number,
+          .reveal .pause-overlay,
+          .reveal .backgrounds,
+          .reveal .navigate-left,
+          .reveal .navigate-right {
+            display: none !important;
+            visibility: hidden !important;
+          }
+
           .reveal {
             overflow: visible !important;
+            position: relative !important;
           }
 
           .reveal .slides {
             width: 100% !important;
             height: auto !important;
             overflow: visible !important;
-            position: static !important;
+            position: relative !important;
             transform: none !important;
+            top: 0 !important;
+            left: 0 !important;
           }
 
           .reveal .slides > section {
             page-break-after: always !important;
             page-break-inside: avoid !important;
-            width: 100% !important;
+            break-after: page !important;
+            break-inside: avoid !important;
+            width: 100vw !important;
             height: 100vh !important;
             min-height: 100vh !important;
             max-height: 100vh !important;
             overflow: hidden !important;
             position: relative !important;
-            display: block !important;
+            display: flex !important;
             visibility: visible !important;
             opacity: 1 !important;
             transform: none !important;
@@ -280,7 +308,11 @@ export default function WebSimPresentation() {
             margin: 0 !important;
             padding: 0 !important;
             box-sizing: border-box !important;
-            background: #f8fafc !important;
+          }
+
+          .reveal .slides > section:last-child {
+            page-break-after: auto !important;
+            break-after: auto !important;
           }
 
           .reveal .slides > section > div {
@@ -289,26 +321,26 @@ export default function WebSimPresentation() {
             overflow: hidden !important;
           }
 
-          /* Hide navigation elements in print */
-          .reveal .controls,
-          .reveal .progress,
-          .reveal .slide-number,
-          .reveal .pause-overlay,
-          .reveal .backgrounds {
-            display: none !important;
-          }
-
-          /* Make all content visible */
+          /* Make all fragments visible */
           .reveal .slides section .fragment {
             opacity: 1 !important;
             visibility: visible !important;
           }
 
-          /* Preserve colors in print */
+          /* Preserve colors */
           * {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
             color-adjust: exact !important;
+          }
+
+          /* Force backgrounds to print */
+          .bg-gradient-to-br,
+          .bg-gradient-to-r,
+          .bg-gradient-to-b,
+          [class*="bg-"] {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
         }
       `}</style>
