@@ -5,6 +5,7 @@ import { Printer, ArrowLeft, FileDown } from "lucide-react"
 import {
   CoverSlide,
   BisectionVsBinarySlide,
+  PythonBinarySearchSlide,
   InstagramSearchSlide,
   AmazonFilterSlide,
   WhatsAppSlide,
@@ -28,12 +29,13 @@ export default function PrintPage() {
   const slides = [
     { id: 1, title: "Portada", component: CoverSlide },
     { id: 2, title: "Biseccion vs Binary Search", component: BisectionVsBinarySlide },
-    { id: 3, title: "Instagram Search", component: InstagramSearchSlide },
-    { id: 4, title: "Amazon Filter", component: AmazonFilterSlide },
-    { id: 5, title: "WhatsApp", component: WhatsAppSlide },
-    { id: 6, title: "Ventajas del Metodo", component: StrengthsSlide },
-    { id: 7, title: "Debilidades del Metodo", component: WeaknessesSlide },
-    { id: 8, title: "Conclusion", component: ConclusionSlide },
+    { id: 3, title: "Binary Search en Python", component: PythonBinarySearchSlide },
+    { id: 4, title: "Instagram Search", component: InstagramSearchSlide },
+    { id: 5, title: "Amazon Filter", component: AmazonFilterSlide },
+    { id: 6, title: "WhatsApp", component: WhatsAppSlide },
+    { id: 7, title: "Ventajas del Metodo", component: StrengthsSlide },
+    { id: 8, title: "Debilidades del Metodo", component: WeaknessesSlide },
+    { id: 9, title: "Conclusion", component: ConclusionSlide },
   ]
 
   return (

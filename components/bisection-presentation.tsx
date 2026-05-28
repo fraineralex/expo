@@ -7,6 +7,7 @@ import "reveal.js/dist/reveal.css"
 import {
   CoverSlide,
   BisectionVsBinarySlide,
+  PythonBinarySearchSlide,
   InstagramSearchSlide,
   AmazonFilterSlide,
   WhatsAppSlide,
@@ -121,27 +122,32 @@ export default function BisectionPresentation() {
             <BisectionVsBinarySlide isPrintMode={isPrintMode} />
           </section>
 
-          {/* SLIDE 3: Frainer - Instagram Search */}
+          {/* SLIDE 3: Binary Search en Python */}
+          <section data-transition="slide">
+            <PythonBinarySearchSlide isPrintMode={isPrintMode} />
+          </section>
+
+          {/* SLIDE 4: Frainer - Instagram Search */}
           <section data-transition="slide">
             <InstagramSearchSlide isPrintMode={isPrintMode} />
           </section>
 
-          {/* SLIDE 4: Enmanuel - Amazon Filter */}
+          {/* SLIDE 5: Enmanuel - Amazon Filter */}
           <section data-transition="slide">
             <AmazonFilterSlide isPrintMode={isPrintMode} />
           </section>
 
-          {/* SLIDE 5: Christopher - WhatsApp + Applications */}
+          {/* SLIDE 6: Christopher - WhatsApp + Applications */}
           <section data-transition="slide">
             <WhatsAppSlide isPrintMode={isPrintMode} />
           </section>
 
-          {/* SLIDE 6: Elmer - Debilidades */}
+          {/* SLIDE 7: Elmer - Debilidades */}
           <section data-transition="slide">
             <WeaknessesSlide isPrintMode={isPrintMode} />
           </section>
 
-          {/* SLIDE 7: Conclusion */}
+          {/* SLIDE 8: Conclusion */}
           <section data-transition="zoom">
             <ConclusionSlide isPrintMode={isPrintMode} />
           </section>

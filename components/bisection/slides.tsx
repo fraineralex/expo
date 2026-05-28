@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState, useCallback } from "react"
-import { Search, Globe, MessageCircle, ShoppingCart, User, ChevronRight, Play, RotateCcw, Check, Pause, Zap, AlertTriangle, XCircle, ArrowRight } from "lucide-react"
+import { Search, Globe, MessageCircle, ShoppingCart, User, ChevronRight, Play, RotateCcw, Check, Pause, Zap, AlertTriangle, XCircle, ArrowRight, Code } from "lucide-react"
 
 /* ─────────────────────────────────────────────
    SLIDE 1 — PORTADA
@@ -512,7 +512,317 @@ export function BisectionVsBinarySlide({ isPrintMode = false }: { isPrintMode?: 
 }
 
 /* ─────────────────────────────────────────────
-   SLIDE 3 — FRAINER: INSTAGRAM SEARCH
+   SLIDE 3 — FRAINER: BINARY SEARCH EN PYTHON
+───────────────────────────────────────────── */
+const pythonWords = [
+  "agenda","algoritmo","archivo","base","binario",
+  "biseccion","busqueda","cache","codigo","compilar",
+  "dato","depurar","descarga","dividir","ejecutar",
+  "encriptar","enlace","error","estructura","funcion",
+  "hardware","implementar","indice","informatica","internet",
+  "iteracion","kernel","libreria","lineal","logica",
+  "memoria","metodo","modulo","navegador","objetivo",
+  "optimizar","ordenar","parametro","pila","programa",
+  "protocolo","python","recursivo","red","rendimiento",
+  "servidor","software","variable","velocidad","web"
+]
+const pythonTarget = "python"
+
+type Step = {
+  lo: number; hi: number; mid: number
+  found: boolean; iterations: number
+  message: string; activeLine: number
+}
+
+export function PythonBinarySearchSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
+  const [range, setRange] = useState<[number, number]>([0, pythonWords.length - 1])
+  const [midIndex, setMidIndex] = useState(Math.floor(pythonWords.length / 2))
+  const [found, setFound] = useState(false)
+  const [isRunning, setIsRunning] = useState(false)
+  const [iterations, setIterations] = useState(0)
+  const [message, setMessage] = useState("Presiona 'Ejecutar' para iniciar la busqueda binaria")
+  const [activeLine, setActiveLine] = useState(-1)
+  const [steps, setSteps] = useState<Step[]>([])
+  const [stepIdx, setStepIdx] = useState(-1)
+  const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map())
+
+  const start = useCallback(() => {
+    const computedSteps: Step[] = []
+    let lo = 0
+    let hi = pythonWords.length - 1
+    let found = false
+    let iter = 0
+
+    while (!found) {
+      const mid = Math.floor((lo + hi) / 2)
+      const word = pythonWords[mid]
+
+      computedSteps.push({
+        lo, hi, mid, found: false, iterations: iter + 1,
+        message: `Paso: medio = (${lo} + ${hi}) // 2 = ${mid}. palabra[${mid}] = "${word}"`,
+        activeLine: 6
+      })
+
+      if (word === pythonTarget) {
+        computedSteps.push({
+          lo, hi, mid, found: true, iterations: iter + 1,
+          message: `"${word}" == "${pythonTarget}" → ENCONTRADO en indice ${mid}! Solo ${iter + 1} iteraciones!`,
+          activeLine: 9
+        })
+        found = true
+      } else {
+        const goRight = word < pythonTarget
+        if (goRight) {
+          lo = mid + 1
+          computedSteps.push({
+            lo, hi, mid, found: false, iterations: iter + 1,
+            message: `"${word}" < "${pythonTarget}" → descartamos izquierda. bajo = ${lo}`,
+            activeLine: 11
+          })
+        } else {
+          hi = mid - 1
+          computedSteps.push({
+            lo, hi, mid, found: false, iterations: iter + 1,
+            message: `"${word}" > "${pythonTarget}" → descartamos derecha. alto = ${hi}`,
+            activeLine: 13
+          })
+        }
+
+      }
+
+      iter++
+    }
+
+    setSteps(computedSteps)
+    setStepIdx(0)
+    setRange([0, pythonWords.length - 1])
+    setMidIndex(Math.floor((0 + pythonWords.length - 1) / 2))
+    setFound(false)
+    setIterations(0)
+    setActiveLine(6)
+    setMessage(computedSteps[0].message)
+    setIsRunning(true)
+  }, [])
+
+  const nextStep = useCallback(() => {
+    if (!isRunning || found) return
+    const nextIdx = stepIdx + 1
+    if (nextIdx >= steps.length) return
+    const s = steps[nextIdx]
+    setStepIdx(nextIdx)
+    setRange([s.lo, s.hi])
+    setMidIndex(s.mid)
+    setFound(s.found)
+    setIterations(s.iterations)
+    setActiveLine(s.activeLine)
+    setMessage(s.message)
+  }, [isRunning, found, stepIdx, steps])
+
+  const reset = useCallback(() => {
+    setIsRunning(false)
+    setRange([0, pythonWords.length - 1])
+    setMidIndex(Math.floor(pythonWords.length / 2))
+    setFound(false)
+    setIterations(0)
+    setMessage("Presiona 'Ejecutar' para iniciar la busqueda binaria")
+    setActiveLine(-1)
+    setSteps([])
+    setStepIdx(-1)
+  }, [])
+
+  useEffect(() => {
+    const el = itemRefs.current.get(midIndex)
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" })
+  }, [midIndex])
+
+  const [lo, hi] = range
+
+  const codeLines = [
+    { tokens: [{ t: "def", c: "text-purple-400" }, { t: " busqueda_binaria(", c: "text-yellow-200" }, { t: "lista", c: "text-sky-300" }, { t: ", ", c: "text-yellow-200" }, { t: "objetivo", c: "text-sky-300" }, { t: "):", c: "text-yellow-200" }], ln: 1 },
+    { tokens: [{ t: "    bajo", c: "text-sky-300" }, { t: " = ", c: "text-white" }, { t: "0", c: "text-orange-300" }, { t: "                          # limite inferior", c: "text-slate-500 italic" }], ln: 2 },
+    { tokens: [{ t: "    alto", c: "text-sky-300" }, { t: " = ", c: "text-white" }, { t: "len", c: "text-purple-400" }, { t: "(", c: "text-white" }, { t: "lista", c: "text-sky-300" }, { t: ") - ", c: "text-white" }, { t: "1", c: "text-orange-300" }, { t: "             # limite superior", c: "text-slate-500 italic" }], ln: 3 },
+    { blank: true, ln: 4 },
+    { tokens: [{ t: "    ", c: "text-white" }, { t: "while", c: "text-purple-400" }, { t: " bajo <= alto:", c: "text-white" }], ln: 5 },
+    { tokens: [{ t: "        medio", c: "text-sky-300" }, { t: " = (bajo + alto) // ", c: "text-white" }, { t: "2", c: "text-orange-300" }, { t: "    # punto medio (biseccion!)", c: "text-slate-500 italic" }], ln: 6 },
+    { blank: true, ln: 7 },
+    { tokens: [{ t: "        ", c: "text-white" }, { t: "if", c: "text-purple-400" }, { t: " lista[medio] == objetivo:", c: "text-white" }], ln: 8 },
+    { tokens: [{ t: "            ", c: "text-white" }, { t: "return", c: "text-purple-400" }, { t: " medio              # palabra encontrada", c: "text-white" }], ln: 9 },
+    { tokens: [{ t: "        ", c: "text-white" }, { t: "elif", c: "text-purple-400" }, { t: " lista[medio] < objetivo:", c: "text-white" }], ln: 10 },
+    { tokens: [{ t: "            bajo", c: "text-sky-300" }, { t: " = medio + ", c: "text-white" }, { t: "1", c: "text-orange-300" }, { t: "          # buscar en mitad derecha", c: "text-slate-500 italic" }], ln: 11 },
+    { tokens: [{ t: "        ", c: "text-white" }, { t: "else", c: "text-purple-400" }, { t: ":", c: "text-white" }], ln: 12 },
+    { tokens: [{ t: "            alto", c: "text-sky-300" }, { t: " = medio - ", c: "text-white" }, { t: "1", c: "text-orange-300" }, { t: "          # buscar en mitad izquierda", c: "text-slate-500 italic" }], ln: 13 },
+    { blank: true, ln: 14 },
+    { tokens: [{ t: "    ", c: "text-white" }, { t: "return", c: "text-purple-400" }, { t: " -", c: "text-white" }, { t: "1", c: "text-orange-300" }, { t: "                         # no encontrada", c: "text-slate-500 italic" }], ln: 15 },
+  ]
+
+  const hasNext = isRunning && !found && stepIdx < steps.length - 1
+
+  return (
+    <div className="w-full h-full flex bg-gradient-to-br from-slate-50 via-white to-cyan-50 relative overflow-hidden p-4">
+      <div className="flex-1 flex flex-col mr-4">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center">
+            <Code className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-slate-900">Binary Search en Python</h3>
+            <p className="text-sm text-slate-500">Frainer &middot; Implementacion paso a paso</p>
+          </div>
+        </div>
+
+        <div className={`rounded-xl p-3 mb-3 text-sm font-medium ${found ? "bg-green-50 border border-green-200 text-green-700" : "bg-cyan-50 border border-cyan-200 text-cyan-700"}`}>
+          <span>{message}</span>
+          {iterations > 0 && (
+            <span className="ml-3 text-xs text-slate-500">Paso {stepIdx}/{steps.length - 1}</span>
+          )}
+        </div>
+
+        <div className="flex-1 flex gap-4 overflow-hidden">
+          <div className="w-[45%] bg-slate-900 rounded-2xl shadow-lg border border-slate-700 overflow-hidden flex flex-col">
+            <div className="flex items-center gap-2 px-4 py-2 bg-slate-800 border-b border-slate-700">
+              <div className="w-3 h-3 rounded-full bg-red-500" />
+              <div className="w-3 h-3 rounded-full bg-yellow-500" />
+              <div className="w-3 h-3 rounded-full bg-green-500" />
+              <span className="text-slate-400 text-xs ml-2">busqueda_binaria.py</span>
+            </div>
+            <div className="flex-1 p-3 font-mono text-sm overflow-auto whitespace-pre">
+              {codeLines.map((line, i) => {
+                if (line.blank) {
+                  return <div key={i} className="h-6" />
+                }
+                const isActive = activeLine === line.ln
+                return (
+                  <div
+                    key={i}
+                    className={`flex items-center gap-3 py-1 px-2 rounded transition-all duration-300 ${isActive ? "bg-cyan-500/20 border-l-2 border-cyan-400" : ""}`}
+                  >
+                    <span className="text-slate-600 w-6 text-right text-xs shrink-0">{line.ln}</span>
+                    <span className={`whitespace-pre ${isActive ? "text-white" : "text-slate-300"}`}>
+                      {line.tokens.map((token, j) => (
+                        <span key={j} className={token.c}>{token.t}</span>
+                      ))}
+                    </span>
+                    {isActive && (
+                      <span className="ml-auto text-xs text-cyan-400 animate-pulse shrink-0">◄</span>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+            <div className="px-4 py-2 bg-slate-800 border-t border-slate-700 text-xs text-slate-400 text-center">
+              La funcion implementa el metodo de <span className="text-cyan-400 font-semibold">biseccion</span> sobre una lista ordenada
+            </div>
+          </div>
+
+          <div className="flex-1 flex flex-col">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 mb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Search className="w-4 h-4 text-slate-400" />
+                  <span className="text-sm text-slate-700">Buscando:</span>
+                  <span className="font-mono text-cyan-600 font-bold bg-cyan-50 px-2 py-0.5 rounded">&quot;{pythonTarget}&quot;</span>
+                </div>
+                <div className="text-xs text-slate-500">{pythonWords.length} palabras ordenadas</div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 mb-3">
+              <div className="flex justify-between text-xs text-slate-500 mb-2">
+                <span>Rango: [{lo} - {hi}]</span>
+                <span className="font-bold text-cyan-600">{hi - lo + 1} restantes</span>
+              </div>
+              <div className="h-4 bg-slate-100 rounded-full overflow-hidden relative">
+                <div
+                  className="absolute top-0 bottom-0 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full transition-all duration-700"
+                  style={{
+                    left: `${(lo / pythonWords.length) * 100}%`,
+                    width: `${((hi - lo + 1) / pythonWords.length) * 100}%`
+                  }}
+                />
+                <div
+                  className={`absolute top-0 bottom-0 w-0.5 transition-all duration-700 ${found ? "bg-green-500" : "bg-yellow-400"}`}
+                  style={{ left: `${(midIndex / pythonWords.length) * 100}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="flex-1 bg-white rounded-2xl shadow-lg border border-slate-200 overflow-y-auto">
+              <div className="p-2">
+                {pythonWords.map((word, i) => {
+                  const inRange = i >= lo && i <= hi
+                  const isMid = i === midIndex && isRunning && inRange
+                  const isFound = found && word === pythonTarget
+                  return (
+                    <div
+                      key={word}
+                      ref={(el) => {
+                        if (el) itemRefs.current.set(i, el)
+                      }}
+                      className={`flex items-center gap-3 px-3 py-1.5 rounded-xl mb-0.5 transition-all duration-500 ${isFound
+                        ? "bg-green-100 border-2 border-green-500 scale-[1.02]"
+                        : isMid
+                          ? "bg-cyan-100 border-2 border-cyan-500 scale-[1.02]"
+                          : inRange
+                            ? "bg-slate-50 hover:bg-slate-100"
+                            : "opacity-20 bg-slate-100"
+                        }`}
+                    >
+                      <span className="text-xs text-slate-400 w-10 font-mono shrink-0">[{i}]</span>
+                      <span className={`flex-1 font-mono text-sm ${isFound ? "text-green-700 font-bold" : isMid ? "text-cyan-700 font-bold" : "text-slate-900"}`}>
+                        {word}
+                      </span>
+                      {isFound && <Check className="w-4 h-4 text-green-500 shrink-0" />}
+                      {isMid && !isFound && (
+                        <span className="text-[10px] bg-cyan-500 text-white px-2 py-0.5 rounded-full animate-pulse shrink-0 font-medium">
+                          MID
+                        </span>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-center gap-3 mt-3">
+          {!isRunning ? (
+            <button
+              onClick={start}
+              className="px-8 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-full font-medium flex items-center gap-2 hover:opacity-90 transition-opacity shadow-lg shadow-cyan-200"
+            >
+              <Play className="w-4 h-4" />
+              Ejecutar
+            </button>
+          ) : hasNext ? (
+            <button
+              onClick={nextStep}
+              className="px-8 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-full font-medium flex items-center gap-2 hover:opacity-90 transition-opacity animate-pulse shadow-lg shadow-cyan-200"
+            >
+              <Play className="w-4 h-4" />
+              Continuar
+            </button>
+          ) : (
+            <div className="px-8 py-2.5 bg-green-500 text-white rounded-full font-medium flex items-center gap-2 shadow-lg shadow-green-200">
+              <Check className="w-4 h-4" />
+              {found ? "Encontrado!" : "Completado"}
+            </div>
+          )}
+          <button
+            onClick={reset}
+            className="px-6 py-2.5 bg-slate-200 text-slate-700 rounded-full font-medium flex items-center gap-2 hover:bg-slate-300 transition-colors"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Reiniciar
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ─────────────────────────────────────────────
+   SLIDE 4 — FRAINER: INSTAGRAM SEARCH
 ───────────────────────────────────────────── */
 const generateUsers = () => {
   const prefixes = [
@@ -812,7 +1122,7 @@ export function InstagramSearchSlide({ isPrintMode = false }: { isPrintMode?: bo
 }
 
 /* ─────────────────────────────────────────────
-   SLIDE 4 — ELMER: AMAZON PRODUCT FILTER
+   SLIDE 5 — ELMER: AMAZON PRODUCT FILTER
 ───────────────────────────────────────────── */
 const generateProducts = () => {
   const names = [
@@ -835,7 +1145,7 @@ const generateProducts = () => {
   return names.map((name, i) => ({
     id: i + 1,
     name,
-    price: 15 + i * 8 + Math.round(Math.random() * 5)
+    price: 15 + i * 8
   })).sort((a, b) => a.price - b.price)
 }
 
@@ -1088,7 +1398,7 @@ export function AmazonFilterSlide({ isPrintMode = false }: { isPrintMode?: boole
 }
 
 /* ─────────────────────────────────────────────
-   SLIDE 5 — CHRISTOPHER: WHATSAPP MESSAGE SEARCH
+   SLIDE 6 — CHRISTOPHER: WHATSAPP MESSAGE SEARCH
 ───────────────────────────────────────────── */
 const generateMessages = () => {
   const texts = [
@@ -1363,7 +1673,7 @@ export function WhatsAppSlide({ isPrintMode = false }: { isPrintMode?: boolean }
 }
 
 /* ─────────────────────────────────────────────
-   SLIDE 6 — CHRISTOPHER: VENTAJAS DEL METODO
+   SLIDE 7 — CHRISTOPHER: VENTAJAS DEL METODO
 ───────────────────────────────────────────── */
 export function AdvantagesSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
   const [activeDemo, setActiveDemo] = useState<string | null>(null)
@@ -1675,7 +1985,7 @@ export function AdvantagesSlide({ isPrintMode = false }: { isPrintMode?: boolean
 }
 
 /* ─────────────────────────────────────────────
-   SLIDE 7 — VENTAJAS DEL METODO DE BISECCION
+   SLIDE 8 — VENTAJAS DEL METODO DE BISECCION
 ───────────────────────────────────────────── */
 export function StrengthsSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
   const [activeStrength, setActiveStrength] = useState<number>(0)
@@ -2113,7 +2423,7 @@ export function StrengthsSlide({ isPrintMode = false }: { isPrintMode?: boolean 
 }
 
 /* ─────────────────────────────────────────────
-  SLIDE 8 — ENMANUEL: DESVENTAJAS DEL METODO
+  SLIDE 9 — ENMANUEL: DESVENTAJAS DEL METODO
   Versión responsive: no usa anchos fijos grandes,
   mantiene todo dentro del cuadro y adapta textos/animaciones.
 ───────────────────────────────────────────── */
@@ -2424,7 +2734,7 @@ export function WeaknessesSlide({ isPrintMode = false }: { isPrintMode?: boolean
 
 
 /* ────���────────────────────────────────────────
-   SLIDE 7 — CONCLUSION
+   SLIDE 10 — CONCLUSION
 ───────────────────────────────────────────── */
 export function ConclusionSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
   const [dataSize, setDataSize] = useState(1024)
