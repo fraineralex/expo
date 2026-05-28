@@ -106,10 +106,10 @@ export function CoverSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
                     <div
                       key={i}
                       className={`w-6 h-6 rounded-md transition-all duration-300 ${isFound
-                          ? "bg-green-500 scale-125 shadow-lg shadow-green-200"
-                          : isInRange
-                            ? "bg-blue-500 shadow-sm"
-                            : "bg-slate-200"
+                        ? "bg-green-500 scale-125 shadow-lg shadow-green-200"
+                        : isInRange
+                          ? "bg-blue-500 shadow-sm"
+                          : "bg-slate-200"
                         }`}
                     />
                   )
@@ -454,12 +454,12 @@ export function BisectionVsBinarySlide({ isPrintMode = false }: { isPrintMode?: 
                   <div
                     key={i}
                     className={`w-7 h-8 rounded text-xs flex items-center justify-center font-mono transition-all duration-500 ${isTarget
-                        ? "bg-green-500 text-white scale-125 shadow-lg"
-                        : isMid
-                          ? "bg-blue-500 text-white scale-110"
-                          : isInRange
-                            ? "bg-blue-100 text-blue-700"
-                            : "bg-slate-100 text-slate-300"
+                      ? "bg-green-500 text-white scale-125 shadow-lg"
+                      : isMid
+                        ? "bg-blue-500 text-white scale-110"
+                        : isInRange
+                          ? "bg-blue-100 text-blue-700"
+                          : "bg-slate-100 text-slate-300"
                       }`}
                   >
                     {val}
@@ -707,12 +707,12 @@ export function InstagramSearchSlide({ isPrintMode = false }: { isPrintMode?: bo
                     if (el) itemRefs.current.set(i, el)
                   }}
                   className={`flex items-center gap-3 p-2.5 rounded-xl mb-1 transition-all duration-500 ${isFound
-                      ? "bg-green-100 border-2 border-green-500 scale-[1.02]"
-                      : isMid
-                        ? "bg-pink-100 border-2 border-pink-500 scale-[1.02]"
-                        : isInRange
-                          ? "bg-slate-50"
-                          : "opacity-20 bg-slate-100"
+                    ? "bg-green-100 border-2 border-green-500 scale-[1.02]"
+                    : isMid
+                      ? "bg-pink-100 border-2 border-pink-500 scale-[1.02]"
+                      : isInRange
+                        ? "bg-slate-50"
+                        : "opacity-20 bg-slate-100"
                     }`}
                 >
                   <div className="text-xs text-slate-400 w-10 font-mono">[{i}]</div>
@@ -983,12 +983,12 @@ export function AmazonFilterSlide({ isPrintMode = false }: { isPrintMode?: boole
                 <div
                   key={product.id}
                   className={`flex items-center gap-3 p-3 rounded-xl mb-1 transition-all duration-500 ${isMatch
-                      ? "bg-green-100 border-2 border-green-500 scale-[1.02]"
-                      : isMid
-                        ? "bg-orange-100 border-2 border-orange-500 scale-[1.02]"
-                        : isInRange
-                          ? "bg-slate-50"
-                          : "opacity-20 bg-slate-100"
+                    ? "bg-green-100 border-2 border-green-500 scale-[1.02]"
+                    : isMid
+                      ? "bg-orange-100 border-2 border-orange-500 scale-[1.02]"
+                      : isInRange
+                        ? "bg-slate-50"
+                        : "opacity-20 bg-slate-100"
                     }`}
                 >
                   <div className="text-xs text-slate-400 w-8 font-mono">[{i}]</div>
@@ -1258,8 +1258,8 @@ export function WhatsAppSlide({ isPrintMode = false }: { isPrintMode?: boolean }
                 >
                   <div
                     className={`max-w-[85%] p-3 rounded-xl transition-all duration-500 ${msg.sender === "me"
-                        ? "bg-green-100 rounded-br-none"
-                        : "bg-white rounded-bl-none"
+                      ? "bg-green-100 rounded-br-none"
+                      : "bg-white rounded-bl-none"
                       } ${isFound
                         ? "ring-4 ring-green-500 scale-105"
                         : isMid
@@ -1445,9 +1445,9 @@ export function AdvantagesSlide({ isPrintMode = false }: { isPrintMode?: boolean
             >
               <div className="flex items-start gap-3">
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white ${a.color === "green" ? "bg-green-500" :
-                    a.color === "blue" ? "bg-blue-500" :
-                      a.color === "purple" ? "bg-purple-500" :
-                        "bg-indigo-500"
+                  a.color === "blue" ? "bg-blue-500" :
+                    a.color === "purple" ? "bg-purple-500" :
+                      "bg-indigo-500"
                   }`}>
                   {a.icon}
                 </div>
@@ -1856,8 +1856,8 @@ export function StrengthsSlide({ isPrintMode = false }: { isPrintMode?: boolean 
 
               {/* Status message */}
               <div className={`mx-2 p-2 rounded-lg text-center text-sm font-medium ${step.found
-                  ? "bg-emerald-100 text-emerald-700 border border-emerald-300"
-                  : "bg-slate-100 text-slate-600"
+                ? "bg-emerald-100 text-emerald-700 border border-emerald-300"
+                : "bg-slate-100 text-slate-600"
                 }`}>
                 {step.label}
               </div>
@@ -1933,9 +1933,9 @@ export function StrengthsSlide({ isPrintMode = false }: { isPrintMode?: boolean 
             <div className="flex-1 flex flex-col justify-center px-2">
               {/* Context card */}
               <div className={`p-5 rounded-2xl border-2 transition-all duration-500 ${ctx.color === "bg-blue-500" ? "bg-blue-50 border-blue-300" :
-                  ctx.color === "bg-red-500" ? "bg-red-50 border-red-300" :
-                    ctx.color === "bg-green-500" ? "bg-green-50 border-green-300" :
-                      "bg-orange-50 border-orange-300"
+                ctx.color === "bg-red-500" ? "bg-red-50 border-red-300" :
+                  ctx.color === "bg-green-500" ? "bg-green-50 border-green-300" :
+                    "bg-orange-50 border-orange-300"
                 }`}>
                 <div className="flex items-center gap-4 mb-4">
                   <div className={`w-14 h-14 ${ctx.color} rounded-xl flex items-center justify-center text-white font-bold text-lg`}>
@@ -1958,8 +1958,8 @@ export function StrengthsSlide({ isPrintMode = false }: { isPrintMode?: boolean 
                     key={i}
                     onClick={() => setContextDemo(i)}
                     className={`p-2 rounded-lg text-center transition-all ${i === contextDemo
-                        ? `${c.color} text-white shadow-md`
-                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      ? `${c.color} text-white shadow-md`
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                       }`}
                   >
                     <div className="text-xs font-medium">{c.name}</div>
@@ -2049,8 +2049,8 @@ export function StrengthsSlide({ isPrintMode = false }: { isPrintMode?: boolean 
                     key={n}
                     onClick={() => setErrorCalcN(n)}
                     className={`py-2 rounded-lg text-xs font-medium transition-all ${errorCalcN === n
-                        ? "bg-amber-500 text-white shadow-md"
-                        : "bg-white text-slate-600 border border-slate-200 hover:border-amber-300"
+                      ? "bg-amber-500 text-white shadow-md"
+                      : "bg-white text-slate-600 border border-slate-200 hover:border-amber-300"
                       }`}
                   >
                     n = {n}
@@ -2086,8 +2086,8 @@ export function StrengthsSlide({ isPrintMode = false }: { isPrintMode?: boolean 
               key={i}
               onClick={() => setActiveStrength(i)}
               className={`text-left p-3 rounded-xl transition-all duration-300 ${activeStrength === i
-                  ? "bg-white shadow-lg border-2 border-emerald-400 scale-[1.02]"
-                  : "bg-white/60 border border-slate-200 hover:bg-white hover:shadow-md"
+                ? "bg-white shadow-lg border-2 border-emerald-400 scale-[1.02]"
+                : "bg-white/60 border border-slate-200 hover:bg-white hover:shadow-md"
                 }`}
             >
               <div className="flex items-start gap-3">
@@ -2112,8 +2112,11 @@ export function StrengthsSlide({ isPrintMode = false }: { isPrintMode?: boolean 
   )
 }
 
+
 /* ─────────────────────────────────────────────
   SLIDE 8 — ENMANUEL: DESVENTAJAS DEL METODO
+  Versión responsive: no usa anchos fijos grandes,
+  mantiene todo dentro del cuadro y adapta textos/animaciones.
 ───────────────────────────────────────────── */
 export function WeaknessesSlide({ isPrintMode = false }: { isPrintMode?: boolean }) {
   const [activeWeakness, setActiveWeakness] = useState(0)
@@ -2124,500 +2127,291 @@ export function WeaknessesSlide({ isPrintMode = false }: { isPrintMode?: boolean
     {
       id: "slow",
       number: "01",
-      title: "Converge seguro, pero lento",
-      subtitle: "Cada iteracion solo divide el error entre 2.",
-      accent: "rose",
-      icon: <ArrowRight className="w-5 h-5" />,
-      phrase: "Es confiable, pero no es el mas rapido cuando se requiere mucha precision."
+      title: "Convergencia lenta",
+      subtitle: "Cada iteración solo reduce el error a la mitad.",
+      color: "rose",
+      icon: <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />,
+      phrase: "Es seguro, pero cuando se requiere mucha precisión puede necesitar demasiadas iteraciones."
     },
     {
       id: "sign",
       number: "02",
-      title: "Necesita cambio de signo",
+      title: "Exige cambio de signo",
       subtitle: "Debe cumplirse f(a) · f(b) < 0.",
-      accent: "amber",
-      icon: <AlertTriangle className="w-5 h-5" />,
-      phrase: "Si los extremos no tienen signos opuestos, el metodo no puede garantizar la raiz."
+      color: "amber",
+      icon: <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5" />,
+      phrase: "Si los extremos no tienen signos opuestos, el método no puede garantizar que exista una raíz."
     },
     {
       id: "continuity",
       number: "03",
-      title: "Falla con discontinuidades",
-      subtitle: "Un salto puede parecer una raiz, aunque no exista cruce real.",
-      accent: "orange",
-      icon: <XCircle className="w-5 h-5" />,
-      phrase: "El cambio de signo solo sirve si la funcion es continua en todo el intervalo."
+      title: "No tolera discontinuidades",
+      subtitle: "Un salto puede aparentar una raíz falsa.",
+      color: "orange",
+      icon: <XCircle className="w-4 h-4 sm:w-5 sm:h-5" />,
+      phrase: "El cambio de signo solo funciona como garantía si la función es continua en todo el intervalo."
     },
     {
       id: "multiple",
       number: "04",
-      title: "Solo encuentra una raiz",
-      subtitle: "Si hay varias soluciones, depende del intervalo elegido.",
-      accent: "sky",
-      icon: <Search className="w-5 h-5" />,
-      phrase: "Para hallar varias raices hay que separar el dominio en intervalos pequenos."
+      title: "Puede ocultar otras raíces",
+      subtitle: "Encuentra una solución dentro del intervalo, no todas.",
+      color: "sky",
+      icon: <Search className="w-4 h-4 sm:w-5 sm:h-5" />,
+      phrase: "Si hay varias raíces, se deben separar intervalos y aplicar el método varias veces."
     }
   ]
 
-  const accentClasses = {
-    rose: {
-      bg: "bg-rose-500",
-      soft: "bg-rose-50",
-      text: "text-rose-600",
-      border: "border-rose-300",
-      ring: "ring-rose-200",
-      gradient: "from-rose-500 to-red-500"
-    },
-    amber: {
-      bg: "bg-amber-500",
-      soft: "bg-amber-50",
-      text: "text-amber-600",
-      border: "border-amber-300",
-      ring: "ring-amber-200",
-      gradient: "from-amber-500 to-yellow-500"
-    },
-    orange: {
-      bg: "bg-orange-500",
-      soft: "bg-orange-50",
-      text: "text-orange-600",
-      border: "border-orange-300",
-      ring: "ring-orange-200",
-      gradient: "from-orange-500 to-red-500"
-    },
-    sky: {
-      bg: "bg-sky-500",
-      soft: "bg-sky-50",
-      text: "text-sky-600",
-      border: "border-sky-300",
-      ring: "ring-sky-200",
-      gradient: "from-sky-500 to-blue-500"
-    }
+  const styles = {
+    rose: { bg: "bg-rose-500", soft: "bg-rose-50", text: "text-rose-600", border: "border-rose-300", line: "stroke-rose-500", fill: "fill-rose-500" },
+    amber: { bg: "bg-amber-500", soft: "bg-amber-50", text: "text-amber-600", border: "border-amber-300", line: "stroke-amber-500", fill: "fill-amber-500" },
+    orange: { bg: "bg-orange-500", soft: "bg-orange-50", text: "text-orange-600", border: "border-orange-300", line: "stroke-orange-500", fill: "fill-orange-500" },
+    sky: { bg: "bg-sky-500", soft: "bg-sky-50", text: "text-sky-600", border: "border-sky-300", line: "stroke-sky-500", fill: "fill-sky-500" }
   }
 
   const active = weaknesses[activeWeakness]
-  const activeStyle = accentClasses[active.accent as keyof typeof accentClasses]
-
-  const resetDemo = () => {
-    setDemoStep(0)
-    setIsRunning(true)
-  }
-
-  const toggleDemo = () => {
-    setIsRunning((value) => !value)
-  }
-
-  useEffect(() => {
-    setDemoStep(0)
-    setIsRunning(!isPrintMode)
-  }, [activeWeakness, isPrintMode])
+  const activeStyle = styles[active.color as keyof typeof styles]
 
   useEffect(() => {
     if (!isRunning || isPrintMode) return
 
     const timer = setInterval(() => {
-      setDemoStep((step) => (step >= 8 ? 0 : step + 1))
-    }, 1200)
+      setDemoStep((step) => (step + 1) % 9)
+    }, 950)
 
     return () => clearInterval(timer)
-  }, [isRunning, isPrintMode, activeWeakness])
+  }, [isRunning, isPrintMode])
 
-  const renderSlowDemo = () => {
-    const bisectionError = (100 / Math.pow(2, Math.max(1, demoStep + 1))).toFixed(3)
-    const newtonError = (100 / Math.pow(2, Math.pow(2, Math.min(demoStep + 1, 5)))).toFixed(5)
-    const bisectionWidth = Math.max(8, 100 - demoStep * 9)
-    const newtonWidth = Math.max(8, 100 - demoStep * 22)
+  const resetDemo = () => {
+    setDemoStep(0)
+    setIsRunning(!isPrintMode)
+  }
 
-    return (
-      <div className="h-full flex flex-col">
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="rounded-2xl bg-slate-50 border border-slate-200 p-4">
-            <p className="text-xs text-slate-500 mb-1">Biseccion</p>
-            <p className="text-2xl font-bold text-slate-900">Lineal</p>
-            <p className="text-xs text-slate-500 mt-1">error / 2 por iteracion</p>
+  const selectWeakness = (index: number) => {
+    setActiveWeakness(index)
+    setDemoStep(0)
+    setIsRunning(!isPrintMode)
+  }
+
+  const miniBars = [100, 50, 25, 12.5, 6.25, 3.13, 1.56, 0.78, 0.39]
+
+  const renderDemo = () => {
+    if (active.id === "slow") {
+      const error = miniBars[demoStep]
+      const newtonStep = Math.min(4, Math.ceil((demoStep + 1) / 2))
+      return (
+        <div className="h-full min-h-0 flex flex-col justify-center gap-3 sm:gap-4 overflow-hidden">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-2 sm:p-3 min-w-0">
+              <p className="text-[10px] sm:text-xs text-slate-500">Bisección</p>
+              <p className="text-lg sm:text-2xl font-bold text-slate-900 truncate">{demoStep + 1} pasos</p>
+              <p className="text-[10px] sm:text-xs text-rose-600">error ≈ {error}%</p>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-2 sm:p-3 min-w-0">
+              <p className="text-[10px] sm:text-xs text-slate-500">Newton-Raphson</p>
+              <p className="text-lg sm:text-2xl font-bold text-slate-900 truncate">{newtonStep} pasos</p>
+              <p className="text-[10px] sm:text-xs text-emerald-600">más rápido</p>
+            </div>
           </div>
-          <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-4">
-            <p className="text-xs text-emerald-600 mb-1">Newton-Raphson</p>
-            <p className="text-2xl font-bold text-emerald-700">Cuadratica</p>
-            <p className="text-xs text-emerald-600 mt-1">se acerca mucho mas rapido</p>
+
+          <div className="space-y-2 sm:space-y-3">
+            <div>
+              <div className="flex justify-between text-[10px] sm:text-xs text-slate-500 mb-1">
+                <span>Error por bisección</span>
+                <span>{error}%</span>
+              </div>
+              <div className="h-4 sm:h-5 bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-full bg-rose-500 rounded-full transition-all duration-700" style={{ width: `${Math.max(error, 4)}%` }} />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between text-[10px] sm:text-xs text-slate-500 mb-1">
+                <span>Avance de Newton</span>
+                <span>{Math.min(100, newtonStep * 25)}%</span>
+              </div>
+              <div className="h-4 sm:h-5 bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-full bg-emerald-500 rounded-full transition-all duration-700" style={{ width: `${Math.min(100, newtonStep * 25)}%` }} />
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-xl bg-rose-50 border border-rose-200 p-2 sm:p-3 text-[11px] sm:text-sm text-rose-700 leading-relaxed">
+            Para exponer: la bisección es confiable, pero su avance es moderado. Si la clase pide alta precisión, puede quedarse corta frente a métodos más rápidos.
           </div>
         </div>
+      )
+    }
 
-        <div className="flex-1 flex flex-col justify-center space-y-6">
-          <div>
-            <div className="flex justify-between text-xs text-slate-500 mb-2">
-              <span>Biseccion: intervalo restante</span>
-              <span className="font-mono">{bisectionError}%</span>
-            </div>
-            <div className="h-8 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
-              <div
-                className="h-full bg-gradient-to-r from-rose-400 to-rose-600 rounded-full transition-all duration-700 flex items-center justify-end pr-3"
-                style={{ width: `${bisectionWidth}%` }}
-              >
-                <span className="text-white text-xs font-bold">{demoStep + 1} pasos</span>
-              </div>
-            </div>
+    if (active.id === "sign") {
+      const leftSign = demoStep < 4 ? "+" : "-"
+      const rightSign = "+"
+      const valid = leftSign !== rightSign
+      return (
+        <div className="h-full min-h-0 flex flex-col justify-center gap-3 overflow-hidden">
+          <div className="relative w-full aspect-[16/9] max-h-[230px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden">
+            <svg viewBox="0 0 320 180" className="w-full h-full" preserveAspectRatio="xMidYMid meet">
+              <line x1="28" y1="100" x2="292" y2="100" stroke="#cbd5e1" strokeWidth="2" />
+              <line x1="40" y1="25" x2="40" y2="150" stroke="#cbd5e1" strokeWidth="2" />
+              <path d={valid ? "M45 130 C95 125 120 112 160 100 C205 84 238 55 285 40" : "M45 62 C105 40 150 44 190 58 C230 72 258 64 285 48"} fill="none" stroke="#f59e0b" strokeWidth="5" strokeLinecap="round" className="transition-all duration-700" />
+              <circle cx="70" cy={valid ? "124" : "55"} r="8" fill={valid ? "#ef4444" : "#22c55e"} />
+              <circle cx="260" cy="50" r="8" fill="#22c55e" />
+              <text x="62" y="160" fontSize="15" fill="#334155">a</text>
+              <text x="252" y="160" fontSize="15" fill="#334155">b</text>
+              <text x="55" y="35" fontSize="18" fontWeight="700" fill={valid ? "#ef4444" : "#22c55e"}>f(a) {leftSign}</text>
+              <text x="218" y="35" fontSize="18" fontWeight="700" fill="#22c55e">f(b) {rightSign}</text>
+              {valid && <circle cx="160" cy="100" r="7" fill="#f59e0b" className="animate-pulse" />}
+            </svg>
           </div>
 
-          <div>
-            <div className="flex justify-between text-xs text-slate-500 mb-2">
-              <span>Newton-Raphson: error aproximado</span>
-              <span className="font-mono">{newtonError}%</span>
-            </div>
-            <div className="h-8 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
-              <div
-                className="h-full bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full transition-all duration-700 flex items-center justify-end pr-3"
-                style={{ width: `${newtonWidth}%` }}
-              >
-                <span className="text-white text-xs font-bold">{Math.max(1, Math.ceil((demoStep + 1) / 2))} pasos</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-2xl bg-rose-50 border border-rose-200 p-4">
-            <p className="text-sm text-rose-700">
-              Para una precision muy pequena, biseccion puede necesitar muchas iteraciones porque avanza de forma constante, no acelerada.
+          <div className={`rounded-xl border p-2 sm:p-3 text-center ${valid ? "bg-emerald-50 border-emerald-200 text-emerald-700" : "bg-amber-50 border-amber-200 text-amber-700"}`}>
+            <p className="text-xs sm:text-sm font-semibold">
+              {valid ? "Sí hay cambio de signo: la raíz queda garantizada." : "No hay cambio de signo: el método no puede iniciar con garantía."}
             </p>
           </div>
         </div>
-      </div>
-    )
-  }
+      )
+    }
 
-  const renderSignDemo = () => {
-    const left = 35 + demoStep * 5
-    const right = 165 - demoStep * 5
-    const mid = (left + right) / 2
+    if (active.id === "continuity") {
+      return (
+        <div className="h-full min-h-0 flex flex-col justify-center gap-3 overflow-hidden">
+          <div className="relative w-full aspect-[16/9] max-h-[230px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden">
+            <svg viewBox="0 0 320 180" className="w-full h-full" preserveAspectRatio="xMidYMid meet">
+              <line x1="28" y1="95" x2="292" y2="95" stroke="#cbd5e1" strokeWidth="2" />
+              <line x1="40" y1="25" x2="40" y2="150" stroke="#cbd5e1" strokeWidth="2" />
+              <path d="M50 132 C88 120 111 112 132 118" fill="none" stroke="#f97316" strokeWidth="5" strokeLinecap="round" />
+              <path d="M172 58 C210 42 250 48 286 65" fill="none" stroke="#f97316" strokeWidth="5" strokeLinecap="round" />
+              <circle cx="132" cy="118" r="6" fill="white" stroke="#f97316" strokeWidth="4" />
+              <circle cx="172" cy="58" r="6" fill="#f97316" />
+              <line x1="152" y1="45" x2="152" y2="130" stroke="#ef4444" strokeWidth="3" strokeDasharray="7 6" className={demoStep >= 2 ? "opacity-100" : "opacity-30"} />
+              <text x="112" y="154" fontSize="14" fontWeight="700" fill="#ef4444">salto</text>
+              {demoStep >= 5 && <text x="58" y="35" fontSize="14" fontWeight="700" fill="#ef4444">cambia el signo, pero no cruza y=0</text>}
+            </svg>
+          </div>
+
+          <div className="rounded-xl bg-orange-50 border border-orange-200 p-2 sm:p-3 text-[11px] sm:text-sm text-orange-700 leading-relaxed">
+            Un salto puede engañar al método: parece que hay raíz porque cambia el signo, pero la gráfica nunca cruza el eje. Por eso se exige continuidad.
+          </div>
+        </div>
+      )
+    }
 
     return (
-      <div className="h-full flex flex-col">
-        <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4 mb-4">
-          <p className="text-sm text-amber-800">
-            Ejemplo: <span className="font-mono font-bold">f(x) = (x - 1)^2</span>. Tiene raiz en x=1, pero no hay cambio de signo.
-          </p>
-        </div>
-
-        <div className="flex-1 bg-slate-50 rounded-2xl border border-slate-200 p-3 flex items-center justify-center">
-          <svg viewBox="0 0 220 160" className="w-full h-full">
-            <line x1="20" y1="115" x2="200" y2="115" stroke="#94a3b8" strokeWidth="1" />
-            <line x1="110" y1="20" x2="110" y2="140" stroke="#94a3b8" strokeWidth="1" />
-            <text x="202" y="119" fontSize="9" fill="#64748b">x</text>
-            <text x="113" y="25" fontSize="9" fill="#64748b">y</text>
-
-            <path
-              d="M 35 35 Q 110 115 185 35"
-              fill="none"
-              stroke="#f59e0b"
-              strokeWidth="4"
-              strokeLinecap="round"
-            />
-
-            <line x1={left} y1="130" x2={right} y2="130" stroke="#ef4444" strokeWidth="5" strokeLinecap="round" />
-            <line x1={left} y1="122" x2={left} y2="138" stroke="#ef4444" strokeWidth="3" />
-            <line x1={right} y1="122" x2={right} y2="138" stroke="#ef4444" strokeWidth="3" />
-
-            <circle cx={left} cy="58" r="6" fill="#ef4444" />
-            <text x={left - 8} y="50" fontSize="10" fill="#ef4444" fontWeight="bold">a</text>
-            <text x={left - 23} y="72" fontSize="8" fill="#ef4444">f(a)&gt;0</text>
-
-            <circle cx={right} cy="58" r="6" fill="#3b82f6" />
-            <text x={right + 6} y="50" fontSize="10" fill="#3b82f6" fontWeight="bold">b</text>
-            <text x={right - 5} y="72" fontSize="8" fill="#3b82f6">f(b)&gt;0</text>
-
-            <circle cx="110" cy="115" r="7" fill={demoStep >= 4 ? "#22c55e" : "#94a3b8"} className={demoStep >= 4 ? "animate-pulse" : ""} />
-            <text x="96" y="105" fontSize="10" fill="#22c55e" fontWeight="bold">raiz</text>
-
-            <line x1={mid} y1="30" x2={mid} y2="130" stroke="#f97316" strokeWidth="2" strokeDasharray="4" />
-            <text x={mid - 12} y="25" fontSize="9" fill="#f97316" fontWeight="bold">mid</text>
-          </svg>
-        </div>
-
-        <div className="mt-4 grid grid-cols-3 gap-3 text-center text-xs">
-          <div className="bg-white rounded-xl border border-slate-200 p-3">
-            <div className="text-slate-500">f(a)</div>
-            <div className="font-bold text-red-500">positivo</div>
-          </div>
-          <div className="bg-white rounded-xl border border-slate-200 p-3">
-            <div className="text-slate-500">f(b)</div>
-            <div className="font-bold text-blue-500">positivo</div>
-          </div>
-          <div className="bg-white rounded-xl border border-amber-200 p-3">
-            <div className="text-slate-500">Producto</div>
-            <div className="font-bold text-amber-600">f(a)·f(b) &gt; 0</div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  const renderContinuityDemo = () => {
-    return (
-      <div className="h-full flex flex-col">
-        <div className="rounded-2xl bg-orange-50 border border-orange-200 p-4 mb-4">
-          <p className="text-sm text-orange-800">
-            Un cambio de signo no basta si la funcion tiene un salto. La grafica puede brincar de negativo a positivo sin tocar el eje x.
-          </p>
-        </div>
-
-        <div className="flex-1 bg-slate-50 rounded-2xl border border-slate-200 p-3 flex items-center justify-center">
-          <svg viewBox="0 0 220 160" className="w-full h-full">
-            <line x1="20" y1="82" x2="200" y2="82" stroke="#94a3b8" strokeWidth="1" />
-            <line x1="25" y1="20" x2="25" y2="140" stroke="#94a3b8" strokeWidth="1" />
-            <text x="202" y="86" fontSize="9" fill="#64748b">y=0</text>
-
-            <path
-              d="M 35 118 C 55 112, 70 105, 90 98"
-              fill="none"
-              stroke="#f97316"
-              strokeWidth="4"
-              strokeLinecap="round"
-            />
-            <circle cx="90" cy="98" r="5" fill="white" stroke="#f97316" strokeWidth="3" />
-
-            <circle cx="112" cy="45" r="5" fill="#f97316" />
-            <path
-              d="M 112 45 C 135 35, 160 40, 185 55"
-              fill="none"
-              stroke="#f97316"
-              strokeWidth="4"
-              strokeLinecap="round"
-            />
-
-            {demoStep >= 2 && (
-              <>
-                <line x1="101" y1="43" x2="101" y2="100" stroke="#ef4444" strokeWidth="3" strokeDasharray="5" />
-                <text x="80" y="28" fontSize="10" fill="#ef4444" fontWeight="bold">salto</text>
-              </>
-            )}
-
-            {demoStep >= 4 && (
-              <>
-                <circle cx="45" cy="115" r="6" fill="#ef4444" />
-                <text x="35" y="132" fontSize="9" fill="#ef4444">f(a)&lt;0</text>
-                <circle cx="175" cy="52" r="6" fill="#3b82f6" />
-                <text x="153" y="35" fontSize="9" fill="#3b82f6">f(b)&gt;0</text>
-              </>
-            )}
-
-            {demoStep >= 6 && (
-              <>
-                <line x1="35" y1="82" x2="185" y2="82" stroke="#ef4444" strokeWidth="2" strokeDasharray="3" />
-                <text x="58" y="75" fontSize="9" fill="#ef4444" fontWeight="bold">no hay cruce real</text>
-              </>
-            )}
-          </svg>
-        </div>
-
-        <div className="mt-4 rounded-2xl bg-white border border-orange-200 p-4">
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-xl bg-orange-500 text-white flex items-center justify-center font-bold">
-              !
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-slate-900">Condicion completa</p>
-              <p className="text-xs text-slate-600 mt-1">
-                Biseccion necesita cambio de signo y continuidad. Si una de las dos falla, la conclusion puede ser incorrecta.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  const renderMultipleDemo = () => {
-    const intervals = [
-      { label: "[-3, -1]", x1: 35, x2: 78, root: -2, cx: 58 },
-      { label: "[-1, 1]", x1: 78, x2: 142, root: 0, cx: 110 },
-      { label: "[1, 3]", x1: 142, x2: 185, root: 2, cx: 162 },
-    ]
-    const selected = intervals[demoStep % intervals.length]
-
-    return (
-      <div className="h-full flex flex-col">
-        <div className="rounded-2xl bg-sky-50 border border-sky-200 p-4 mb-4">
-          <p className="text-sm text-sky-800">
-            En una funcion con varias raices, el resultado no es global: depende del intervalo inicial.
-          </p>
-        </div>
-
-        <div className="flex-1 bg-slate-50 rounded-2xl border border-slate-200 p-3 flex items-center justify-center">
-          <svg viewBox="0 0 220 160" className="w-full h-full">
-            <line x1="20" y1="82" x2="200" y2="82" stroke="#94a3b8" strokeWidth="1" />
-            <line x1="110" y1="20" x2="110" y2="140" stroke="#94a3b8" strokeWidth="1" />
-
-            <path
-              d="M 35 120 C 48 142, 55 82, 64 54 C 78 12, 94 42, 110 82 C 126 122, 142 150, 156 82 C 166 35, 178 34, 190 48"
-              fill="none"
-              stroke="#0ea5e9"
-              strokeWidth="4"
-              strokeLinecap="round"
-            />
-
-            {intervals.map((it, i) => (
-              <g key={it.label}>
-                <circle cx={it.cx} cy="82" r="6" fill={selected.label === it.label ? "#0ea5e9" : "#cbd5e1"} />
-                <text x={it.cx - 6} y="101" fontSize="9" fill={selected.label === it.label ? "#0284c7" : "#94a3b8"} fontWeight="bold">
-                  {it.root}
-                </text>
+      <div className="h-full min-h-0 flex flex-col justify-center gap-3 overflow-hidden">
+        <div className="relative w-full aspect-[16/9] max-h-[230px] rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden">
+          <svg viewBox="0 0 320 180" className="w-full h-full" preserveAspectRatio="xMidYMid meet">
+            <line x1="28" y1="90" x2="292" y2="90" stroke="#cbd5e1" strokeWidth="2" />
+            <line x1="160" y1="25" x2="160" y2="150" stroke="#cbd5e1" strokeWidth="2" />
+            <path d="M35 130 C72 30 105 30 130 90 C146 128 174 128 190 90 C216 30 250 30 285 130" fill="none" stroke="#0ea5e9" strokeWidth="5" strokeLinecap="round" />
+            {[90, 160, 230].map((x, index) => (
+              <g key={x} className={demoStep >= index * 2 ? "opacity-100" : "opacity-25"}>
+                <circle cx={x} cy="90" r="8" fill={index === 1 ? "#0ea5e9" : "#94a3b8"} />
+                <text x={x - 9} y="118" fontSize="14" fontWeight="700" fill={index === 1 ? "#0ea5e9" : "#64748b"}>{index === 0 ? "r1" : index === 1 ? "r2" : "r3"}</text>
               </g>
             ))}
-
-            <line x1={selected.x1} y1="132" x2={selected.x2} y2="132" stroke="#ef4444" strokeWidth="5" strokeLinecap="round" />
-            <line x1={selected.x1} y1="124" x2={selected.x1} y2="140" stroke="#ef4444" strokeWidth="3" />
-            <line x1={selected.x2} y1="124" x2={selected.x2} y2="140" stroke="#ef4444" strokeWidth="3" />
-            <text x={(selected.x1 + selected.x2) / 2 - 18} y="150" fontSize="10" fill="#ef4444" fontWeight="bold">
-              {selected.label}
-            </text>
+            <line x1="45" y1="155" x2="275" y2="155" stroke="#ef4444" strokeWidth="3" />
+            <text x="103" y="172" fontSize="13" fill="#ef4444">un intervalo grande puede ocultar raíces</text>
           </svg>
         </div>
 
-        <div className="mt-4 grid grid-cols-3 gap-3">
-          {intervals.map((it) => (
-            <button
-              key={it.label}
-              onClick={() => setDemoStep(intervals.indexOf(it))}
-              className={`rounded-xl p-3 text-center border transition-all ${selected.label === it.label
-                  ? "bg-sky-500 text-white border-sky-500 shadow-md"
-                  : "bg-white text-slate-600 border-slate-200"
-                }`}
-            >
-              <div className="text-xs opacity-80">Intervalo</div>
-              <div className="font-bold">{it.label}</div>
-              <div className="text-xs opacity-80">raiz: {it.root}</div>
-            </button>
-          ))}
+        <div className="rounded-xl bg-sky-50 border border-sky-200 p-2 sm:p-3 text-[11px] sm:text-sm text-sky-700 leading-relaxed">
+          El método se queda con una raíz. Para encontrar todas, hay que dividir el dominio en intervalos pequeños y verificar cada cambio de signo.
         </div>
       </div>
     )
-  }
-
-  const renderDemo = () => {
-    if (active.id === "slow") return renderSlowDemo()
-    if (active.id === "sign") return renderSignDemo()
-    if (active.id === "continuity") return renderContinuityDemo()
-    return renderMultipleDemo()
   }
 
   return (
-    <div className="w-full h-full bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 relative overflow-hidden p-5">
-      <div className="absolute -top-24 -right-24 w-80 h-80 bg-rose-500/20 rounded-full blur-3xl" />
-      <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-sky-500/20 rounded-full blur-3xl" />
-      <div
-        className="absolute inset-0 opacity-[0.05]"
-        style={{
-          backgroundImage: "linear-gradient(#ffffff 1px, transparent 1px), linear-gradient(90deg, #ffffff 1px, transparent 1px)",
-          backgroundSize: "44px 44px",
-        }}
-      />
-
-      <div className="relative z-10 h-full flex flex-col">
-        <div className="flex items-end justify-between mb-4">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-slate-300 text-xs mb-2">
-              <span className={`w-2 h-2 rounded-full ${activeStyle.bg}`} />
-              Enmanuel · Analisis critico del metodo
-            </div>
-            <h2 className="text-3xl font-bold text-white leading-tight">
-              Desventajas del Metodo de <span className={`text-transparent bg-clip-text bg-gradient-to-r ${activeStyle.gradient}`}>Biseccion</span>
-            </h2>
-            <p className="text-slate-400 text-sm mt-1">
-              No basta con que el metodo sea seguro: tambien hay que saber cuando no conviene usarlo.
-            </p>
+    <div className="w-full h-full min-h-0 overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-2 sm:p-3 md:p-5 flex flex-col">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-2 sm:mb-3 shrink-0">
+        <div className="min-w-0">
+          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/10 border border-white/10 text-slate-300 text-[10px] sm:text-xs mb-1">
+            <span className={`w-2 h-2 rounded-full ${activeStyle.bg}`} />
+            Enmanuel · Análisis crítico
           </div>
-
-          <div className="flex gap-2">
-            <button
-              onClick={toggleDemo}
-              className="px-4 py-2 bg-white/10 hover:bg-white/15 border border-white/10 text-white rounded-xl text-sm font-medium flex items-center gap-2 transition-all"
-            >
-              {isRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-              {isRunning ? "Pausar" : "Reproducir"}
-            </button>
-            <button
-              onClick={resetDemo}
-              className="px-4 py-2 bg-white text-slate-900 hover:bg-slate-100 rounded-xl text-sm font-medium flex items-center gap-2 transition-all"
-            >
-              <RotateCcw className="w-4 h-4" />
-              Reiniciar
-            </button>
-          </div>
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white leading-tight truncate sm:whitespace-normal">
+            Desventajas del Método de <span className={activeStyle.text}>Bisección</span>
+          </h2>
+          <p className="hidden sm:block text-slate-400 text-xs md:text-sm mt-1">
+            Una simulación compacta para explicar cuándo el método deja de ser conveniente.
+          </p>
         </div>
 
-        <div className="flex-1 grid grid-cols-[320px_1fr] gap-4 min-h-0">
-          <div className="space-y-3 overflow-auto pr-1">
-            {weaknesses.map((weakness, index) => {
-              const style = accentClasses[weakness.accent as keyof typeof accentClasses]
-              const selected = activeWeakness === index
+        <div className="flex gap-2 shrink-0">
+          <button
+            onClick={() => setIsRunning((value) => !value)}
+            className="px-3 py-2 bg-white/10 hover:bg-white/15 border border-white/10 text-white rounded-xl text-xs sm:text-sm font-medium flex items-center gap-2 transition-all"
+          >
+            {isRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+            <span className="hidden md:inline">{isRunning ? "Pausar" : "Reproducir"}</span>
+          </button>
+          <button
+            onClick={resetDemo}
+            className="px-3 py-2 bg-white text-slate-900 hover:bg-slate-100 rounded-xl text-xs sm:text-sm font-medium flex items-center gap-2 transition-all"
+          >
+            <RotateCcw className="w-4 h-4" />
+            <span className="hidden md:inline">Reiniciar</span>
+          </button>
+        </div>
+      </div>
 
-              return (
-                <button
-                  key={weakness.id}
-                  onClick={() => setActiveWeakness(index)}
-                  className={`w-full text-left rounded-2xl p-4 border transition-all duration-300 ${selected
-                      ? `bg-white shadow-2xl ${style.border} ring-4 ${style.ring}`
-                      : "bg-white/8 border-white/10 hover:bg-white/12"
-                    }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${selected ? `${style.bg} text-white` : "bg-white/10 text-slate-300"
-                      }`}>
-                      {weakness.icon}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className={`text-xs font-bold ${selected ? style.text : "text-slate-500"}`}>
-                          {weakness.number}
-                        </span>
-                        {selected && <Check className={`w-4 h-4 ${style.text}`} />}
-                      </div>
-                      <h3 className={`font-bold text-sm leading-tight ${selected ? "text-slate-900" : "text-white"}`}>
-                        {weakness.title}
-                      </h3>
-                      <p className={`text-xs mt-1 leading-relaxed ${selected ? "text-slate-600" : "text-slate-400"}`}>
-                        {weakness.subtitle}
-                      </p>
-                    </div>
+      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[minmax(210px,280px)_minmax(0,1fr)] gap-2 sm:gap-3 md:gap-4">
+        <div className="min-h-0 overflow-auto pr-0 lg:pr-1 grid grid-cols-2 lg:grid-cols-1 gap-2 auto-rows-min">
+          {weaknesses.map((weakness, index) => {
+            const style = styles[weakness.color as keyof typeof styles]
+            const selected = activeWeakness === index
+
+            return (
+              <button
+                key={weakness.id}
+                onClick={() => selectWeakness(index)}
+                className={`w-full text-left rounded-xl sm:rounded-2xl p-2 sm:p-3 border transition-all duration-300 min-w-0 ${selected
+                    ? `bg-white ${style.border} shadow-xl`
+                    : "bg-white/8 border-white/10 hover:bg-white/12"
+                  }`}
+              >
+                <div className="flex items-start gap-2 sm:gap-3 min-w-0">
+                  <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 ${selected ? `${style.bg} text-white` : "bg-white/10 text-slate-300"
+                    }`}>
+                    {weakness.icon}
                   </div>
-                </button>
-              )
-            })}
+                  <div className="min-w-0 flex-1">
+                    <div className={`text-[10px] sm:text-xs font-bold ${selected ? style.text : "text-slate-500"}`}>{weakness.number}</div>
+                    <h3 className={`font-bold text-xs sm:text-sm leading-tight ${selected ? "text-slate-900" : "text-white"}`}>{weakness.title}</h3>
+                    <p className={`hidden sm:block text-[10px] md:text-xs mt-1 leading-snug ${selected ? "text-slate-600" : "text-slate-400"}`}>{weakness.subtitle}</p>
+                  </div>
+                </div>
+              </button>
+            )
+          })}
+        </div>
 
-            <div className="rounded-2xl bg-white/8 border border-white/10 p-4">
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Idea para exponer: la biseccion es excelente como metodo seguro, pero pierde fuerza cuando el problema exige velocidad, varias raices o funciones con condiciones especiales.
-              </p>
+        <div className="min-h-0 bg-white rounded-2xl md:rounded-[28px] shadow-2xl border border-white/20 p-3 sm:p-4 md:p-5 flex flex-col overflow-hidden">
+          <div className="flex items-start justify-between gap-3 mb-2 sm:mb-3 shrink-0">
+            <div className="min-w-0">
+              <div className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-full ${activeStyle.soft} ${activeStyle.text} text-[10px] sm:text-xs font-semibold mb-1`}>Simulación {active.number}</div>
+              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 leading-tight">{active.title}</h3>
+              <p className="text-xs sm:text-sm text-slate-500 mt-1 line-clamp-2">{active.phrase}</p>
+            </div>
+            <div className="text-right shrink-0">
+              <p className="text-[10px] sm:text-xs text-slate-400">Paso</p>
+              <p className={`text-xl sm:text-2xl md:text-3xl font-bold ${activeStyle.text}`}>{demoStep + 1}</p>
             </div>
           </div>
 
-          <div className="bg-white rounded-[28px] shadow-2xl border border-white/20 p-5 min-h-0 flex flex-col">
-            <div className="flex items-start justify-between gap-4 mb-4">
-              <div>
-                <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full ${activeStyle.soft} ${activeStyle.text} text-xs font-semibold mb-2`}>
-                  Simulacion {active.number}
-                </div>
-                <h3 className="text-2xl font-bold text-slate-900">{active.title}</h3>
-                <p className="text-sm text-slate-500 mt-1">{active.phrase}</p>
-              </div>
+          <div className="flex-1 min-h-0 overflow-hidden">
+            {renderDemo()}
+          </div>
 
-              <div className="text-right">
-                <p className="text-xs text-slate-400">Paso</p>
-                <p className={`text-3xl font-bold ${activeStyle.text}`}>{demoStep + 1}</p>
-              </div>
-            </div>
-
-            <div className="flex-1 min-h-0">
-              {renderDemo()}
-            </div>
-
-            <div className="mt-4 flex items-center gap-2">
-              {Array.from({ length: 9 }).map((_, index) => (
-                <div
-                  key={index}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${index === demoStep ? `w-10 ${activeStyle.bg}` : "w-2 bg-slate-200"
-                    }`}
-                />
-              ))}
-            </div>
+          <div className="mt-2 sm:mt-3 flex items-center gap-1.5 shrink-0 overflow-hidden">
+            {Array.from({ length: 9 }).map((_, index) => (
+              <div
+                key={index}
+                className={`h-1.5 rounded-full transition-all duration-300 ${index === demoStep ? `w-8 sm:w-10 ${activeStyle.bg}` : "w-2 bg-slate-200"
+                  }`}
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -2682,8 +2476,8 @@ export function ConclusionSlide({ isPrintMode = false }: { isPrintMode?: boolean
                 <div
                   key={i}
                   className={`w-4 h-4 rounded-sm transition-all duration-300 ${dataSize <= 1
-                      ? "bg-green-500 scale-150"
-                      : "bg-blue-500"
+                    ? "bg-green-500 scale-150"
+                    : "bg-blue-500"
                     }`}
                   style={{
                     opacity: dataSize <= 1 ? 1 : 0.3 + (i / blocks) * 0.7,
