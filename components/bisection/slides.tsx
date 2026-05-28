@@ -544,7 +544,7 @@ export function PythonBinarySearchSlide({ isPrintMode = false }: { isPrintMode?:
   const [activeLine, setActiveLine] = useState(-1)
   const [steps, setSteps] = useState<Step[]>([])
   const [stepIdx, setStepIdx] = useState(-1)
-  const scrollRef = useRef<HTMLDivElement>(null)
+  const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map())
 
   const start = useCallback(() => {
     const computedSteps: Step[] = []
@@ -553,27 +553,20 @@ export function PythonBinarySearchSlide({ isPrintMode = false }: { isPrintMode?:
     let found = false
     let iter = 0
 
-    computedSteps.push({
-      lo, hi, mid: Math.floor((lo + hi) / 2), found: false, iterations: 0,
-      message: "Inicializando: bajo = 0, alto = 49. Lista de 50 palabras ordenadas lista.",
-      activeLine: 1
-    })
-
     while (!found) {
-      iter++
       const mid = Math.floor((lo + hi) / 2)
       const word = pythonWords[mid]
 
       computedSteps.push({
-        lo, hi, mid, found: false, iterations: iter,
-        message: `Iteracion ${iter}: medio = (${lo} + ${hi}) // 2 = ${mid}. Apuntamos a "${word}" [${mid}].`,
+        lo, hi, mid, found: false, iterations: iter + 1,
+        message: `Paso: medio = (${lo} + ${hi}) // 2 = ${mid}. palabra[${mid}] = "${word}"`,
         activeLine: 6
       })
 
       if (word === pythonTarget) {
         computedSteps.push({
-          lo, hi, mid, found: true, iterations: iter,
-          message: `ENCONTRADO! "${pythonTarget}" en el indice ${mid}! Solo ${iter} iteraciones!`,
+          lo, hi, mid, found: true, iterations: iter + 1,
+          message: `"${word}" == "${pythonTarget}" → ENCONTRADO en indice ${mid}! Solo ${iter + 1} iteraciones!`,
           activeLine: 9
         })
         found = true
@@ -582,28 +575,31 @@ export function PythonBinarySearchSlide({ isPrintMode = false }: { isPrintMode?:
         if (goRight) {
           lo = mid + 1
           computedSteps.push({
-            lo, hi, mid, found: false, iterations: iter,
-            message: `"${word}" < "${pythonTarget}" → mitad IZQUIERDA descartada. bajo = ${lo}. Rango: [${lo}, ${hi}]`,
+            lo, hi, mid, found: false, iterations: iter + 1,
+            message: `"${word}" < "${pythonTarget}" → descartamos izquierda. bajo = ${lo}`,
             activeLine: 11
           })
         } else {
           hi = mid - 1
           computedSteps.push({
-            lo, hi, mid, found: false, iterations: iter,
-            message: `"${word}" > "${pythonTarget}" → mitad DERECHA descartada. alto = ${hi}. Rango: [${lo}, ${hi}]`,
+            lo, hi, mid, found: false, iterations: iter + 1,
+            message: `"${word}" > "${pythonTarget}" → descartamos derecha. alto = ${hi}`,
             activeLine: 13
           })
         }
+
       }
+
+      iter++
     }
 
     setSteps(computedSteps)
     setStepIdx(0)
     setRange([0, pythonWords.length - 1])
-    setMidIndex(Math.floor(pythonWords.length / 2))
+    setMidIndex(Math.floor((0 + pythonWords.length - 1) / 2))
     setFound(false)
     setIterations(0)
-    setActiveLine(1)
+    setActiveLine(6)
     setMessage(computedSteps[0].message)
     setIsRunning(true)
   }, [])
@@ -635,10 +631,8 @@ export function PythonBinarySearchSlide({ isPrintMode = false }: { isPrintMode?:
   }, [])
 
   useEffect(() => {
-    if (scrollRef.current && midIndex >= 0) {
-      const el = scrollRef.current.children[midIndex] as HTMLElement
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" })
-    }
+    const el = itemRefs.current.get(midIndex)
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" })
   }, [midIndex])
 
   const [lo, hi] = range
@@ -752,15 +746,18 @@ export function PythonBinarySearchSlide({ isPrintMode = false }: { isPrintMode?:
               </div>
             </div>
 
-            <div ref={scrollRef} className="flex-1 bg-white rounded-2xl shadow-lg border border-slate-200 overflow-y-auto">
+            <div className="flex-1 bg-white rounded-2xl shadow-lg border border-slate-200 overflow-y-auto">
               <div className="p-2">
                 {pythonWords.map((word, i) => {
                   const inRange = i >= lo && i <= hi
-                  const isMid = i === midIndex && isRunning
+                  const isMid = i === midIndex && isRunning && inRange
                   const isFound = found && word === pythonTarget
                   return (
                     <div
                       key={word}
+                      ref={(el) => {
+                        if (el) itemRefs.current.set(i, el)
+                      }}
                       className={`flex items-center gap-3 px-3 py-1.5 rounded-xl mb-0.5 transition-all duration-500 ${isFound
                         ? "bg-green-100 border-2 border-green-500 scale-[1.02]"
                         : isMid
